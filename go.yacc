@@ -1,5 +1,11 @@
 %{
 #include <stdio.h>
+int yylex();
+
+struct Expression{
+    void EvaluateExpression()
+
+}
 
 struct Symbol{
     char name[10];
@@ -51,22 +57,19 @@ int lookupSymbol(struct SymbolTable* st, char* name) {
 
 %}
 
-%union{
-    char* id;
-    int integer;
-    bool boolean;
-}
 
-%token SEMICOLON INT BOOL PACKAGE RETURN VAR IF FOR LPAREN RPAREN LBRACE RBRACE
-%token PLUS MIN MUL DIV PLUSASSIGN MINASSIGN MULASSIGN DIVASSIGN AND OR NOT INC DEC GT GE LT LE EQ NE
 
-%token <id> IDENTIFIER
-%token <integer> INTLITERAL
-%token <boolean> BOOLLITERAL
+%token IDENTIFIER SEMICOLON INT BOOL PACKAGE RETURN VAR IF FOR LPAREN RPAREN LBRACE RBRACE PLUS MIN MUL DIV PLUSASSIGN MINASSIGN 
+%token MULASSIGN DIVASSIGN AND OR NOT INC DEC GT GE LT LE EQ NE INTLITERAL BOOLLITERAL
+
 
 
 %left MUL DIV
 %left PLUS MIN
+
+%type declaration
+
+//TODO: structs maken voor alle producties zoals in opwarmingsoefening
 
 %%
 
@@ -79,33 +82,83 @@ statement : declaration
           | if_statement
           | for_statement
           | return_statement
+          | block
           ;
 
-//Todo: expressionlist, .... andere expressies
-declaration : VAR IDENTIFIER INT  {$$ = addSymbol(&symbolTable, $1, 0)}
-              VAR IDENTIFIER BOOL {$$ = addSymbol(&symbolTable, $1, false)}
+statementlist : statement {}
+              | statementlist statement {}
+
+identifierlist : IDENTIFIER identifierlist
+               | IDENTIFIER
+               ;
+
+
+type : INT
+     | BOOL
+     ;
+
+declaration : VAR identifierlist type SEMICOLON {}
+            | VAR identifierlist type EQ expressionlist SEMICOLON {}
             ;
 
-/* type_specifier : INT
-               | BOOL
-               ; */
+function_declaration : 'func' IDENTIFIER function_signature function_body{}
+            ;
 
+function_signature : LPAREN parameters RPAREN function_result {}
+                   ;
+
+function_result : type
+                ;
+
+function_body : block
+              ; 
+
+parameters : parameterlist {}
+           | %empty {}
+           ;
+
+parameterlist : parameter_declaration {}
+              | parameterlist ',' parameter_declaration {}
+              ;
+
+parameter_declaration : IDENTIFIER type {}
+                      ;
+            
 assignment : IDENTIFIER  expression SEMICOLON
            ;
 
-if_statement : IF expression LBRACE statement RBRACE {if($2){$$ = $4}}
+if_statement : IF expression LBRACE block if_statement_continuation{}
              ;
 
-for_statement : FOR LPAREN assignment SEMICOLON expression SEMICOLON assignment RPAREN LBRACE program RBRACE
+if_statement_continuation : %empty //Else not implemented
+                          | 
+
+for_statement : FOR expression block
               ;
 
 return_statement : RETURN expression SEMICOLON
                  ;
 
+block : LBRACE statementlist RBRACE
+      ;
+
+//EXPRESSIONS
+
+expressionlist : expressionlist ',' expression
+               | expression
+               ;
+
 expression : INTLITERAL 
            | BOOLLITERAL
            | IDENTIFIER {$$ = lookupSymbol($1)}
-           | expression PLUS expression   { $$ = $1 + $3; }
+           | op_expression
+           | NOT expression               { $$ = !$2; }
+           | INC expression               { $$ = $2 + 1; }
+           | DEC expression               { $$ = $2 - 1; }
+           | LPAREN expression RPAREN
+           ;
+
+op_expression : expression PLUS expression   { $$ = $1 + $3; }
            | expression MIN expression    { $$ = $1 - $3; }
            | expression MUL expression    { $$ = $1 * $3; }
            | expression DIV expression    { $$ = $1 / $3; }
@@ -115,17 +168,12 @@ expression : INTLITERAL
            | expression DIVASSIGN expression    { $$ = $1 /= $3; }
            | expression AND expression    { $$ = $1 && $3; }
            | expression OR expression     { $$ = $1 || $3; }
-           | NOT expression               { $$ = !$2; }
-           | INC expression               { $$ = $2 + 1; }
-           | DEC expression               { $$ = $2 - 1; }
            | expression GT expression     { $$ = $1 > $3; }
            | expression GE expression     { $$ = $1 >= $3; }
            | expression LT expression     { $$ = $1 < $3; }
            | expression LE expression     { $$ = $1 <= $3; }
            | expression EQ expression     { $$ = $1 == $3; }
            | expression NE expression     { $$ = $1 != $3; }
-           | LPAREN expression RPAREN
-           ;
 
 %%
 

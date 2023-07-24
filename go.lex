@@ -9,6 +9,7 @@ go.lex: lex-file for go basisniveau
      the position just *after* the last token read */
   int line_nr = 1;
   int col_nr = 1; 
+  int lastTokenType = -1;
 
 %}
 
@@ -51,43 +52,46 @@ identifier            [a-z]([a-z]|[0-9])*
 
 %%
 " "                       {}
-{semicolon}               {return SEMICOLON;}
-{integer}                 {return INT;}
-{boolean}                 {return BOOL;}                
-{package}                 {return PACKAGE;}               
-{return}                  {return RETURN;}   
-{var}                     {return VAR;}
-{if}                      {return IF;}
-{for}                     {return FOR;}
-{leftparenthesis}         {return LPAREN;}
-{rightparenthesis}        {return RPAREN;}
-{leftbracket}             {return LBRACE;}
-{rightbracket}            {return RBRACE;}
-{plus}                    {return PLUS;}
-{min}                     {return MIN;}
-{mul}                     {return MUL;}
-{div}                     {return DIV;}
-{plusassign}              {return PLUSASSIGN;}
-{minassign}               {return MINASSIGN;}
-{mulassign}               {return MULASSIGN;}
-{divassign}               {return DIVASSIGN;}
-{and}                     {return AND;}
-{or}                      {return OR;}
-{not}                     {return NOT;}
-{increment}               {return INC;}
-{decrement}               {return DEC;}
-{greaterthan}             {return GT;}
-{greaterorequal}          {return GE;}
-{lesserthan}              {return LT;}
-{lesserorequal}           {return LE;}
-{equals}                  {return EQ;}
-{notequals}               {return NE;}
-{intliteral}              {return INTLITERAL;}
-{boolliteral}             {return BOOLLITERAL;}
-{identifier}              {return IDENTIFIER;}
+{semicolon}               {lastTokenType = SEMICOLON; return SEMICOLON;}
+{integer}                 {lastTokenType = INT; return INT;}
+{boolean}                 {lastTokenType = BOOL; return BOOL;}                
+{package}                 {lastTokenType = PACKAGE; return PACKAGE;}               
+{return}                  {lastTokenType = RETURN; return RETURN;}   
+{var}                     {lastTokenType = VAR; return VAR;}
+{if}                      {lastTokenType = IF; return IF;}
+{for}                     {lastTokenType = FOR; return FOR;}
+{leftparenthesis}         {lastTokenType = LPAREN; return LPAREN;}
+{rightparenthesis}        {lastTokenType = RPAREN; return RPAREN;}
+{leftbracket}             {lastTokenType = LEFTBRACKET; return LBRACE;}
+{rightbracket}            {lastTokenType = RIGHTBRACKET; return RBRACE;}
+{plus}                    {lastTokenType = PLUS; return PLUS;}
+{min}                     {lastTokenType = MIN; return MIN;}
+{mul}                     {lastTokenType = MUL; return MUL;}
+{div}                     {lastTokenType = DIV; return DIV;}
+{plusassign}              {lastTokenType = PLUSASSIGN; return PLUSASSIGN;}
+{minassign}               {lastTokenType = MINASSIGN; return MINASSIGN;}
+{mulassign}               {lastTokenType = MULASSIGN; return MULASSIGN;}
+{divassign}               {lastTokenType = DIVASSIGN; return DIVASSIGN;}
+{and}                     {lastTokenType = AND; return AND;}
+{or}                      {lastTokenType = OR; return OR;}
+{not}                     {lastTokenType = NOT; return NOT;}
+{increment}               {lastTokenType = INC; return INC;}
+{decrement}               {lastTokenType = DEC; return DEC;}
+{greaterthan}             {lastTokenType = GT; return GT;}
+{greaterorequal}          {lastTokenType = GE; return GE;}
+{lesserthan}              {lastTokenType = LT; return LT;}
+{lesserorequal}           {lastTokenType = LE; return LE;}
+{equals}                  {lastTokenType = EQ; return EQ;}
+{notequals}               {lastTokenType = NE;  return NE;}
+{intliteral}              {lastTokenType = INTLITERAL; return INTLITERAL;}
+{boolliteral}             {lastTokenType = BOOLLITERAL; return BOOLLITERAL;}
+{identifier}              {lastTokenType = IDENTIFIER; return IDENTIFIER;}
+"\n"                      {if (lastTokenType == IDENTIFIER || lastTokenType == CONSTANT || lastTokenType == CLOSING_BRACKET) {
+                               lastTokenType = -1; 
+                               return SEMICOLON; 
+                           }}
 
-
-.      {
+.            {
   if (yytext[0] < ' '){ /* non-printable char */
   
     /*yyerror*/ fprintf(stderr,"illegal character: ^%c",yytext[0] + '@'); 
