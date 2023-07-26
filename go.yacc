@@ -1,60 +1,8 @@
 %{
 #include <stdio.h>
-int yylex();
-
-struct Expression{
-    void EvaluateExpression()
-
-}
-
-struct Symbol{
-    char name[10];
-    void* value; 
-    struct Symbol* next;
-};
-
-struct SymbolTable{
-    struct Symbol* head;
-};
-
-struct SymbolTable symbolTable = {NULL};
-
-void addSymbol(SymbolTable* symbolTable, char* name, int value) {
-    struct Symbol* newSymbol = {NULL, NULL, NULL}
-    strcpy(newSymbol->name, name);
-    newSymbol->value = value;
-    newSymbol->next = st->head;
-    st->head = newSymbol;
-}
-
-void updateSymbol(struct SymbolTable* st, char* name, int value) {
-    struct Symbol* current = st->head;
-    while (current != NULL) {
-        if (strcmp(current->name, name) == 0) {
-            current->value = value;
-            return;
-        }
-        current = current->next;
-    }
-
-    printf("Variabele '%s' bestaat niet in de symbol table.\n", name);
-
-}
-
-int lookupSymbol(struct SymbolTable* st, char* name) {
-    struct Symbol* current = st->head;
-    while (current != NULL) {
-        if (strcmp(current->name, name) == 0) {
-            return current->value;
-        }
-        current = current->next;
-    }
-
-    printf("Variabele '%s' is niet aanwezig in de symbol table.\n", name);
-    return 0;
-}
-
-
+#include "structs.h"
+#include "symboltable.h"
+#include "yyfunctions.h"
 %}
 
 
@@ -67,41 +15,37 @@ int lookupSymbol(struct SymbolTable* st, char* name) {
 %left MUL DIV
 %left PLUS MIN
 
-%type declaration
+%type declaration_statement
 
 //TODO: structs maken voor alle producties zoals in opwarmingsoefening
 
 %%
 
-program : //$
-        | program statement '\n'
-        ;
 
-statement : declaration
-          | assignment
+statement : declaration_statement
+          | assignment_statement
           | if_statement
           | for_statement
           | return_statement
-          | block
+          | block_statement
+          | compound_statement
           ;
 
-statementlist : statement {}
-              | statementlist statement {}
+compound_statement : statement statement {}
 
 identifierlist : IDENTIFIER identifierlist
                | IDENTIFIER
                ;
 
-
 type : INT
      | BOOL
      ;
 
-declaration : VAR identifierlist type SEMICOLON {}
+declaration_statement : VAR identifierlist type SEMICOLON {}
             | VAR identifierlist type EQ expressionlist SEMICOLON {}
             ;
 
-function_declaration : 'func' IDENTIFIER function_signature function_body{}
+function_declaration : 'func' IDENTIFIER function_signature block_statement{}
             ;
 
 function_signature : LPAREN parameters RPAREN function_result {}
@@ -109,9 +53,9 @@ function_signature : LPAREN parameters RPAREN function_result {}
 
 function_result : type
                 ;
-
-function_body : block
-              ; 
+/* 
+function_body : block_statement
+              ;  */
 
 parameters : parameterlist {}
            | %empty {}
@@ -124,23 +68,20 @@ parameterlist : parameter_declaration {}
 parameter_declaration : IDENTIFIER type {}
                       ;
             
-assignment : IDENTIFIER  expression SEMICOLON
+assignment_statement : IDENTIFIER  expression SEMICOLON
            ;
 
-if_statement : IF expression LBRACE block if_statement_continuation{}
+if_statement : IF expression LBRACE block_statement %empty{} //Else not implemented
              ;
 
-if_statement_continuation : %empty //Else not implemented
-                          | 
-
-for_statement : FOR expression block
+for_statement : FOR expression block_statement
               ;
 
 return_statement : RETURN expression SEMICOLON
                  ;
 
-block : LBRACE statementlist RBRACE
-      ;
+block_statement : LBRACE compound_statement RBRACE
+                ;
 
 //EXPRESSIONS
 
@@ -151,29 +92,40 @@ expressionlist : expressionlist ',' expression
 expression : INTLITERAL 
            | BOOLLITERAL
            | IDENTIFIER {$$ = lookupSymbol($1)}
-           | op_expression
+           | arithmetic_op_expression
+           | arithmetic_assign_op_expression
+           | boolean_op_expression
            | NOT expression               { $$ = !$2; }
-           | INC expression               { $$ = $2 + 1; }
-           | DEC expression               { $$ = $2 - 1; }
+           | expression INC                { $$ = $2 + 1; }
+           | expression INC                { $$ = $2 - 1; }
            | LPAREN expression RPAREN
            ;
 
-op_expression : expression PLUS expression   { $$ = $1 + $3; }
+arithmetic_op_expression : 
+             expression PLUS expression   { $$ = $1 + $3; }
            | expression MIN expression    { $$ = $1 - $3; }
            | expression MUL expression    { $$ = $1 * $3; }
            | expression DIV expression    { $$ = $1 / $3; }
-           | expression PLUSASSIGN expression   { $$ = $1 += $3; }
-           | expression MINASSIGN expression    { $$ = $1 -= $3; }
-           | expression MULASSIGN expression    { $$ = $1 *= $3; }
-           | expression DIVASSIGN expression    { $$ = $1 /= $3; }
-           | expression AND expression    { $$ = $1 && $3; }
+
+arithmetic_assign_op_expression :
+             IDENTIFIER PLUSASSIGN expression   { $$ = $1 += $3; } // find typeid for int to validate $3 is numeriic
+           | IDENTIFIER MINASSIGN expression    { $$ = $1 -= $3; }
+           | IDENTIFIER MULASSIGN expression    { $$ = $1 *= $3; }
+           | IDENTIFIER DIVASSIGN expression    { $$ = $1 /= $3; }
+
+boolean_op_expression : 
+             expression AND expression    { $$ = $1 && $3; }
            | expression OR expression     { $$ = $1 || $3; }
-           | expression GT expression     { $$ = $1 > $3; }
+           | expression EQ expression     { $$ = $1 == $3; } // compare types and do yyerror
+           | expression NE expression     { $$ = $1 != $3; }
+
+boolean_arithmetic_op_expression:
+             expression GT expression     { $$ = $1 > $3; }
            | expression GE expression     { $$ = $1 >= $3; }
            | expression LT expression     { $$ = $1 < $3; }
            | expression LE expression     { $$ = $1 <= $3; }
-           | expression EQ expression     { $$ = $1 == $3; }
-           | expression NE expression     { $$ = $1 != $3; }
+
+         
 
 %%
 
@@ -190,10 +142,7 @@ int yyerror(const char *message) {
 int yylex() {
 }
 
-void yyerror(const char* message) {
-    printf("Error: %s\n", message);
-    exit(1);
-}
+
 
 
 
