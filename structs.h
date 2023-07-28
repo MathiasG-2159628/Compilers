@@ -56,6 +56,14 @@ struct IdList{
 
 };
 
+bool containsValue(const std::vector<char*> vec, char* value) {
+    for (const auto& element : vec) {
+        if (element == value) {
+            return true;
+        }
+    }
+    return false;
+}
 
 //Statements
 
@@ -70,11 +78,21 @@ struct DeclarationStm : public Stm_{
         explist = expl;
     }
 
+
     void interp() override{
+        
+        std::vector<char*> declared_ids;
 
         if(explist == nullptr){
             //Default assignment of value, but only if a type is specified
             while(idlist->next != nullptr){
+                
+                if(containsValue(declared_ids, idlist->head)){
+                    //error
+                }
+                declared_ids.push_back(idlist->head);
+
+
                 if(declaredType == INT){
                     addSymbol(idlist->head, 0);
                 }
@@ -88,6 +106,17 @@ struct DeclarationStm : public Stm_{
         }
         else{
              while(idlist->next != nullptr){
+                
+                
+                if(containsValue(declared_ids, idlist->head)){
+                    //error
+                }
+                declared_ids.push_back(idlist->head);
+
+                if((idlist != nullptr && explist == nullptr) || (idlist == nullptr && explist != nullptr) ){
+                    //throw error
+                }
+
                 //Since a declaration without a specified type is possible it needs runtime typechecking.
                 if(declaredType == INT){
                     if(std::is_same<decltype(explist->head->interp()), int>::value){
@@ -114,9 +143,7 @@ struct DeclarationStm : public Stm_{
                 idlist = idlist->next;
                 explist = explist->next;
 
-                if((idlist != nullptr && explist == nullptr) || (idlist == nullptr && explist != nullptr) ){
-                    //throw error
-                }
+                
             }
         }
 
@@ -137,11 +164,28 @@ struct AssignStm : public Stm_
     ~AssignStm();
 
     void interp() {
+       
+        std::vector<char*> assigned_ids;
+
         while(idlist.next != nullptr){
-            updateSymbol(idlist->head, explist->head->interp())
+
+            if(containsValue(assigned_ids, idlist->head)){
+                //error
+            }
+            
+            assigned_ids.push_back(idlist->head);
+
+            if((idlist != nullptr && explist == nullptr) || (idlist == nullptr && explist != nullptr) ){
+                //throw error
+            }
+
+            updateSymbol(idlist->head, explist->head->interp());
+
+            idlist = idlist->next;
+            explist = explist->next;
         }
-        E value = exp->interp();
-        addSymbol(id, value);
+        
+        
     };
 };
 
