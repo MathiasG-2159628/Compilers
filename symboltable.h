@@ -1,6 +1,6 @@
 #include <cstring> 
 #include "yyfunctions.h"
-
+#include <typeinfo>
 //TODO: error handling
 
 template <typename T>
@@ -26,12 +26,13 @@ void addSymbol(char* name, T value) {
     symbolTable->head = newSymbol;
 }
 
+//TODO: catch runtime error
 template <typename T>
 void updateSymbol(char* name, T value) {
     Symbol<T>* current = st->head;
     while (current != NULL) {
         if (strcmp(current->name, name) == 0) {
-            current->value = value;
+            current->value = value;          
             return;
         }
         current = current->next;

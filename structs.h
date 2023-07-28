@@ -2,6 +2,8 @@
 #include "symboltable.h"
 #include "tokens.h"
 #include "yyfunctions.h"
+#include <vector>
+#include <type_traits>
 
 //TODO: error handling
 
@@ -9,8 +11,6 @@
 typedef Stm_* Stm;
 
 typedef Exp_<void>* Exp;
-
-typedef ExpList_* ExpList;
 
 struct Stm_ {
     virtual void interp() { return; };
@@ -21,17 +21,115 @@ struct Exp_ {
     virtual T interp(){ return; };
 };
 
-struct ExpList_ {
-    virtual void interp() { return; };
+
+
+
+
+//Lists
+
+struct ExpList {
+    Exp head;
+    ExpList* next;
+
+    ExpList(Exp h, ExpList* t) {
+        head = h;
+        next = t;
+    };
+
+    ExpList(){
+
+    };
 };
+
+struct IdList{
+    char* head;
+    IdList* next;
+
+    IdList(char* h, IdList* t) {
+        head = h;
+        next = t;
+    };
+
+    IdList(){
+
+    };
+
+};
+
 
 //Statements
 
-template <typename T>
+struct DeclarationStm : public Stm_{
+    int declaredType; 
+    IdList* idlist;
+    ExpList* explist;
+
+    DeclarationStm(int dcltype, IdList* idl, ExpList* expl){
+        declaredType = dcltype;
+        idlist = idl;
+        explist = expl;
+    }
+
+    void interp() override{
+
+        if(explist == nullptr){
+            //Default assignment of value, but only if a type is specified
+            while(idlist->next != nullptr){
+                if(declaredType == INT){
+                    addSymbol(idlist->head, 0);
+                }
+                else if(declaredType == BOOL){
+                    addSymbol(idlist->head, true);
+                }
+                else{
+                    //Throw error
+                }
+            }
+        }
+        else{
+             while(idlist->next != nullptr){
+                //Since a declaration without a specified type is possible it needs runtime typechecking.
+                if(declaredType == INT){
+                    if(std::is_same<decltype(explist->head->interp()), int>::value){
+                        addSymbol(idlist->head, explist->head->interp());
+                    }
+                    else{
+                        //throw error
+                    }
+                }
+                else if(declaredType == BOOL){
+                    if(std::is_same<decltype(explist->head->interp()), bool>::value){
+                        addSymbol(idlist->head, explist->head->interp());
+                    }else{
+                        //throw error
+                    }
+                }
+                else if(declaredType == -1){
+                    addSymbol(idlist->head, explist->head->interp());
+                }
+                else{
+                    //throw error
+                }
+                
+                idlist = idlist->next;
+                explist = explist->next;
+
+                if((idlist != nullptr && explist == nullptr) || (idlist == nullptr && explist != nullptr) ){
+                    //throw error
+                }
+            }
+        }
+
+       
+    }
+
+};
+
+template <typename E>
 struct AssignStm : public Stm_
 {
-    char* id;
-    Exp exp;
+    IdList* idlist;
+    ExpList* explist;
     AssignStm(char* i, Exp e) {
         id = i;
         exp = e;
@@ -39,8 +137,10 @@ struct AssignStm : public Stm_
     ~AssignStm();
 
     void interp() {
-
-        T value = exp->interp();
+        while(idlist.next != nullptr){
+            updateSymbol(idlist->head, explist->head->interp())
+        }
+        E value = exp->interp();
         addSymbol(id, value);
     };
 };
@@ -93,6 +193,19 @@ struct IntlitExp : public Exp_<int>
   
     virtual int interp() override{
         return integer;
+    }
+};
+
+struct BoollitExp : public Exp_<bool>
+{
+    bool boolean;
+
+    BoollitExp(bool b){
+        boolean = b;
+    }
+
+    virtual bool interp() override{
+        return boolean;
     }
 };
 
@@ -163,6 +276,7 @@ struct ArithmeticAssignOpExp : public Exp_<void>{
 };
 
 struct BooleanOpExp : public Exp_<bool>{
+
     Exp left;
     Exp right;
     int oper;
@@ -185,5 +299,45 @@ struct BooleanOpExp : public Exp_<bool>{
             return left->interp() || right->interp();
         }
 
+        return false;
     }
-}
+};
+
+struct BooleanArithmeticOpExp : public Exp_<bool>{
+
+    Exp left;
+    Exp right;
+    int oper;
+
+    virtual bool interp() override{
+
+        //Check if left and right types are both numeric
+        //if not throw yyerror
+
+        if(oper == GT){
+            return left->interp() > right->interp();           
+        }
+        else if(oper == LT){
+            return left->interp() < right->interp();
+        }
+        else if(oper == GE){
+            return left->interp() >= right->interp();
+        }
+        else if(oper == GT){
+            return left->interp() <= right->interp();
+        }
+
+        return false;
+    }
+
+};
+
+struct NotExp : public Exp_<bool>{
+    Exp expr;
+
+    //Check if expr result is of type bool
+
+    virtual bool interp() override{
+        return !(expr->interp());
+    }
+};

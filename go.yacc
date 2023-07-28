@@ -29,20 +29,28 @@ statement : declaration_statement
           | return_statement
           | block_statement
           | compound_statement
+          | expression INC SEMICOLON                
+          | expression DEC SEMICOLON 
           ;
 
 compound_statement : statement statement {}
 
 identifierlist : IDENTIFIER identifierlist
-               | IDENTIFIER
+               | IDENTIFIER //Pass nullptr to the constuctor for the "next" pointer
                ;
 
 type : INT
      | BOOL
      ;
 
+
+//Check if these lists are of equal size
+assignment_statement : identifierlist EQ expressionlist SEMICOLON
+           ;
+
 declaration_statement : VAR identifierlist type SEMICOLON {}
             | VAR identifierlist type EQ expressionlist SEMICOLON {}
+              VAR identifierlist EQ expressionlist SEMICOLON{}
             ;
 
 function_declaration : 'func' IDENTIFIER function_signature block_statement{}
@@ -67,9 +75,6 @@ parameterlist : parameter_declaration {}
 
 parameter_declaration : IDENTIFIER type {}
                       ;
-            
-assignment_statement : IDENTIFIER  expression SEMICOLON
-           ;
 
 if_statement : IF expression LBRACE block_statement %empty{} //Else not implemented
              ;
@@ -95,9 +100,7 @@ expression : INTLITERAL
            | arithmetic_op_expression
            | arithmetic_assign_op_expression
            | boolean_op_expression
-           | NOT expression               { $$ = !$2; }
-           | expression INC                { $$ = $2 + 1; }
-           | expression INC                { $$ = $2 - 1; }
+           | NOT expression SEMICOLON                { $$ = !$2; }
            | LPAREN expression RPAREN
            ;
 
@@ -108,7 +111,7 @@ arithmetic_op_expression :
            | expression DIV expression    { $$ = $1 / $3; }
 
 arithmetic_assign_op_expression :
-             IDENTIFIER PLUSASSIGN expression   { $$ = $1 += $3; } // find typeid for int to validate $3 is numeriic
+             IDENTIFIER PLUSASSIGN expression   { $$ = $1 += $3; } 
            | IDENTIFIER MINASSIGN expression    { $$ = $1 -= $3; }
            | IDENTIFIER MULASSIGN expression    { $$ = $1 *= $3; }
            | IDENTIFIER DIVASSIGN expression    { $$ = $1 /= $3; }
@@ -116,7 +119,7 @@ arithmetic_assign_op_expression :
 boolean_op_expression : 
              expression AND expression    { $$ = $1 && $3; }
            | expression OR expression     { $$ = $1 || $3; }
-           | expression EQ expression     { $$ = $1 == $3; } // compare types and do yyerror
+           | expression EQ expression     { $$ = $1 == $3; } 
            | expression NE expression     { $$ = $1 != $3; }
 
 boolean_arithmetic_op_expression:
