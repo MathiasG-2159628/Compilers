@@ -1,21 +1,49 @@
 #include <cstring> 
 #include "yyfunctions.h"
 #include <typeinfo>
+#include <vector>
 //TODO: error handling
 
 template <typename T>
 struct Symbol {
-    char name[10];
+    char* name;
     T value;
     struct Symbol* next;
+
+    Symbol(char* n, T val, Symbol* nx){
+        name = n;
+        value = val;
+        next = nx;
+    }
+
+    Symbol(){
+        
+    }
 };
 
 
 struct SymbolTable {
-    Symbol<void>* head; 
+    Symbol<int>* head; 
 };
 
-extern SymbolTable symbolTable;
+std::vector<SymbolTable> symbolTableStack;
+SymbolTable* symbolTable = nullptr;
+
+void pushSymbolTable(SymbolTable st) {
+    symbolTableStack.emplace_back(st);
+    symbolTable = &symbolTableStack.back();
+};
+
+void popSymbolTable() {
+    if (!symbolTableStack.empty()) {
+        symbolTableStack.pop_back();
+        if (!symbolTableStack.empty()) {
+            symbolTable = &symbolTableStack.back();
+        } else {
+            symbolTable = nullptr;
+        }
+    }
+}
 
 template <typename T>
 void addSymbol(char* name, T value) {
@@ -29,7 +57,7 @@ void addSymbol(char* name, T value) {
 //TODO: catch runtime error
 template <typename T>
 void updateSymbol(char* name, T value) {
-    Symbol<T>* current = st->head;
+    Symbol<T>* current = symbolTable->head;
     while (current != NULL) {
         if (strcmp(current->name, name) == 0) {
             current->value = value;          
@@ -44,7 +72,7 @@ void updateSymbol(char* name, T value) {
 // Templated function to lookup a symbol
 template <typename T>
 T lookupSymbol(char* name) {
-    Symbol<T>* current = st->head;
+    Symbol<T>* current = symbolTable->head;
     while (current != NULL) {
         if (strcmp(current->name, name) == 0) {
             return current->value;
@@ -57,4 +85,3 @@ T lookupSymbol(char* name) {
 }
 
 
-extern SymbolTable symbolTable;

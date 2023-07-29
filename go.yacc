@@ -3,6 +3,8 @@
 #include "structs.h"
 #include "symboltable.h"
 #include "yyfunctions.h"
+
+
 %}
 
 
@@ -28,12 +30,13 @@ statement : declaration_statement
           | for_statement
           | return_statement
           | block_statement
-          | compound_statement
           | expression INC SEMICOLON                
           | expression DEC SEMICOLON 
           ;
 
-compound_statement : statement statement {}
+statementlist : statement statementlist {}
+              | statement {}
+              ;
 
 identifierlist : IDENTIFIER identifierlist
                | IDENTIFIER //Pass nullptr to the constuctor for the "next" pointer
@@ -50,20 +53,16 @@ assignment_statement : identifierlist EQ expressionlist SEMICOLON
 
 declaration_statement : VAR identifierlist type SEMICOLON {}
             | VAR identifierlist type EQ expressionlist SEMICOLON {}
-              VAR identifierlist EQ expressionlist SEMICOLON{}
+            | VAR identifierlist EQ expressionlist SEMICOLON{}
             ;
 
-function_declaration : 'func' IDENTIFIER function_signature block_statement{}
+
+function_declaration_statement : 'func' IDENTIFIER function_signature LBRACE statementlist RBRACE{}
             ;
 
-function_signature : LPAREN parameters RPAREN function_result {}
+function_signature : LPAREN parameters RPAREN type {}
+                   | LPAREN parameters RPAREN {}
                    ;
-
-function_result : type
-                ;
-/* 
-function_body : block_statement
-              ;  */
 
 parameters : parameterlist {}
            | %empty {}
@@ -85,7 +84,7 @@ for_statement : FOR expression block_statement
 return_statement : RETURN expression SEMICOLON
                  ;
 
-block_statement : LBRACE compound_statement RBRACE
+block_statement : LBRACE statementlist RBRACE
                 ;
 
 //EXPRESSIONS
@@ -133,6 +132,7 @@ boolean_arithmetic_op_expression:
 %%
 
 int main() {
+    pushSymbolTable();
     yyparse();
     return 0;
 }

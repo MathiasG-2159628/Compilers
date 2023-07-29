@@ -4,8 +4,10 @@
 #include "yyfunctions.h"
 #include <vector>
 #include <type_traits>
+#include <typeinfo>
 
 //TODO: error handling
+//TODO: for block statement: push and pop new symbol table on the stack
 
 
 typedef Stm_* Stm;
@@ -22,11 +24,7 @@ struct Exp_ {
 };
 
 
-
-
-
 //Lists
-
 struct ExpList {
     Exp head;
     ExpList* next;
@@ -40,7 +38,6 @@ struct ExpList {
 
     };
 };
-
 struct IdList{
     char* head;
     IdList* next;
@@ -56,16 +53,76 @@ struct IdList{
 
 };
 
-bool containsValue(const std::vector<char*> vec, char* value) {
-    for (const auto& element : vec) {
-        if (element == value) {
-            return true;
-        }
+struct StmList{
+    Stm head;
+    StmList* next;
+
+    StmList(Stm h, StmList* s){
+        head = h;
+        next = s;
     }
-    return false;
-}
+
+    StmList(){};
+};
+
+struct Param_declaration{
+    char* name;
+    int type;
+};
+struct ParamList{
+    Param_declaration head;
+    ParamList* next;
+};
+
+struct Function_signature{
+    ParamList params;
+    int type;
+};
 
 //Statements
+
+struct Function_DeclarationStm : public Stm_{
+    Function_signature signature;
+    StmList stmlist;
+
+    void interp() override{
+        int returnType = signature.type;
+        ParamList* paramlist = &signature.params;
+
+        std::vector<int> paramtypes;
+        std::vector<char*> paramnames;
+
+        while(paramlist->next != nullptr){
+            paramtypes.push_back(paramlist->head.type);
+            paramnames.push_back(paramlist->head.name);
+
+            paramlist = paramlist->next;
+        }
+
+
+        // //Check before execution if the function is of correct format
+        // //No unreachable code after return is allowed 
+        // //Check if the return type is right 
+        // bool hasReturnType = false;
+        // StmList* list = &stmlist;
+
+        // while(list->next != nullptr){
+        //     if(std::is_same<decltype(list->head), ReturnStm>::value){
+        //         ReturnStm returnstm = (ReturnStm) list->head;
+
+        //         if(list->next != nullptr){
+        //             //Unreachable code error
+        //         }
+        //         else{
+        //             if(typeid(returnstm->))
+        //         }
+        //     }
+        // }
+        
+
+    }
+};
+
 
 struct DeclarationStm : public Stm_{
     int declaredType; 
@@ -77,7 +134,6 @@ struct DeclarationStm : public Stm_{
         idlist = idl;
         explist = expl;
     }
-
 
     void interp() override{
         
@@ -106,7 +162,6 @@ struct DeclarationStm : public Stm_{
         }
         else{
              while(idlist->next != nullptr){
-                
                 
                 if(containsValue(declared_ids, idlist->head)){
                     //error
@@ -151,15 +206,13 @@ struct DeclarationStm : public Stm_{
     }
 
 };
-
-template <typename E>
 struct AssignStm : public Stm_
 {
     IdList* idlist;
     ExpList* explist;
-    AssignStm(char* i, Exp e) {
-        id = i;
-        exp = e;
+    AssignStm(IdList* id, ExpList* e) {
+        idlist = id;
+        explist = e;
     };
     ~AssignStm();
 
@@ -167,7 +220,7 @@ struct AssignStm : public Stm_
        
         std::vector<char*> assigned_ids;
 
-        while(idlist.next != nullptr){
+        while(idlist->next != nullptr){
 
             if(containsValue(assigned_ids, idlist->head)){
                 //error
@@ -189,23 +242,39 @@ struct AssignStm : public Stm_
     };
 };
 
-struct CompoundStm : public Stm_
+struct ReturnStm : public Stm_
 {
-    Stm stm1, stm2;
-    CompoundStm(Stm s1, Stm s2) {
-        stm1 = s1;
-        stm2 = s2;
-    };
-    ~CompoundStm();
+    Exp expr;
 
+    ReturnStm(Exp e){
 
-    virtual void interp() {
-        stm1->interp();
-        stm2->interp();
-    };
+    }
+
+    virtual void interp() override{
+        
+    }
 };
 
-//Expressions
+struct BlockStatement : public Stm_{
+    
+    StmList* stmlist;
+
+    BlockStatement(StmList *stl){
+        stmlist = stl;
+    }
+
+    BlockStatement();
+
+    virtual void interp() override{
+        SymbolTable head = symbolTableStack[symbolTableStack.size() -1];
+        pushSymbolTable(head);
+        while(stmlist != nullptr){
+            stmlist->head->interp();
+            stmlist = stmlist->next;
+        }
+        popSymbolTable();
+    }
+};
 
 template <typename T>
 struct IdExp : public Exp_
@@ -223,7 +292,6 @@ struct IdExp : public Exp_
     }
 };
 
-
 struct IntlitExp : public Exp_<int>
 {
     int integer;
@@ -239,7 +307,6 @@ struct IntlitExp : public Exp_<int>
         return integer;
     }
 };
-
 struct BoollitExp : public Exp_<bool>
 {
     bool boolean;
@@ -252,7 +319,6 @@ struct BoollitExp : public Exp_<bool>
         return boolean;
     }
 };
-
 struct ArithmeticOpExp : public Exp_<int>
 {
     Exp left, right;
@@ -288,7 +354,6 @@ struct ArithmeticOpExp : public Exp_<int>
         return value_return;
     }
 };
-
 struct ArithmeticAssignOpExp : public Exp_<void>{
 
     char* left;
@@ -318,7 +383,6 @@ struct ArithmeticAssignOpExp : public Exp_<void>{
     }
 
 };
-
 struct BooleanOpExp : public Exp_<bool>{
 
     Exp left;
@@ -346,7 +410,6 @@ struct BooleanOpExp : public Exp_<bool>{
         return false;
     }
 };
-
 struct BooleanArithmeticOpExp : public Exp_<bool>{
 
     Exp left;
@@ -375,7 +438,6 @@ struct BooleanArithmeticOpExp : public Exp_<bool>{
     }
 
 };
-
 struct NotExp : public Exp_<bool>{
     Exp expr;
 
@@ -385,3 +447,13 @@ struct NotExp : public Exp_<bool>{
         return !(expr->interp());
     }
 };
+
+//Methods
+bool containsValue(const std::vector<char*> vec, char* value) {
+    for (const auto& element : vec) {
+        if (element == value) {
+            return true;
+        }
+    }
+    return false;
+}
