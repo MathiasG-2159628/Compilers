@@ -3,14 +3,14 @@
 #include <typeinfo>
 #include <vector>
 //TODO: error handling
-
+//TODO: handle scoping, look at chatGPT as
 template <typename T>
 struct Symbol {
-    char* name;
+    std::string name;
     T value;
-    struct Symbol* next;
+    Symbol* next;
 
-    Symbol(char* n, T val, Symbol* nx){
+    Symbol(std::string n, T val, Symbol* nx){
         name = n;
         value = val;
         next = nx;
@@ -46,41 +46,43 @@ void popSymbolTable() {
 }
 
 template <typename T>
-void addSymbol(char* name, T value) {
-    Symbol<T>* newSymbol = new Symbol<T>(); 
-    strcpy(newSymbol->name, name);
-    newSymbol->value = value;
-    newSymbol->next = symbolTable->head;
+void addSymbol(std::string name, T value) {
+    Symbol<T>* newSymbol = new Symbol<T>(name, value); 
     symbolTable->head = newSymbol;
 }
 
 //TODO: catch runtime error
 template <typename T>
-void updateSymbol(char* name, T value) {
-    Symbol<T>* current = symbolTable->head;
-    while (current != NULL) {
-        if (strcmp(current->name, name) == 0) {
-            current->value = value;          
-            return;
+void updateSymbol(std::string name, T value) {
+    for (int i = symbolTableStack.size() - 1; i >= 0; --i) {
+        Symbol<T>* current = symbolTableStack[i]->head;
+        while (current != nullptr) {
+            if (strcmp(current->name, name) == 0) {
+                current->value = value;
+                return;
+            }
+            current = current->next;
         }
-        current = current->next;
     }
 
-    printf("Variabele '%s' bestaat niet in the symbol table.\n", name);
+    printf("Variable '%s' does not exist in the symbol table.\n", name);
 }
 
 // Templated function to lookup a symbol
 template <typename T>
-T lookupSymbol(char* name) {
-    Symbol<T>* current = symbolTable->head;
-    while (current != NULL) {
-        if (strcmp(current->name, name) == 0) {
-            return current->value;
+T lookupSymbol(std::string name) {
+    for (int i = symbolTableStack.size() - 1; i >= 0; --i) {
+        Symbol<T>* current = symbolTableStack[i]->head;
+        while (current != nullptr) {
+            if (strcmp(current->name, name) == 0) {
+                return current->value;
+            }
+            current = current->next;
         }
-        current = current->next;
     }
 
-    printf("Variabele '%s' is niet aanwezig in the symbol table.\n", name);
+    printf("Variable '%s' is not present in the symbol table.\n", name);
+
     return;
 }
 

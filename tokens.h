@@ -32,4 +32,6 @@
 #define NE 281
 #define INTLITERAL 282
 #define BOOLLITERAL 283
-
+#define FUNC 284
+#define COMMA 285
+#define PRINT 286

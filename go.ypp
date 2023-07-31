@@ -1,0 +1,246 @@
+%{
+#include <stdio.h>
+#include "structs.h"
+#include "symboltable.h"
+#include "yyfunctions.h"
+#include <string>
+
+Stm thesyntree;
+
+%}
+
+%union{
+  //Literals and base classes
+  std::string id;
+  bool boollit;
+  int intlit;
+  Stm_ stm;
+  Exp_ exp;
+
+  //Lists
+  Explist explist;
+  Idlist idlist;
+  Stmlist stmlist;
+  PramList paramlist;
+
+  //Statements and statement related objects
+  Param_declaration param_declaration;
+  Function_signature func_signature;
+  PrintStm printstm;
+  Function_DeclarationStm func_declarationstm;
+  DeclarationStm declarationstm;
+  AssignStm assignstm;
+  ReturnStm returnstm;
+  BlockStm blockstm;
+  VoidFunctionStm voidfunctionstm;
+  IncDecStm incdecstm;
+  If_stm if_stm;
+  For_stm for_stm;
+
+  //Expressions
+  IdExp idexp;
+  IntlitExp intlitexp;
+  BoollitExp boollitexp;
+  ArithmeticOpExp arithmeticopexp;
+  ArithmeticAssignOpExp arithmeticassignopexp;
+  BooleanOpExp booleanopexp;
+  BooleanArithmeticOpExp booleanarithmeticopexp;
+  NotExp nexp;
+  FunctionExp functionexp;
+}
+
+%token IDENTIFIER SEMICOLON INT BOOL PACKAGE RETURN VAR IF FOR LPAREN RPAREN LBRACE RBRACE PLUS MIN MUL DIV PLUSASSIGN MINASSIGN 
+%token MULASSIGN DIVASSIGN AND OR NOT INC DEC GT GE LT LE EQ NE INTLITERAL BOOLLITERAL
+%token COMMA PRINT FUNC
+
+%left MUL DIV
+%left PLUS MIN
+
+//Base 
+%type <stm> statement
+%type <exp> expression
+
+//Lists
+%type <explist> expressionlist
+%type <idlist> identifierlist
+%type <stmlist> statementlist
+%type <paramlist> parameterlist
+
+//Statements and statement related types
+%type <param_declaration> parameter_declaration
+%type <func_signature> function_signature
+%type <printstm> print_statement
+%type <func_declarationstm> function_declaration_statement
+%type <declarationstm> declaration_statement
+%type <assignstm> assignment_statement
+%type <returnstm> return_statement
+%type <blockstm> block_statement
+%type <voidfunctionstm> void_function_statement
+%type <incdecstm> increment_decrement_statement
+%type <if_stm> if_statement
+%type <for_stm> for_statement
+
+//Expressions
+%type <functionexp> function_expression
+%type <arithmeticopexp> arithmetic_op_expression
+%type <arithmeticassignopexp> arithmetic_assign_op_expression
+%type <booleanopexp> boolean_op_expression
+%type <booleanarithmeticopexp> boolean_arithmetic_op_expression 
+%type <intlitexp> intlit_expression
+%type <boollitexp> boollit_expression
+%type <idexp> id_expression
+%type <nexp> notexp
+
+//TODO: structs maken voor alle producties zoals in opwarmingsoefening
+
+%%
+
+
+statement : declaration_statement 
+          | assignment_statement 
+          | if_statement
+          | for_statement
+          | return_statement
+          | block_statement
+          | print_statement
+          | void_function_statement
+          ;
+
+statementlist : statement statementlist {$$ = new StmList($1, &$2);}
+              | statement {$$ = new StmList($1, nullptr);}
+              ;
+
+identifierlist : IDENTIFIER identifierlist {$$ = new IdList($1, &$2);}
+               | IDENTIFIER {$$ = new IdList($1, nullptr);}
+               ;
+
+type : INT
+     | BOOL
+     ;
+
+
+void_function_statement : IDENTIFIER LPAREN expressionlist RPAREN SEMICOLON {$$ = new VoidFunctionStm($3, $1); thesyntree = $$;}
+                        ;
+
+print_statement : PRINT LPAREN expressionlist RPAREN {$$ = new PrintStm(&$3); thesyntree = $$;}
+
+//Check if these lists are of equal size
+assignment_statement : identifierlist EQ expressionlist SEMICOLON {$$ = new AssignStm(&$1, &$3); thesyntree = $$;}
+           ;
+
+declaration_statement : VAR identifierlist type SEMICOLON {$$ = new DeclarationStm($3, $2, nullptr); thesyntree = $$;}
+            | VAR identifierlist type EQ expressionlist SEMICOLON {$$ = new DeclarationStm($3, $2, $5); thesyntree = $$;}
+            | VAR identifierlist EQ expressionlist SEMICOLON{$$ = new DeclarationStm(-1, $2, $5); thesyntree = $$;}
+            ;
+
+
+function_declaration_statement : FUNC IDENTIFIER function_signature LBRACE statementlist RBRACE{$$ = new Function_DeclarationStm($3, $5, $2); thesyntree = $$;}
+            ;
+
+function_signature : LPAREN parameterlist RPAREN type {$$ = new Function_signature($2, $4);}
+                   | LPAREN parameterlist RPAREN {$$ = new Function_signature($2, -1);}
+                   ;
+
+
+parameterlist : parameter_declaration {$$ = new ParamList($1, nullptr);}
+              | parameterlist COMMA parameter_declaration {$$ = new ParamList($1, $3);}
+              | {$$ = nullptr;}
+              ;
+
+parameter_declaration : IDENTIFIER type {$$ = new Param_declaration($1, $2);}
+                      ;
+
+if_statement : IF LBRACE expression RBRACE block_statement{$$ = new If_stm($3, $5); thesyntree = $$;} //Else not implemented
+             ;
+
+for_statement : FOR LBRACE expression RBRACE block_statement{$$ = new For_stm($3, $5); thesyntree = $$;}
+              ;
+
+return_statement : RETURN expression SEMICOLON{$$ = new ReturnStm($2); thesyntree = $$;}
+                 ;
+
+block_statement : LBRACE statementlist RBRACE{$$ = new BlockStm($2); thesyntree = $$;}
+                ;
+
+increment_decrement_statement : IDENTIFIER INC SEMICOLON {$$ = new IncDecStm($2, $1);}                
+                              | IDENTIFIER DEC SEMICOLON {$$ = new IncDecStm($2, $1);}
+                              ;
+
+//EXPRESSIONS
+
+expressionlist : expressionlist ',' expression {$$ = new ExpList($3, &$1);}
+               | expression {$$ = new ExpList($1, nullptr);}
+               ;
+
+expression : intlit_expression
+           | boollit_expression
+           | function_expression
+           | arithmetic_op_expression
+           | arithmetic_assign_op_expression
+           | boolean_op_expression
+           | boolean_arithmetic_op_expression
+           | LPAREN expression RPAREN               
+           ;
+
+intlit_expression : INTLITERAL {$$ = $1;} 
+                  ;  
+
+boollit_expression : BOOLLITERAL {$$ = $1;}
+                   ;
+
+id_expression : IDENTIFIER {$$ = new IdExp($1);}
+              ;
+
+notexp : NOT expression SEMICOLON {$$ = new NotExp($2);}
+       ;
+
+function_expression : IDENTIFIER LPAREN expressionlist RPAREN SEMICOLON{$$ = new FunctionExp($3, $1);}
+           ;
+
+arithmetic_op_expression : 
+             expression PLUS expression   {$$ = new ArithmeticOpExp($1, $2, $3); }
+           | expression MIN expression    {$$ = new ArithmeticOpExp($1, $2, $3); }
+           | expression MUL expression    {$$ = new ArithmeticOpExp($1, $2, $3); }
+           | expression DIV expression    {$$ = new ArithmeticOpExp($1, $2, $3); }
+
+arithmetic_assign_op_expression :
+             IDENTIFIER PLUSASSIGN expression   {$$ = new ArithmeticAssignOpExp($1, $2, $3); } 
+           | IDENTIFIER MINASSIGN expression    {$$ = new ArithmeticAssignOpExp($1, $2, $3); }
+           | IDENTIFIER MULASSIGN expression    {$$ = new ArithmeticAssignOpExp($1, $2, $3); }
+           | IDENTIFIER DIVASSIGN expression    {$$ = new ArithmeticAssignOpExp($1, $2, $3); }
+
+boolean_op_expression : 
+             expression AND expression    {$$ = new BooleanOpExp($1, $2, $3); }
+           | expression OR expression     {$$ = new BooleanOpExp($1, $2, $3); }
+           | expression EQ expression     {$$ = new BooleanOpExp($1, $2, $3); } 
+           | expression NE expression     {$$ = new BooleanOpExp($1, $2, $3); }
+
+boolean_arithmetic_op_expression:
+             expression GT expression     {$$ = new BooleanArithmeticOpExp($1, $2, $3); }
+           | expression GE expression     { $$ = new BooleanArithmeticOpExp($1, $2, $3); }
+           | expression LT expression     { $$ = new BooleanArithmeticOpExp($1, $2, $3); }
+           | expression LE expression     { $$ = new BooleanArithmeticOpExp($1, $2, $3); }
+
+         
+
+%%
+
+int main() {
+    pushSymbolTable();
+    yyparse();
+    return 0;
+}
+
+int yyerror(std::string message) {
+    printf("Error: %s\n", message);
+    return 1;
+}
+
+int yylex() {
+}
+
+
+
+
+
+

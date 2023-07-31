@@ -5,9 +5,12 @@
 #include <vector>
 #include <type_traits>
 #include <typeinfo>
+#include <iostream>
+#include <string>
 
 //TODO: error handling
 //TODO: for block statement: push and pop new symbol table on the stack
+
 
 
 typedef Stm_* Stm;
@@ -22,6 +25,9 @@ template <typename T>
 struct Exp_ {
     virtual T interp(){ return; };
 };
+
+bool returnEncountered = false;
+Exp returnExp = nullptr;
 
 
 //Lists
@@ -39,10 +45,10 @@ struct ExpList {
     };
 };
 struct IdList{
-    char* head;
+    std::string head;
     IdList* next;
 
-    IdList(char* h, IdList* t) {
+    IdList(std::string h, IdList* t) {
         head = h;
         next = t;
     };
@@ -65,64 +71,96 @@ struct StmList{
     StmList(){};
 };
 
-struct Param_declaration{
-    char* name;
-    int type;
-};
+
 struct ParamList{
     Param_declaration head;
     ParamList* next;
+
+    ParamList(Param_declaration h, ParamList* n){
+        head = h;
+        next = n;
+    }
+
+    ParamList();
 };
 
+//Params
+
+struct Param_declaration{
+    std::string name;
+    int type;
+
+    Param_declaration(std::string n, int t){
+        name = n;
+        type = t;
+    }
+
+    Param_declaration();
+};
 struct Function_signature{
     ParamList params;
     int type;
+
+    Function_signature(ParamList p, int t){
+        params = p;
+        type = t;
+    }
+
+    Function_signature();
 };
 
+
 //Statements
+
+struct PrintStm : public Stm_{
+    ExpList* explist;
+
+    PrintStm(ExpList* expl){
+        explist = expl;
+    }
+
+    void interp() override{
+        while(explist != nullptr){
+            std::cout << std::to_string(explist->head->interp()) << " ";
+            explist = explist->next;
+        }
+        std::cout << "\n";
+    }
+};
 
 struct Function_DeclarationStm : public Stm_{
     Function_signature signature;
     StmList stmlist;
+    std::string identifier;
+
+    Function_DeclarationStm(Function_signature sig, StmList stml, std::string id){
+        signature = sig;
+        stmlist = stml;
+        identifier = id;
+    }
+
+    Function_DeclarationStm();
 
     void interp() override{
         int returnType = signature.type;
         ParamList* paramlist = &signature.params;
 
         std::vector<int> paramtypes;
-        std::vector<char*> paramnames;
+        std::vector<std::string> paramnames;
 
-        while(paramlist->next != nullptr){
+        while(paramlist != nullptr){
             paramtypes.push_back(paramlist->head.type);
             paramnames.push_back(paramlist->head.name);
 
             paramlist = paramlist->next;
         }
 
-
-        // //Check before execution if the function is of correct format
-        // //No unreachable code after return is allowed 
-        // //Check if the return type is right 
-        // bool hasReturnType = false;
-        // StmList* list = &stmlist;
-
-        // while(list->next != nullptr){
-        //     if(std::is_same<decltype(list->head), ReturnStm>::value){
-        //         ReturnStm returnstm = (ReturnStm) list->head;
-
-        //         if(list->next != nullptr){
-        //             //Unreachable code error
-        //         }
-        //         else{
-        //             if(typeid(returnstm->))
-        //         }
-        //     }
-        // }
+        Function function(identifier, paramnames, paramtypes, returnType, stmlist);
         
-
+        //Add function to table
+        addFunction(identifier, &function);
     }
 };
-
 
 struct DeclarationStm : public Stm_{
     int declaredType; 
@@ -135,13 +173,15 @@ struct DeclarationStm : public Stm_{
         explist = expl;
     }
 
+    DeclarationStm(){};
+
     void interp() override{
         
-        std::vector<char*> declared_ids;
+        std::vector<std::string> declared_ids;
 
         if(explist == nullptr){
             //Default assignment of value, but only if a type is specified
-            while(idlist->next != nullptr){
+            while(idlist != nullptr){
                 
                 if(containsValue(declared_ids, idlist->head)){
                     //error
@@ -161,7 +201,7 @@ struct DeclarationStm : public Stm_{
             }
         }
         else{
-             while(idlist->next != nullptr){
+             while(idlist != nullptr){
                 
                 if(containsValue(declared_ids, idlist->head)){
                     //error
@@ -200,12 +240,10 @@ struct DeclarationStm : public Stm_{
 
                 
             }
-        }
-
-       
+        }  
     }
-
 };
+
 struct AssignStm : public Stm_
 {
     IdList* idlist;
@@ -214,13 +252,14 @@ struct AssignStm : public Stm_
         idlist = id;
         explist = e;
     };
-    ~AssignStm();
+
+    AssignStm();
 
     void interp() {
        
-        std::vector<char*> assigned_ids;
+        std::vector<std::string> assigned_ids;
 
-        while(idlist->next != nullptr){
+        while(idlist != nullptr){
 
             if(containsValue(assigned_ids, idlist->head)){
                 //error
@@ -247,7 +286,7 @@ struct ReturnStm : public Stm_
     Exp expr;
 
     ReturnStm(Exp e){
-
+        expr = e;
     }
 
     virtual void interp() override{
@@ -255,33 +294,248 @@ struct ReturnStm : public Stm_
     }
 };
 
-struct BlockStatement : public Stm_{
+struct BlockStm : public Stm_{
     
     StmList* stmlist;
 
-    BlockStatement(StmList *stl){
+    BlockStm(StmList *stl){
         stmlist = stl;
     }
 
-    BlockStatement();
+    BlockStm();
 
     virtual void interp() override{
-        SymbolTable head = symbolTableStack[symbolTableStack.size() -1];
-        pushSymbolTable(head);
+       
+        pushSymbolTable(SymbolTable());
         while(stmlist != nullptr){
-            stmlist->head->interp();
-            stmlist = stmlist->next;
+
+            if(std::is_same<decltype(stmlist->head), ReturnStm>::value){
+                    ReturnStm returnstm = (ReturnStm) stmlist->head;
+
+                    returnEncountered = true;
+                    returnExp = returnstm.expr;
+                    //returnstm.interp();
+
+                    if(stmlist->next != nullptr){
+                        //Unreachable code error
+                    }
+
+                    return;
+            }          
         }
         popSymbolTable();
     }
 };
 
+struct VoidFunctionStm : public Stm_{
+    ExpList arguments;
+    std::string identifier;
+
+    VoidFunctionStm(ExpList args, std::string id){
+        arguments = args;
+        identifier = id;
+    }
+
+    virtual void interp() override{
+        //Call the function from the function table 
+        Function function = lookupFunction(identifier);
+        int returntype = function.functionType;
+        StmList* stmlist = &function.stmlist;
+
+        //New scope definition
+        pushSymbolTable(SymbolTable());
+
+        //Pushing the arguments onto the symbol table of the new scope
+        ExpList* args = &arguments;
+        std::vector<std::string> paramNames = function.paramNames;
+        std::vector<int> paramTypes = function.paramTypes;
+    
+        if(args != nullptr){
+
+            if(paramNames.size() == 0 ){
+                //Too many arguments error
+                //(function has no arguments)
+            }
+
+            int i = 0;
+            while (args->next != nullptr)
+            {
+                if(i == paramNames.size() && args->next != nullptr){
+                    //Too many arguments
+                }
+                else if(i != paramNames.size() && args->next == nullptr){
+                    //Not enough arguments
+                }
+
+                //Couldn't use typeinfo due to bogus inclusion error
+                //So I have to do it the stupid way
+                if(std::is_same<decltype(args->head->interp()), int>::value){
+                    if(paramTypes[i] != INT){
+                        //wrong type
+                    }
+                }
+                else if(std::is_same<decltype(args->head->interp()), bool>::value){
+                    if(paramTypes[i] != BOOL){
+                        //wrong type
+
+                    }
+                }
+                
+                addSymbol(paramNames[i], args->head->interp());
+                i++;
+                args = args->next;
+            }
+        }
+
+        //Executing the function
+
+        if(stmlist != nullptr){
+            while(stmlist != nullptr){
+               
+                if(std::is_same<decltype(stmlist->head), ReturnStm>::value){
+                    ReturnStm returnstm = (ReturnStm) stmlist->head;
+
+                    //returnstm.interp();
+
+                    if(returnstm.expr != nullptr && returntype == -1){
+                        //no return in void function allowed
+                    }
+
+                    if(std::is_same<decltype(returnstm.expr->interp()), bool>::value){
+                        if(returntype != BOOL){
+                            //wrong return type error
+                        }
+                    }
+                    else if(std::is_same<decltype(returnstm.expr->interp()), int>::value){
+                        if(returntype != INT){
+                            //wrong return type error
+                        }
+                    }
+
+                    if(stmlist->next != nullptr){
+                        //Unreachable code error
+                    }
+
+                    return;
+                }
+                else {
+                    stmlist->head->interp(); // Execute the nested block
+                    if (returnEncountered) {
+                        
+
+                        if(returnExp != nullptr && returntype == -1){
+                            //no return in void function allowed
+                        }
+
+                        if(std::is_same<decltype(returnExp->interp()), bool>::value){
+                            if(returntype != BOOL){
+                                //wrong return type error
+                            }
+                        }
+                        else if(std::is_same<decltype(returnExp->interp()), int>::value){
+                            if(returntype != INT){
+                                //wrong return type error
+                            }
+                        }
+
+                        returnEncountered = false;
+                        // Bubble up the return statement
+                        return;
+                    }
+                }
+
+            }
+        }       
+    }
+
+};
+
+template <typename T>
+
+struct IncDecStm : public Stm_{
+    int action;
+    std::string identifier;
+
+    IncDecStm(int ac, std::string id){
+        action = ac;
+        identifier = id;
+    }
+
+    virtual void interp() override{
+
+        T value =  lookupSymbol(identifier);
+
+        if(std::is_same<decltype(value), int>::value){
+            int castedValue = (int) value;
+            
+            if(action == DEC){
+                castedValue--;
+            }
+            else if(action == INC){
+                castedValue++;
+            }
+
+            updateSymbol(identifier, castedValue);
+        }
+        else{
+            //Throw type error
+        }
+
+    }
+
+};
+
+struct If_stm : public Stm_{
+    Exp exp;
+    BlockStm blockStm;
+
+    If_stm(Exp ex, BlockStm bstm){
+        exp = ex;
+        blockStm = bstm;
+    }
+
+    virtual void interp() override{
+         if(std::is_same<decltype(exp->interp()), bool>::value){
+            if(exp->interp()){
+                blockStm.interp();
+            }
+         }
+         else{
+            //Wrong type error
+         }
+    }
+};
+
+struct For_stm : public Stm_{
+    Exp exp;
+    BlockStm blockStm;
+
+    For_stm(Exp ex, BlockStm bstm){
+        exp = ex;
+        blockStm = bstm;
+    }
+
+    virtual void interp() override{
+         if(std::is_same<decltype(exp->interp()), bool>::value){
+            while(exp->interp()){
+                blockStm.interp();
+            }
+         }
+         else{
+            //Wrong type error
+         }
+    }
+};
+
+
+//Expressions
+
 template <typename T>
 struct IdExp : public Exp_
 {
-    char* id;
+    std::string id;
 
-    IdExp(char* i) {
+    IdExp(std::string i) {
         id = i;
     };
 
@@ -356,9 +610,15 @@ struct ArithmeticOpExp : public Exp_<int>
 };
 struct ArithmeticAssignOpExp : public Exp_<void>{
 
-    char* left;
+    std::string left;
     Exp right;
     int oper;
+
+     ArithmeticAssignOpExp(std::string l, int op, Exp r) {
+        left = l;
+        right = r;
+        oper = op;
+    };
 
     virtual void interp() override{
 
@@ -389,6 +649,12 @@ struct BooleanOpExp : public Exp_<bool>{
     Exp right;
     int oper;
 
+    BooleanOpExp(Exp l, int op, Exp r) {
+        left = l;
+        right = r;
+        oper = op;
+    };
+
     virtual bool interp() override{
 
         //Check if left and right types are equal
@@ -416,6 +682,12 @@ struct BooleanArithmeticOpExp : public Exp_<bool>{
     Exp right;
     int oper;
 
+    BooleanArithmeticOpExp(Exp l, int op, Exp r) {
+        left = l;
+        right = r;
+        oper = op;
+    };
+
     virtual bool interp() override{
 
         //Check if left and right types are both numeric
@@ -440,20 +712,205 @@ struct BooleanArithmeticOpExp : public Exp_<bool>{
 };
 struct NotExp : public Exp_<bool>{
     Exp expr;
-
-    //Check if expr result is of type bool
+    
+    NotExp(Exp ex){
+        expr = ex;
+    }
 
     virtual bool interp() override{
+
+        if(!(std::is_same<decltype(expr->interp()), int>::value)){
+            //type error
+        }
+
         return !(expr->interp());
     }
 };
 
+template <typename T>
+struct FunctionExp : public Exp_<T>{
+
+
+    ExpList arguments;
+    std::string identifier;
+
+
+    FunctionExp(Explist args, std::string id){
+        arguments = args;
+        identifier = id;
+    }
+
+
+     virtual T interp() override{
+
+        //Call the function from the function table 
+        Function function = lookupFunction(identifier);
+        int returntype = function.functionType;
+        StmList* stmlist = &function.stmlist;
+
+        //New scope definition
+        pushSymbolTable(SymbolTable());
+
+        //Pushing the arguments onto the symbol table of the new scope
+        ExpList* args = &arguments;
+        std::vector<std::string> paramNames = function.paramNames;
+        std::vector<int> paramTypes = function.paramTypes;
+    
+        if(returntype == -1){
+            //a void function expression is not allowed
+        }
+
+        if(args != nullptr){
+
+            if(paramNames.size() == 0 ){
+                //Too many arguments error
+                //(function has no arguments)
+            }
+
+            int i = 0;
+            while (args != nullptr)
+            {
+                if(i == paramNames.size() && args->next != nullptr){
+                    //Too many arguments
+                }
+                else if(i != paramNames.size() && args->next == nullptr){
+                    //Not enough arguments
+                }
+
+                //Couldn't use typeinfo due to bogus inclusion error
+                //So I have to do it the stupid way
+                if(std::is_same<decltype(args->head->interp()), int>::value){
+                    if(paramTypes[i] != INT){
+                        //wrong type
+                    }
+                }
+                else if(std::is_same<decltype(args->head->interp()), bool>::value){
+                    if(paramTypes[i] != BOOL){
+                        //wrong type
+
+                    }
+                }
+                
+                addSymbol(paramNames[i], args->head->interp());
+                i++;
+                args = args->next;
+            }
+        }
+
+        //Executing the function
+
+        if(stmlist != nullptr){
+            while(stmlist != nullptr){
+               
+                if(std::is_same<decltype(stmlist->head), ReturnStm>::value){
+                    ReturnStm returnstm = (ReturnStm) stmlist->head;
+
+                    //returnstm.interp();
+
+                    if(std::is_same<decltype(returnstm.expr->interp()), bool>::value){
+                        if(returntype != BOOL){
+                            //wrong return type error
+                        }
+                    }
+                    else if(std::is_same<decltype(returnstm.expr->interp()), int>::value){
+                        if(returntype != INT){
+                            //wrong return type error
+                        }
+                    }
+
+                    if(stmlist->next != nullptr){
+                        //Unreachable code error
+                    }
+
+                    return returnstm.expr->interp();
+                }
+                else {
+                    stmlist->head->interp(); // Execute the nested block
+                    if (returnEncountered) {
+                        
+
+                        if(returnExp != nullptr && returntype == -1){
+                            //no return in void function allowed
+                        }
+
+                        if(std::is_same<decltype(returnExp->interp()), bool>::value){
+                            if(returntype != BOOL){
+                                //wrong return type error
+                            }
+                        }
+                        else if(std::is_same<decltype(returnExp->interp()), int>::value){
+                            if(returntype != INT){
+                                //wrong return type error
+                            }
+                        }
+
+                        returnEncountered = false;
+                        // Bubble up the return statement
+                        return returnstm.expr->interp();
+                    }
+                }
+
+            }
+        }       
+    }
+};
+
+
 //Methods
-bool containsValue(const std::vector<char*> vec, char* value) {
+bool containsValue(const std::vector<std::string> vec, std::string value) {
     for (const auto& element : vec) {
         if (element == value) {
             return true;
         }
     }
     return false;
+}
+
+//Function table
+
+struct Function{
+
+    //call on this data whenever a function is called
+    Function* next;
+    std::string name;
+    std::vector<std::string> paramNames;
+    std::vector<int> paramTypes;
+    int functionType;
+    StmList stmlist;
+
+    Function(std::string n, std::vector<std::string> names, std::vector<int> types, int functype, StmList slist){
+        name = n;
+        paramNames = names;
+        paramTypes = types;
+        functionType = functype;
+        stmlist = slist;
+    }
+    
+};
+
+struct FunctionTable {
+    Function* head; 
+};
+
+FunctionTable* functionTable;
+
+Function lookupFunction(std::string name) {
+    Function* current = functionTable->head;
+    while (current != nullptr) {
+        if (strcmp(current->name, name) == 0) {
+            return *current;
+        }
+        current = current->next;
+    }
+    
+
+    printf("Function '%s' is not present in the function table.\n", name);
+
+    return;
+}
+
+void addFunction(std::string name, Function* newFunction) {
+
+    newFunction->next = functionTable->head;
+    functionTable->head = newFunction;
 }

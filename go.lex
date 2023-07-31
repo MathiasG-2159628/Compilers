@@ -11,7 +11,9 @@ go.lex: lex-file for go basisniveau
   int col_nr = 1; 
   int lastTokenType = -1;
 
-%}
+%
+
+}
 
 semicolon             ";"
 integer               "int"
@@ -47,7 +49,9 @@ notequals             "!="
 intliteral            "-"?[0-9]+
 boolliteral          "true"|"false"
 identifier            [a-z]([a-z]|[0-9])*
-
+print                 "fmt.Println"
+comma                ","
+func                 "func"
 
 
 %%
@@ -83,13 +87,32 @@ identifier            [a-z]([a-z]|[0-9])*
 {lesserorequal}           {lastTokenType = LE; return LE;}
 {equals}                  {lastTokenType = EQ; return EQ;}
 {notequals}               {lastTokenType = NE;  return NE;}
-{intliteral}              {lastTokenType = INTLITERAL; return INTLITERAL;}
-{boolliteral}             {lastTokenType = BOOLLITERAL; return BOOLLITERAL;}
-{identifier}              {lastTokenType = IDENTIFIER; return IDENTIFIER;}
-"\n"                      {if (lastTokenType == IDENTIFIER || lastTokenType == CONSTANT || lastTokenType == CLOSING_BRACKET) {
+{intliteral}              {lastTokenType = INTLITERAL; 
+                          yyval.intlit = std::stoi(yytext)
+                          return INTLITERAL;}
+{boolliteral}             {lastTokenType = BOOLLITERAL; 
+                          bool boollit;
+
+                          if(yytext == "true"){
+                            yyval.boollit = true;
+                          }
+                          else{
+                            yyval.boollit = false;
+                          }
+
+                          return BOOLLITERAL;}
+{identifier}              {lastTokenType = IDENTIFIER; 
+                            yyval.id = yytext;
+                            return IDENTIFIER;}
+"\n"                      {if (lastTokenType == IDENTIFIER || lastTokenType == CONSTANT || lastTokenType == CLOSING_BRACKET) 
+                          {
                                lastTokenType = -1; 
                                return SEMICOLON; 
-                           }}
+                          }}
+
+{func}                    {lastTokenType = FUNC; return FUNC;}
+{comma}                   {lastTokenType = COMMA; return COMMA;}
+{print}                   {lastTokenType = PRINT; return PRINT;}  
 
 .            {
   if (yytext[0] < ' '){ /* non-printable char */
