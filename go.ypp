@@ -18,10 +18,10 @@ Stm thesyntree;
   Exp_ exp;
 
   //Lists
-  Explist explist;
-  Idlist idlist;
-  Stmlist stmlist;
-  PramList paramlist;
+  ExpList explist;
+  IdList idlist;
+  StmList stmlist;
+  ParamList paramlist;
 
   //Statements and statement related objects
   Param_declaration param_declaration;
@@ -49,12 +49,20 @@ Stm thesyntree;
   FunctionExp functionexp;
 }
 
-%token IDENTIFIER SEMICOLON INT BOOL PACKAGE RETURN VAR IF FOR LPAREN RPAREN LBRACE RBRACE PLUS MIN MUL DIV PLUSASSIGN MINASSIGN 
-%token MULASSIGN DIVASSIGN AND OR NOT INC DEC GT GE LT LE EQ NE INTLITERAL BOOLLITERAL
-%token COMMA PRINT FUNC
+%token <id> IDENTIFIER 
+%token <boollit> BOOLLITERAL
+%token <intlit> SEMICOLON INT BOOL RETURN VAR IF FOR LPAREN RPAREN LBRACE RBRACE PLUS MIN MUL DIV PLUSASSIGN MINASSIGN 
+%token <intlit> MULASSIGN DIVASSIGN AND OR NOT INC DEC GT GE LT LE EQ NE INTLITERAL 
+%token <intlit> COMMA PRINT FUNC
 
 %left MUL DIV
 %left PLUS MIN
+%nonassoc EQ NE
+%nonassoc GT GE LT LE
+%nonassoc AND
+%nonassoc OR
+
+
 
 //Base 
 %type <stm> statement
@@ -86,12 +94,7 @@ Stm thesyntree;
 %type <arithmeticassignopexp> arithmetic_assign_op_expression
 %type <booleanopexp> boolean_op_expression
 %type <booleanarithmeticopexp> boolean_arithmetic_op_expression 
-%type <intlitexp> intlit_expression
-%type <boollitexp> boollit_expression
-%type <idexp> id_expression
 %type <nexp> notexp
-
-//TODO: structs maken voor alle producties zoals in opwarmingsoefening
 
 %%
 
@@ -114,11 +117,6 @@ identifierlist : IDENTIFIER identifierlist {$$ = new IdList($1, &$2);}
                | IDENTIFIER {$$ = new IdList($1, nullptr);}
                ;
 
-type : INT
-     | BOOL
-     ;
-
-
 void_function_statement : IDENTIFIER LPAREN expressionlist RPAREN SEMICOLON {$$ = new VoidFunctionStm($3, $1); thesyntree = $$;}
                         ;
 
@@ -128,16 +126,19 @@ print_statement : PRINT LPAREN expressionlist RPAREN {$$ = new PrintStm(&$3); th
 assignment_statement : identifierlist EQ expressionlist SEMICOLON {$$ = new AssignStm(&$1, &$3); thesyntree = $$;}
            ;
 
-declaration_statement : VAR identifierlist type SEMICOLON {$$ = new DeclarationStm($3, $2, nullptr); thesyntree = $$;}
-            | VAR identifierlist type EQ expressionlist SEMICOLON {$$ = new DeclarationStm($3, $2, $5); thesyntree = $$;}
-            | VAR identifierlist EQ expressionlist SEMICOLON{$$ = new DeclarationStm(-1, $2, $5); thesyntree = $$;}
-            ;
+declaration_statement : VAR identifierlist INT SEMICOLON {$$ = new DeclarationStm($3, $2, nullptr); thesyntree = $$;}
+                      | VAR identifierlist BOOL SEMICOLON {$$ = new DeclarationStm($3, $2, nullptr); thesyntree = $$;}
+                      | VAR identifierlist INT EQ expressionlist SEMICOLON {$$ = new DeclarationStm($3, $2, $5); thesyntree = $$;}
+                      | VAR identifierlist BOOL EQ expressionlist SEMICOLON {$$ = new DeclarationStm($3, $2, $5); thesyntree = $$;}
+                      | VAR identifierlist EQ expressionlist SEMICOLON{$$ = new DeclarationStm(-1, $2, $5); thesyntree = $$;}
+                      ;
 
 
 function_declaration_statement : FUNC IDENTIFIER function_signature LBRACE statementlist RBRACE{$$ = new Function_DeclarationStm($3, $5, $2); thesyntree = $$;}
             ;
 
-function_signature : LPAREN parameterlist RPAREN type {$$ = new Function_signature($2, $4);}
+function_signature : LPAREN parameterlist RPAREN INT {$$ = new Function_signature($2, $4);}
+                   | LPAREN parameterlist RPAREN BOOL {$$ = new Function_signature($2, $4);}
                    | LPAREN parameterlist RPAREN {$$ = new Function_signature($2, -1);}
                    ;
 
@@ -147,7 +148,8 @@ parameterlist : parameter_declaration {$$ = new ParamList($1, nullptr);}
               | {$$ = nullptr;}
               ;
 
-parameter_declaration : IDENTIFIER type {$$ = new Param_declaration($1, $2);}
+parameter_declaration : IDENTIFIER INT {$$ = new Param_declaration($1, $2);}
+                      | IDENTIFIER BOOL {$$ = new Param_declaration($1, $2);}
                       ;
 
 if_statement : IF LBRACE expression RBRACE block_statement{$$ = new If_stm($3, $5); thesyntree = $$;} //Else not implemented
@@ -156,7 +158,9 @@ if_statement : IF LBRACE expression RBRACE block_statement{$$ = new If_stm($3, $
 for_statement : FOR LBRACE expression RBRACE block_statement{$$ = new For_stm($3, $5); thesyntree = $$;}
               ;
 
-return_statement : RETURN expression SEMICOLON{$$ = new ReturnStm($2); thesyntree = $$;}
+return_statement : RETURN SEMICOLON {$$ = new ReturnStm(nullptr); thesyntree = $$}
+                 | RETURN expression SEMICOLON {$$ = new ReturnStm($2); thesyntree = $$;}
+                   
                  ;
 
 block_statement : LBRACE statementlist RBRACE{$$ = new BlockStm($2); thesyntree = $$;}
@@ -172,8 +176,20 @@ expressionlist : expressionlist ',' expression {$$ = new ExpList($3, &$1);}
                | expression {$$ = new ExpList($1, nullptr);}
                ;
 
-expression : intlit_expression
-           | boollit_expression
+expression : INTLITERAL {$$ = $1;} 
+           | BOOLLITERAL {$$ = $1;}
+           | IDENTIFIER {
+
+              ReturnValue returnValue = lookupSymbol($1);
+
+              if(returnValue.intValue == nullptr){
+                $$ = new BoollitExp(*returnValue.boolValue);
+              }
+              else{
+                $$ = new IntlitExp(*returnValue.intValue);
+              }
+            
+            }
            | function_expression
            | arithmetic_op_expression
            | arithmetic_assign_op_expression
@@ -182,14 +198,6 @@ expression : intlit_expression
            | LPAREN expression RPAREN               
            ;
 
-intlit_expression : INTLITERAL {$$ = $1;} 
-                  ;  
-
-boollit_expression : BOOLLITERAL {$$ = $1;}
-                   ;
-
-id_expression : IDENTIFIER {$$ = new IdExp($1);}
-              ;
 
 notexp : NOT expression SEMICOLON {$$ = new NotExp($2);}
        ;
@@ -233,6 +241,7 @@ int main() {
 
 int yyerror(std::string message) {
     printf("Error: %s\n", message);
+    yyabort();
     return 1;
 }
 

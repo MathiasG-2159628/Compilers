@@ -1,0 +1,1914 @@
+Niet-eindsymbolen die nutteloos zijn in de grammatica
+
+   function_declaration_statement
+   function_signature
+   parameterlist
+   parameter_declaration
+   increment_decrement_statement
+   notexp
+
+
+Eindsymbolen die niet gebruikt worden in de grammatica
+
+   NOT
+   INC
+   DEC
+   COMMA
+   FUNC
+
+
+Regels die nutteloos zijn in de grammatica
+
+   54 function_declaration_statement: FUNC IDENTIFIER function_signature LBRACE statementlist RBRACE
+
+   55 function_signature: LPAREN parameterlist RPAREN INT
+   56                   | LPAREN parameterlist RPAREN BOOL
+   57                   | LPAREN parameterlist RPAREN
+
+   58 parameterlist: parameter_declaration
+   59              | parameterlist COMMA parameter_declaration
+   60              | /* leeg */
+
+   61 parameter_declaration: IDENTIFIER INT
+   62                      | IDENTIFIER BOOL
+
+   63 increment_decrement_statement: IDENTIFIER INC SEMICOLON
+   64                              | IDENTIFIER DEC SEMICOLON
+
+   65 notexp: NOT expression SEMICOLON
+
+
+Staat 73conflicten: 12 shift/reductie
+Staat 74conflicten: 12 shift/reductie
+Staat 75conflicten: 12 shift/reductie
+Staat 76conflicten: 12 shift/reductie
+
+
+Grammatica
+
+    0 $accept: statement $end
+
+    1 statement: declaration_statement
+    2          | assignment_statement
+    3          | if_statement
+    4          | for_statement
+    5          | return_statement
+    6          | block_statement
+    7          | print_statement
+    8          | void_function_statement
+
+    9 statementlist: statement statementlist
+   10              | statement
+
+   11 identifierlist: IDENTIFIER identifierlist
+   12               | IDENTIFIER
+
+   13 void_function_statement: IDENTIFIER LPAREN expressionlist RPAREN SEMICOLON
+
+   14 print_statement: PRINT LPAREN expressionlist RPAREN
+
+   15 assignment_statement: identifierlist EQ expressionlist SEMICOLON
+
+   16 declaration_statement: VAR identifierlist INT SEMICOLON
+   17                      | VAR identifierlist BOOL SEMICOLON
+   18                      | VAR identifierlist INT EQ expressionlist SEMICOLON
+   19                      | VAR identifierlist BOOL EQ expressionlist SEMICOLON
+   20                      | VAR identifierlist EQ expressionlist SEMICOLON
+
+   21 if_statement: IF LBRACE expression RBRACE block_statement
+
+   22 for_statement: FOR LBRACE expression RBRACE block_statement
+
+   23 return_statement: RETURN SEMICOLON
+   24                 | RETURN expression SEMICOLON
+
+   25 block_statement: LBRACE statementlist RBRACE
+
+   26 expressionlist: expressionlist ',' expression
+   27               | expression
+
+   28 expression: INTLITERAL
+   29           | BOOLLITERAL
+   30           | IDENTIFIER
+   31           | function_expression
+   32           | arithmetic_op_expression
+   33           | arithmetic_assign_op_expression
+   34           | boolean_op_expression
+   35           | boolean_arithmetic_op_expression
+   36           | LPAREN expression RPAREN
+
+   37 function_expression: IDENTIFIER LPAREN expressionlist RPAREN SEMICOLON
+
+   38 arithmetic_op_expression: expression PLUS expression
+   39                         | expression MIN expression
+   40                         | expression MUL expression
+   41                         | expression DIV expression
+
+   42 arithmetic_assign_op_expression: IDENTIFIER PLUSASSIGN expression
+   43                                | IDENTIFIER MINASSIGN expression
+   44                                | IDENTIFIER MULASSIGN expression
+   45                                | IDENTIFIER DIVASSIGN expression
+
+   46 boolean_op_expression: expression AND expression
+   47                      | expression OR expression
+   48                      | expression EQ expression
+   49                      | expression NE expression
+
+   50 boolean_arithmetic_op_expression: expression GT expression
+   51                                 | expression GE expression
+   52                                 | expression LT expression
+   53                                 | expression LE expression
+
+
+Eindsymbolen, met de regels waarin ze voorkomen
+
+$end (0) 0
+',' (44) 26
+error (256)
+IDENTIFIER (258) 11 12 13 30 37 42 43 44 45
+BOOLLITERAL (259) 29
+SEMICOLON (260) 13 15 16 17 18 19 20 23 24 37
+INT (261) 16 18
+BOOL (262) 17 19
+RETURN (263) 23 24
+VAR (264) 16 17 18 19 20
+IF (265) 21
+FOR (266) 22
+LPAREN (267) 13 14 36 37
+RPAREN (268) 13 14 36 37
+LBRACE (269) 21 22 25
+RBRACE (270) 21 22 25
+PLUS (271) 38
+MIN (272) 39
+MUL (273) 40
+DIV (274) 41
+PLUSASSIGN (275) 42
+MINASSIGN (276) 43
+MULASSIGN (277) 44
+DIVASSIGN (278) 45
+AND (279) 46
+OR (280) 47
+NOT (281)
+INC (282)
+DEC (283)
+GT (284) 50
+GE (285) 51
+LT (286) 52
+LE (287) 53
+EQ (288) 15 18 19 20 48
+NE (289) 49
+INTLITERAL (290) 28
+COMMA (291)
+PRINT (292) 14
+FUNC (293)
+
+
+Niet-eindsymbolen, met de regels waarin ze voorkomen
+
+$accept (40)
+    links: 0
+statement (41)
+    links: 1 2 3 4 5 6 7 8, rechts: 0 9 10
+statementlist (42)
+    links: 9 10, rechts: 9 25
+identifierlist (43)
+    links: 11 12, rechts: 11 15 16 17 18 19 20
+void_function_statement (44)
+    links: 13, rechts: 8
+print_statement (45)
+    links: 14, rechts: 7
+assignment_statement (46)
+    links: 15, rechts: 2
+declaration_statement (47)
+    links: 16 17 18 19 20, rechts: 1
+if_statement (48)
+    links: 21, rechts: 3
+for_statement (49)
+    links: 22, rechts: 4
+return_statement (50)
+    links: 23 24, rechts: 5
+block_statement (51)
+    links: 25, rechts: 6 21 22
+expressionlist (52)
+    links: 26 27, rechts: 13 14 15 18 19 20 26 37
+expression (53)
+    links: 28 29 30 31 32 33 34 35 36, rechts: 21 22 24 26 27 36 38
+    39 40 41 42 43 44 45 46 47 48 49 50 51 52 53
+function_expression (54)
+    links: 37, rechts: 31
+arithmetic_op_expression (55)
+    links: 38 39 40 41, rechts: 32
+arithmetic_assign_op_expression (56)
+    links: 42 43 44 45, rechts: 33
+boolean_op_expression (57)
+    links: 46 47 48 49, rechts: 34
+boolean_arithmetic_op_expression (58)
+    links: 50 51 52 53, rechts: 35
+
+
+toestand 0
+
+    0 $accept: . statement $end
+
+    IDENTIFIER  shift, en ga naar toestand 1
+    RETURN      shift, en ga naar toestand 2
+    VAR         shift, en ga naar toestand 3
+    IF          shift, en ga naar toestand 4
+    FOR         shift, en ga naar toestand 5
+    LBRACE      shift, en ga naar toestand 6
+    PRINT       shift, en ga naar toestand 7
+
+    statement                ga naar toestand 8
+    identifierlist           ga naar toestand 9
+    void_function_statement  ga naar toestand 10
+    print_statement          ga naar toestand 11
+    assignment_statement     ga naar toestand 12
+    declaration_statement    ga naar toestand 13
+    if_statement             ga naar toestand 14
+    for_statement            ga naar toestand 15
+    return_statement         ga naar toestand 16
+    block_statement          ga naar toestand 17
+
+
+toestand 1
+
+   11 identifierlist: IDENTIFIER . identifierlist
+   12               | IDENTIFIER .
+   13 void_function_statement: IDENTIFIER . LPAREN expressionlist RPAREN SEMICOLON
+
+    IDENTIFIER  shift, en ga naar toestand 18
+    LPAREN      shift, en ga naar toestand 19
+
+    $standaard  reduceren via regel 12 (identifierlist)
+
+    identifierlist  ga naar toestand 20
+
+
+toestand 2
+
+   23 return_statement: RETURN . SEMICOLON
+   24                 | RETURN . expression SEMICOLON
+
+    IDENTIFIER   shift, en ga naar toestand 21
+    BOOLLITERAL  shift, en ga naar toestand 22
+    SEMICOLON    shift, en ga naar toestand 23
+    LPAREN       shift, en ga naar toestand 24
+    INTLITERAL   shift, en ga naar toestand 25
+
+    expression                        ga naar toestand 26
+    function_expression               ga naar toestand 27
+    arithmetic_op_expression          ga naar toestand 28
+    arithmetic_assign_op_expression   ga naar toestand 29
+    boolean_op_expression             ga naar toestand 30
+    boolean_arithmetic_op_expression  ga naar toestand 31
+
+
+toestand 3
+
+   16 declaration_statement: VAR . identifierlist INT SEMICOLON
+   17                      | VAR . identifierlist BOOL SEMICOLON
+   18                      | VAR . identifierlist INT EQ expressionlist SEMICOLON
+   19                      | VAR . identifierlist BOOL EQ expressionlist SEMICOLON
+   20                      | VAR . identifierlist EQ expressionlist SEMICOLON
+
+    IDENTIFIER  shift, en ga naar toestand 18
+
+    identifierlist  ga naar toestand 32
+
+
+toestand 4
+
+   21 if_statement: IF . LBRACE expression RBRACE block_statement
+
+    LBRACE  shift, en ga naar toestand 33
+
+
+toestand 5
+
+   22 for_statement: FOR . LBRACE expression RBRACE block_statement
+
+    LBRACE  shift, en ga naar toestand 34
+
+
+toestand 6
+
+   25 block_statement: LBRACE . statementlist RBRACE
+
+    IDENTIFIER  shift, en ga naar toestand 1
+    RETURN      shift, en ga naar toestand 2
+    VAR         shift, en ga naar toestand 3
+    IF          shift, en ga naar toestand 4
+    FOR         shift, en ga naar toestand 5
+    LBRACE      shift, en ga naar toestand 6
+    PRINT       shift, en ga naar toestand 7
+
+    statement                ga naar toestand 35
+    statementlist            ga naar toestand 36
+    identifierlist           ga naar toestand 9
+    void_function_statement  ga naar toestand 10
+    print_statement          ga naar toestand 11
+    assignment_statement     ga naar toestand 12
+    declaration_statement    ga naar toestand 13
+    if_statement             ga naar toestand 14
+    for_statement            ga naar toestand 15
+    return_statement         ga naar toestand 16
+    block_statement          ga naar toestand 17
+
+
+toestand 7
+
+   14 print_statement: PRINT . LPAREN expressionlist RPAREN
+
+    LPAREN  shift, en ga naar toestand 37
+
+
+toestand 8
+
+    0 $accept: statement . $end
+
+    $end  shift, en ga naar toestand 38
+
+
+toestand 9
+
+   15 assignment_statement: identifierlist . EQ expressionlist SEMICOLON
+
+    EQ  shift, en ga naar toestand 39
+
+
+toestand 10
+
+    8 statement: void_function_statement .
+
+    $standaard  reduceren via regel 8 (statement)
+
+
+toestand 11
+
+    7 statement: print_statement .
+
+    $standaard  reduceren via regel 7 (statement)
+
+
+toestand 12
+
+    2 statement: assignment_statement .
+
+    $standaard  reduceren via regel 2 (statement)
+
+
+toestand 13
+
+    1 statement: declaration_statement .
+
+    $standaard  reduceren via regel 1 (statement)
+
+
+toestand 14
+
+    3 statement: if_statement .
+
+    $standaard  reduceren via regel 3 (statement)
+
+
+toestand 15
+
+    4 statement: for_statement .
+
+    $standaard  reduceren via regel 4 (statement)
+
+
+toestand 16
+
+    5 statement: return_statement .
+
+    $standaard  reduceren via regel 5 (statement)
+
+
+toestand 17
+
+    6 statement: block_statement .
+
+    $standaard  reduceren via regel 6 (statement)
+
+
+toestand 18
+
+   11 identifierlist: IDENTIFIER . identifierlist
+   12               | IDENTIFIER .
+
+    IDENTIFIER  shift, en ga naar toestand 18
+
+    $standaard  reduceren via regel 12 (identifierlist)
+
+    identifierlist  ga naar toestand 20
+
+
+toestand 19
+
+   13 void_function_statement: IDENTIFIER LPAREN . expressionlist RPAREN SEMICOLON
+
+    IDENTIFIER   shift, en ga naar toestand 21
+    BOOLLITERAL  shift, en ga naar toestand 22
+    LPAREN       shift, en ga naar toestand 24
+    INTLITERAL   shift, en ga naar toestand 25
+
+    expressionlist                    ga naar toestand 40
+    expression                        ga naar toestand 41
+    function_expression               ga naar toestand 27
+    arithmetic_op_expression          ga naar toestand 28
+    arithmetic_assign_op_expression   ga naar toestand 29
+    boolean_op_expression             ga naar toestand 30
+    boolean_arithmetic_op_expression  ga naar toestand 31
+
+
+toestand 20
+
+   11 identifierlist: IDENTIFIER identifierlist .
+
+    $standaard  reduceren via regel 11 (identifierlist)
+
+
+toestand 21
+
+   30 expression: IDENTIFIER .
+   37 function_expression: IDENTIFIER . LPAREN expressionlist RPAREN SEMICOLON
+   42 arithmetic_assign_op_expression: IDENTIFIER . PLUSASSIGN expression
+   43                                | IDENTIFIER . MINASSIGN expression
+   44                                | IDENTIFIER . MULASSIGN expression
+   45                                | IDENTIFIER . DIVASSIGN expression
+
+    LPAREN      shift, en ga naar toestand 42
+    PLUSASSIGN  shift, en ga naar toestand 43
+    MINASSIGN   shift, en ga naar toestand 44
+    MULASSIGN   shift, en ga naar toestand 45
+    DIVASSIGN   shift, en ga naar toestand 46
+
+    $standaard  reduceren via regel 30 (expression)
+
+
+toestand 22
+
+   29 expression: BOOLLITERAL .
+
+    $standaard  reduceren via regel 29 (expression)
+
+
+toestand 23
+
+   23 return_statement: RETURN SEMICOLON .
+
+    $standaard  reduceren via regel 23 (return_statement)
+
+
+toestand 24
+
+   36 expression: LPAREN . expression RPAREN
+
+    IDENTIFIER   shift, en ga naar toestand 21
+    BOOLLITERAL  shift, en ga naar toestand 22
+    LPAREN       shift, en ga naar toestand 24
+    INTLITERAL   shift, en ga naar toestand 25
+
+    expression                        ga naar toestand 47
+    function_expression               ga naar toestand 27
+    arithmetic_op_expression          ga naar toestand 28
+    arithmetic_assign_op_expression   ga naar toestand 29
+    boolean_op_expression             ga naar toestand 30
+    boolean_arithmetic_op_expression  ga naar toestand 31
+
+
+toestand 25
+
+   28 expression: INTLITERAL .
+
+    $standaard  reduceren via regel 28 (expression)
+
+
+toestand 26
+
+   24 return_statement: RETURN expression . SEMICOLON
+   38 arithmetic_op_expression: expression . PLUS expression
+   39                         | expression . MIN expression
+   40                         | expression . MUL expression
+   41                         | expression . DIV expression
+   46 boolean_op_expression: expression . AND expression
+   47                      | expression . OR expression
+   48                      | expression . EQ expression
+   49                      | expression . NE expression
+   50 boolean_arithmetic_op_expression: expression . GT expression
+   51                                 | expression . GE expression
+   52                                 | expression . LT expression
+   53                                 | expression . LE expression
+
+    SEMICOLON  shift, en ga naar toestand 48
+    PLUS       shift, en ga naar toestand 49
+    MIN        shift, en ga naar toestand 50
+    MUL        shift, en ga naar toestand 51
+    DIV        shift, en ga naar toestand 52
+    AND        shift, en ga naar toestand 53
+    OR         shift, en ga naar toestand 54
+    GT         shift, en ga naar toestand 55
+    GE         shift, en ga naar toestand 56
+    LT         shift, en ga naar toestand 57
+    LE         shift, en ga naar toestand 58
+    EQ         shift, en ga naar toestand 59
+    NE         shift, en ga naar toestand 60
+
+
+toestand 27
+
+   31 expression: function_expression .
+
+    $standaard  reduceren via regel 31 (expression)
+
+
+toestand 28
+
+   32 expression: arithmetic_op_expression .
+
+    $standaard  reduceren via regel 32 (expression)
+
+
+toestand 29
+
+   33 expression: arithmetic_assign_op_expression .
+
+    $standaard  reduceren via regel 33 (expression)
+
+
+toestand 30
+
+   34 expression: boolean_op_expression .
+
+    $standaard  reduceren via regel 34 (expression)
+
+
+toestand 31
+
+   35 expression: boolean_arithmetic_op_expression .
+
+    $standaard  reduceren via regel 35 (expression)
+
+
+toestand 32
+
+   16 declaration_statement: VAR identifierlist . INT SEMICOLON
+   17                      | VAR identifierlist . BOOL SEMICOLON
+   18                      | VAR identifierlist . INT EQ expressionlist SEMICOLON
+   19                      | VAR identifierlist . BOOL EQ expressionlist SEMICOLON
+   20                      | VAR identifierlist . EQ expressionlist SEMICOLON
+
+    INT   shift, en ga naar toestand 61
+    BOOL  shift, en ga naar toestand 62
+    EQ    shift, en ga naar toestand 63
+
+
+toestand 33
+
+   21 if_statement: IF LBRACE . expression RBRACE block_statement
+
+    IDENTIFIER   shift, en ga naar toestand 21
+    BOOLLITERAL  shift, en ga naar toestand 22
+    LPAREN       shift, en ga naar toestand 24
+    INTLITERAL   shift, en ga naar toestand 25
+
+    expression                        ga naar toestand 64
+    function_expression               ga naar toestand 27
+    arithmetic_op_expression          ga naar toestand 28
+    arithmetic_assign_op_expression   ga naar toestand 29
+    boolean_op_expression             ga naar toestand 30
+    boolean_arithmetic_op_expression  ga naar toestand 31
+
+
+toestand 34
+
+   22 for_statement: FOR LBRACE . expression RBRACE block_statement
+
+    IDENTIFIER   shift, en ga naar toestand 21
+    BOOLLITERAL  shift, en ga naar toestand 22
+    LPAREN       shift, en ga naar toestand 24
+    INTLITERAL   shift, en ga naar toestand 25
+
+    expression                        ga naar toestand 65
+    function_expression               ga naar toestand 27
+    arithmetic_op_expression          ga naar toestand 28
+    arithmetic_assign_op_expression   ga naar toestand 29
+    boolean_op_expression             ga naar toestand 30
+    boolean_arithmetic_op_expression  ga naar toestand 31
+
+
+toestand 35
+
+    9 statementlist: statement . statementlist
+   10              | statement .
+
+    IDENTIFIER  shift, en ga naar toestand 1
+    RETURN      shift, en ga naar toestand 2
+    VAR         shift, en ga naar toestand 3
+    IF          shift, en ga naar toestand 4
+    FOR         shift, en ga naar toestand 5
+    LBRACE      shift, en ga naar toestand 6
+    PRINT       shift, en ga naar toestand 7
+
+    $standaard  reduceren via regel 10 (statementlist)
+
+    statement                ga naar toestand 35
+    statementlist            ga naar toestand 66
+    identifierlist           ga naar toestand 9
+    void_function_statement  ga naar toestand 10
+    print_statement          ga naar toestand 11
+    assignment_statement     ga naar toestand 12
+    declaration_statement    ga naar toestand 13
+    if_statement             ga naar toestand 14
+    for_statement            ga naar toestand 15
+    return_statement         ga naar toestand 16
+    block_statement          ga naar toestand 17
+
+
+toestand 36
+
+   25 block_statement: LBRACE statementlist . RBRACE
+
+    RBRACE  shift, en ga naar toestand 67
+
+
+toestand 37
+
+   14 print_statement: PRINT LPAREN . expressionlist RPAREN
+
+    IDENTIFIER   shift, en ga naar toestand 21
+    BOOLLITERAL  shift, en ga naar toestand 22
+    LPAREN       shift, en ga naar toestand 24
+    INTLITERAL   shift, en ga naar toestand 25
+
+    expressionlist                    ga naar toestand 68
+    expression                        ga naar toestand 41
+    function_expression               ga naar toestand 27
+    arithmetic_op_expression          ga naar toestand 28
+    arithmetic_assign_op_expression   ga naar toestand 29
+    boolean_op_expression             ga naar toestand 30
+    boolean_arithmetic_op_expression  ga naar toestand 31
+
+
+toestand 38
+
+    0 $accept: statement $end .
+
+    $standaard  accepteer
+
+
+toestand 39
+
+   15 assignment_statement: identifierlist EQ . expressionlist SEMICOLON
+
+    IDENTIFIER   shift, en ga naar toestand 21
+    BOOLLITERAL  shift, en ga naar toestand 22
+    LPAREN       shift, en ga naar toestand 24
+    INTLITERAL   shift, en ga naar toestand 25
+
+    expressionlist                    ga naar toestand 69
+    expression                        ga naar toestand 41
+    function_expression               ga naar toestand 27
+    arithmetic_op_expression          ga naar toestand 28
+    arithmetic_assign_op_expression   ga naar toestand 29
+    boolean_op_expression             ga naar toestand 30
+    boolean_arithmetic_op_expression  ga naar toestand 31
+
+
+toestand 40
+
+   13 void_function_statement: IDENTIFIER LPAREN expressionlist . RPAREN SEMICOLON
+   26 expressionlist: expressionlist . ',' expression
+
+    RPAREN  shift, en ga naar toestand 70
+    ','     shift, en ga naar toestand 71
+
+
+toestand 41
+
+   27 expressionlist: expression .
+   38 arithmetic_op_expression: expression . PLUS expression
+   39                         | expression . MIN expression
+   40                         | expression . MUL expression
+   41                         | expression . DIV expression
+   46 boolean_op_expression: expression . AND expression
+   47                      | expression . OR expression
+   48                      | expression . EQ expression
+   49                      | expression . NE expression
+   50 boolean_arithmetic_op_expression: expression . GT expression
+   51                                 | expression . GE expression
+   52                                 | expression . LT expression
+   53                                 | expression . LE expression
+
+    PLUS  shift, en ga naar toestand 49
+    MIN   shift, en ga naar toestand 50
+    MUL   shift, en ga naar toestand 51
+    DIV   shift, en ga naar toestand 52
+    AND   shift, en ga naar toestand 53
+    OR    shift, en ga naar toestand 54
+    GT    shift, en ga naar toestand 55
+    GE    shift, en ga naar toestand 56
+    LT    shift, en ga naar toestand 57
+    LE    shift, en ga naar toestand 58
+    EQ    shift, en ga naar toestand 59
+    NE    shift, en ga naar toestand 60
+
+    $standaard  reduceren via regel 27 (expressionlist)
+
+
+toestand 42
+
+   37 function_expression: IDENTIFIER LPAREN . expressionlist RPAREN SEMICOLON
+
+    IDENTIFIER   shift, en ga naar toestand 21
+    BOOLLITERAL  shift, en ga naar toestand 22
+    LPAREN       shift, en ga naar toestand 24
+    INTLITERAL   shift, en ga naar toestand 25
+
+    expressionlist                    ga naar toestand 72
+    expression                        ga naar toestand 41
+    function_expression               ga naar toestand 27
+    arithmetic_op_expression          ga naar toestand 28
+    arithmetic_assign_op_expression   ga naar toestand 29
+    boolean_op_expression             ga naar toestand 30
+    boolean_arithmetic_op_expression  ga naar toestand 31
+
+
+toestand 43
+
+   42 arithmetic_assign_op_expression: IDENTIFIER PLUSASSIGN . expression
+
+    IDENTIFIER   shift, en ga naar toestand 21
+    BOOLLITERAL  shift, en ga naar toestand 22
+    LPAREN       shift, en ga naar toestand 24
+    INTLITERAL   shift, en ga naar toestand 25
+
+    expression                        ga naar toestand 73
+    function_expression               ga naar toestand 27
+    arithmetic_op_expression          ga naar toestand 28
+    arithmetic_assign_op_expression   ga naar toestand 29
+    boolean_op_expression             ga naar toestand 30
+    boolean_arithmetic_op_expression  ga naar toestand 31
+
+
+toestand 44
+
+   43 arithmetic_assign_op_expression: IDENTIFIER MINASSIGN . expression
+
+    IDENTIFIER   shift, en ga naar toestand 21
+    BOOLLITERAL  shift, en ga naar toestand 22
+    LPAREN       shift, en ga naar toestand 24
+    INTLITERAL   shift, en ga naar toestand 25
+
+    expression                        ga naar toestand 74
+    function_expression               ga naar toestand 27
+    arithmetic_op_expression          ga naar toestand 28
+    arithmetic_assign_op_expression   ga naar toestand 29
+    boolean_op_expression             ga naar toestand 30
+    boolean_arithmetic_op_expression  ga naar toestand 31
+
+
+toestand 45
+
+   44 arithmetic_assign_op_expression: IDENTIFIER MULASSIGN . expression
+
+    IDENTIFIER   shift, en ga naar toestand 21
+    BOOLLITERAL  shift, en ga naar toestand 22
+    LPAREN       shift, en ga naar toestand 24
+    INTLITERAL   shift, en ga naar toestand 25
+
+    expression                        ga naar toestand 75
+    function_expression               ga naar toestand 27
+    arithmetic_op_expression          ga naar toestand 28
+    arithmetic_assign_op_expression   ga naar toestand 29
+    boolean_op_expression             ga naar toestand 30
+    boolean_arithmetic_op_expression  ga naar toestand 31
+
+
+toestand 46
+
+   45 arithmetic_assign_op_expression: IDENTIFIER DIVASSIGN . expression
+
+    IDENTIFIER   shift, en ga naar toestand 21
+    BOOLLITERAL  shift, en ga naar toestand 22
+    LPAREN       shift, en ga naar toestand 24
+    INTLITERAL   shift, en ga naar toestand 25
+
+    expression                        ga naar toestand 76
+    function_expression               ga naar toestand 27
+    arithmetic_op_expression          ga naar toestand 28
+    arithmetic_assign_op_expression   ga naar toestand 29
+    boolean_op_expression             ga naar toestand 30
+    boolean_arithmetic_op_expression  ga naar toestand 31
+
+
+toestand 47
+
+   36 expression: LPAREN expression . RPAREN
+   38 arithmetic_op_expression: expression . PLUS expression
+   39                         | expression . MIN expression
+   40                         | expression . MUL expression
+   41                         | expression . DIV expression
+   46 boolean_op_expression: expression . AND expression
+   47                      | expression . OR expression
+   48                      | expression . EQ expression
+   49                      | expression . NE expression
+   50 boolean_arithmetic_op_expression: expression . GT expression
+   51                                 | expression . GE expression
+   52                                 | expression . LT expression
+   53                                 | expression . LE expression
+
+    RPAREN  shift, en ga naar toestand 77
+    PLUS    shift, en ga naar toestand 49
+    MIN     shift, en ga naar toestand 50
+    MUL     shift, en ga naar toestand 51
+    DIV     shift, en ga naar toestand 52
+    AND     shift, en ga naar toestand 53
+    OR      shift, en ga naar toestand 54
+    GT      shift, en ga naar toestand 55
+    GE      shift, en ga naar toestand 56
+    LT      shift, en ga naar toestand 57
+    LE      shift, en ga naar toestand 58
+    EQ      shift, en ga naar toestand 59
+    NE      shift, en ga naar toestand 60
+
+
+toestand 48
+
+   24 return_statement: RETURN expression SEMICOLON .
+
+    $standaard  reduceren via regel 24 (return_statement)
+
+
+toestand 49
+
+   38 arithmetic_op_expression: expression PLUS . expression
+
+    IDENTIFIER   shift, en ga naar toestand 21
+    BOOLLITERAL  shift, en ga naar toestand 22
+    LPAREN       shift, en ga naar toestand 24
+    INTLITERAL   shift, en ga naar toestand 25
+
+    expression                        ga naar toestand 78
+    function_expression               ga naar toestand 27
+    arithmetic_op_expression          ga naar toestand 28
+    arithmetic_assign_op_expression   ga naar toestand 29
+    boolean_op_expression             ga naar toestand 30
+    boolean_arithmetic_op_expression  ga naar toestand 31
+
+
+toestand 50
+
+   39 arithmetic_op_expression: expression MIN . expression
+
+    IDENTIFIER   shift, en ga naar toestand 21
+    BOOLLITERAL  shift, en ga naar toestand 22
+    LPAREN       shift, en ga naar toestand 24
+    INTLITERAL   shift, en ga naar toestand 25
+
+    expression                        ga naar toestand 79
+    function_expression               ga naar toestand 27
+    arithmetic_op_expression          ga naar toestand 28
+    arithmetic_assign_op_expression   ga naar toestand 29
+    boolean_op_expression             ga naar toestand 30
+    boolean_arithmetic_op_expression  ga naar toestand 31
+
+
+toestand 51
+
+   40 arithmetic_op_expression: expression MUL . expression
+
+    IDENTIFIER   shift, en ga naar toestand 21
+    BOOLLITERAL  shift, en ga naar toestand 22
+    LPAREN       shift, en ga naar toestand 24
+    INTLITERAL   shift, en ga naar toestand 25
+
+    expression                        ga naar toestand 80
+    function_expression               ga naar toestand 27
+    arithmetic_op_expression          ga naar toestand 28
+    arithmetic_assign_op_expression   ga naar toestand 29
+    boolean_op_expression             ga naar toestand 30
+    boolean_arithmetic_op_expression  ga naar toestand 31
+
+
+toestand 52
+
+   41 arithmetic_op_expression: expression DIV . expression
+
+    IDENTIFIER   shift, en ga naar toestand 21
+    BOOLLITERAL  shift, en ga naar toestand 22
+    LPAREN       shift, en ga naar toestand 24
+    INTLITERAL   shift, en ga naar toestand 25
+
+    expression                        ga naar toestand 81
+    function_expression               ga naar toestand 27
+    arithmetic_op_expression          ga naar toestand 28
+    arithmetic_assign_op_expression   ga naar toestand 29
+    boolean_op_expression             ga naar toestand 30
+    boolean_arithmetic_op_expression  ga naar toestand 31
+
+
+toestand 53
+
+   46 boolean_op_expression: expression AND . expression
+
+    IDENTIFIER   shift, en ga naar toestand 21
+    BOOLLITERAL  shift, en ga naar toestand 22
+    LPAREN       shift, en ga naar toestand 24
+    INTLITERAL   shift, en ga naar toestand 25
+
+    expression                        ga naar toestand 82
+    function_expression               ga naar toestand 27
+    arithmetic_op_expression          ga naar toestand 28
+    arithmetic_assign_op_expression   ga naar toestand 29
+    boolean_op_expression             ga naar toestand 30
+    boolean_arithmetic_op_expression  ga naar toestand 31
+
+
+toestand 54
+
+   47 boolean_op_expression: expression OR . expression
+
+    IDENTIFIER   shift, en ga naar toestand 21
+    BOOLLITERAL  shift, en ga naar toestand 22
+    LPAREN       shift, en ga naar toestand 24
+    INTLITERAL   shift, en ga naar toestand 25
+
+    expression                        ga naar toestand 83
+    function_expression               ga naar toestand 27
+    arithmetic_op_expression          ga naar toestand 28
+    arithmetic_assign_op_expression   ga naar toestand 29
+    boolean_op_expression             ga naar toestand 30
+    boolean_arithmetic_op_expression  ga naar toestand 31
+
+
+toestand 55
+
+   50 boolean_arithmetic_op_expression: expression GT . expression
+
+    IDENTIFIER   shift, en ga naar toestand 21
+    BOOLLITERAL  shift, en ga naar toestand 22
+    LPAREN       shift, en ga naar toestand 24
+    INTLITERAL   shift, en ga naar toestand 25
+
+    expression                        ga naar toestand 84
+    function_expression               ga naar toestand 27
+    arithmetic_op_expression          ga naar toestand 28
+    arithmetic_assign_op_expression   ga naar toestand 29
+    boolean_op_expression             ga naar toestand 30
+    boolean_arithmetic_op_expression  ga naar toestand 31
+
+
+toestand 56
+
+   51 boolean_arithmetic_op_expression: expression GE . expression
+
+    IDENTIFIER   shift, en ga naar toestand 21
+    BOOLLITERAL  shift, en ga naar toestand 22
+    LPAREN       shift, en ga naar toestand 24
+    INTLITERAL   shift, en ga naar toestand 25
+
+    expression                        ga naar toestand 85
+    function_expression               ga naar toestand 27
+    arithmetic_op_expression          ga naar toestand 28
+    arithmetic_assign_op_expression   ga naar toestand 29
+    boolean_op_expression             ga naar toestand 30
+    boolean_arithmetic_op_expression  ga naar toestand 31
+
+
+toestand 57
+
+   52 boolean_arithmetic_op_expression: expression LT . expression
+
+    IDENTIFIER   shift, en ga naar toestand 21
+    BOOLLITERAL  shift, en ga naar toestand 22
+    LPAREN       shift, en ga naar toestand 24
+    INTLITERAL   shift, en ga naar toestand 25
+
+    expression                        ga naar toestand 86
+    function_expression               ga naar toestand 27
+    arithmetic_op_expression          ga naar toestand 28
+    arithmetic_assign_op_expression   ga naar toestand 29
+    boolean_op_expression             ga naar toestand 30
+    boolean_arithmetic_op_expression  ga naar toestand 31
+
+
+toestand 58
+
+   53 boolean_arithmetic_op_expression: expression LE . expression
+
+    IDENTIFIER   shift, en ga naar toestand 21
+    BOOLLITERAL  shift, en ga naar toestand 22
+    LPAREN       shift, en ga naar toestand 24
+    INTLITERAL   shift, en ga naar toestand 25
+
+    expression                        ga naar toestand 87
+    function_expression               ga naar toestand 27
+    arithmetic_op_expression          ga naar toestand 28
+    arithmetic_assign_op_expression   ga naar toestand 29
+    boolean_op_expression             ga naar toestand 30
+    boolean_arithmetic_op_expression  ga naar toestand 31
+
+
+toestand 59
+
+   48 boolean_op_expression: expression EQ . expression
+
+    IDENTIFIER   shift, en ga naar toestand 21
+    BOOLLITERAL  shift, en ga naar toestand 22
+    LPAREN       shift, en ga naar toestand 24
+    INTLITERAL   shift, en ga naar toestand 25
+
+    expression                        ga naar toestand 88
+    function_expression               ga naar toestand 27
+    arithmetic_op_expression          ga naar toestand 28
+    arithmetic_assign_op_expression   ga naar toestand 29
+    boolean_op_expression             ga naar toestand 30
+    boolean_arithmetic_op_expression  ga naar toestand 31
+
+
+toestand 60
+
+   49 boolean_op_expression: expression NE . expression
+
+    IDENTIFIER   shift, en ga naar toestand 21
+    BOOLLITERAL  shift, en ga naar toestand 22
+    LPAREN       shift, en ga naar toestand 24
+    INTLITERAL   shift, en ga naar toestand 25
+
+    expression                        ga naar toestand 89
+    function_expression               ga naar toestand 27
+    arithmetic_op_expression          ga naar toestand 28
+    arithmetic_assign_op_expression   ga naar toestand 29
+    boolean_op_expression             ga naar toestand 30
+    boolean_arithmetic_op_expression  ga naar toestand 31
+
+
+toestand 61
+
+   16 declaration_statement: VAR identifierlist INT . SEMICOLON
+   18                      | VAR identifierlist INT . EQ expressionlist SEMICOLON
+
+    SEMICOLON  shift, en ga naar toestand 90
+    EQ         shift, en ga naar toestand 91
+
+
+toestand 62
+
+   17 declaration_statement: VAR identifierlist BOOL . SEMICOLON
+   19                      | VAR identifierlist BOOL . EQ expressionlist SEMICOLON
+
+    SEMICOLON  shift, en ga naar toestand 92
+    EQ         shift, en ga naar toestand 93
+
+
+toestand 63
+
+   20 declaration_statement: VAR identifierlist EQ . expressionlist SEMICOLON
+
+    IDENTIFIER   shift, en ga naar toestand 21
+    BOOLLITERAL  shift, en ga naar toestand 22
+    LPAREN       shift, en ga naar toestand 24
+    INTLITERAL   shift, en ga naar toestand 25
+
+    expressionlist                    ga naar toestand 94
+    expression                        ga naar toestand 41
+    function_expression               ga naar toestand 27
+    arithmetic_op_expression          ga naar toestand 28
+    arithmetic_assign_op_expression   ga naar toestand 29
+    boolean_op_expression             ga naar toestand 30
+    boolean_arithmetic_op_expression  ga naar toestand 31
+
+
+toestand 64
+
+   21 if_statement: IF LBRACE expression . RBRACE block_statement
+   38 arithmetic_op_expression: expression . PLUS expression
+   39                         | expression . MIN expression
+   40                         | expression . MUL expression
+   41                         | expression . DIV expression
+   46 boolean_op_expression: expression . AND expression
+   47                      | expression . OR expression
+   48                      | expression . EQ expression
+   49                      | expression . NE expression
+   50 boolean_arithmetic_op_expression: expression . GT expression
+   51                                 | expression . GE expression
+   52                                 | expression . LT expression
+   53                                 | expression . LE expression
+
+    RBRACE  shift, en ga naar toestand 95
+    PLUS    shift, en ga naar toestand 49
+    MIN     shift, en ga naar toestand 50
+    MUL     shift, en ga naar toestand 51
+    DIV     shift, en ga naar toestand 52
+    AND     shift, en ga naar toestand 53
+    OR      shift, en ga naar toestand 54
+    GT      shift, en ga naar toestand 55
+    GE      shift, en ga naar toestand 56
+    LT      shift, en ga naar toestand 57
+    LE      shift, en ga naar toestand 58
+    EQ      shift, en ga naar toestand 59
+    NE      shift, en ga naar toestand 60
+
+
+toestand 65
+
+   22 for_statement: FOR LBRACE expression . RBRACE block_statement
+   38 arithmetic_op_expression: expression . PLUS expression
+   39                         | expression . MIN expression
+   40                         | expression . MUL expression
+   41                         | expression . DIV expression
+   46 boolean_op_expression: expression . AND expression
+   47                      | expression . OR expression
+   48                      | expression . EQ expression
+   49                      | expression . NE expression
+   50 boolean_arithmetic_op_expression: expression . GT expression
+   51                                 | expression . GE expression
+   52                                 | expression . LT expression
+   53                                 | expression . LE expression
+
+    RBRACE  shift, en ga naar toestand 96
+    PLUS    shift, en ga naar toestand 49
+    MIN     shift, en ga naar toestand 50
+    MUL     shift, en ga naar toestand 51
+    DIV     shift, en ga naar toestand 52
+    AND     shift, en ga naar toestand 53
+    OR      shift, en ga naar toestand 54
+    GT      shift, en ga naar toestand 55
+    GE      shift, en ga naar toestand 56
+    LT      shift, en ga naar toestand 57
+    LE      shift, en ga naar toestand 58
+    EQ      shift, en ga naar toestand 59
+    NE      shift, en ga naar toestand 60
+
+
+toestand 66
+
+    9 statementlist: statement statementlist .
+
+    $standaard  reduceren via regel 9 (statementlist)
+
+
+toestand 67
+
+   25 block_statement: LBRACE statementlist RBRACE .
+
+    $standaard  reduceren via regel 25 (block_statement)
+
+
+toestand 68
+
+   14 print_statement: PRINT LPAREN expressionlist . RPAREN
+   26 expressionlist: expressionlist . ',' expression
+
+    RPAREN  shift, en ga naar toestand 97
+    ','     shift, en ga naar toestand 71
+
+
+toestand 69
+
+   15 assignment_statement: identifierlist EQ expressionlist . SEMICOLON
+   26 expressionlist: expressionlist . ',' expression
+
+    SEMICOLON  shift, en ga naar toestand 98
+    ','        shift, en ga naar toestand 71
+
+
+toestand 70
+
+   13 void_function_statement: IDENTIFIER LPAREN expressionlist RPAREN . SEMICOLON
+
+    SEMICOLON  shift, en ga naar toestand 99
+
+
+toestand 71
+
+   26 expressionlist: expressionlist ',' . expression
+
+    IDENTIFIER   shift, en ga naar toestand 21
+    BOOLLITERAL  shift, en ga naar toestand 22
+    LPAREN       shift, en ga naar toestand 24
+    INTLITERAL   shift, en ga naar toestand 25
+
+    expression                        ga naar toestand 100
+    function_expression               ga naar toestand 27
+    arithmetic_op_expression          ga naar toestand 28
+    arithmetic_assign_op_expression   ga naar toestand 29
+    boolean_op_expression             ga naar toestand 30
+    boolean_arithmetic_op_expression  ga naar toestand 31
+
+
+toestand 72
+
+   26 expressionlist: expressionlist . ',' expression
+   37 function_expression: IDENTIFIER LPAREN expressionlist . RPAREN SEMICOLON
+
+    RPAREN  shift, en ga naar toestand 101
+    ','     shift, en ga naar toestand 71
+
+
+toestand 73
+
+   38 arithmetic_op_expression: expression . PLUS expression
+   39                         | expression . MIN expression
+   40                         | expression . MUL expression
+   41                         | expression . DIV expression
+   42 arithmetic_assign_op_expression: IDENTIFIER PLUSASSIGN expression .
+   46 boolean_op_expression: expression . AND expression
+   47                      | expression . OR expression
+   48                      | expression . EQ expression
+   49                      | expression . NE expression
+   50 boolean_arithmetic_op_expression: expression . GT expression
+   51                                 | expression . GE expression
+   52                                 | expression . LT expression
+   53                                 | expression . LE expression
+
+    PLUS  shift, en ga naar toestand 49
+    MIN   shift, en ga naar toestand 50
+    MUL   shift, en ga naar toestand 51
+    DIV   shift, en ga naar toestand 52
+    AND   shift, en ga naar toestand 53
+    OR    shift, en ga naar toestand 54
+    GT    shift, en ga naar toestand 55
+    GE    shift, en ga naar toestand 56
+    LT    shift, en ga naar toestand 57
+    LE    shift, en ga naar toestand 58
+    EQ    shift, en ga naar toestand 59
+    NE    shift, en ga naar toestand 60
+
+    PLUS        [reduceren via regel 42 (arithmetic_assign_op_expression)]
+    MIN         [reduceren via regel 42 (arithmetic_assign_op_expression)]
+    MUL         [reduceren via regel 42 (arithmetic_assign_op_expression)]
+    DIV         [reduceren via regel 42 (arithmetic_assign_op_expression)]
+    AND         [reduceren via regel 42 (arithmetic_assign_op_expression)]
+    OR          [reduceren via regel 42 (arithmetic_assign_op_expression)]
+    GT          [reduceren via regel 42 (arithmetic_assign_op_expression)]
+    GE          [reduceren via regel 42 (arithmetic_assign_op_expression)]
+    LT          [reduceren via regel 42 (arithmetic_assign_op_expression)]
+    LE          [reduceren via regel 42 (arithmetic_assign_op_expression)]
+    EQ          [reduceren via regel 42 (arithmetic_assign_op_expression)]
+    NE          [reduceren via regel 42 (arithmetic_assign_op_expression)]
+    $standaard  reduceren via regel 42 (arithmetic_assign_op_expression)
+
+
+toestand 74
+
+   38 arithmetic_op_expression: expression . PLUS expression
+   39                         | expression . MIN expression
+   40                         | expression . MUL expression
+   41                         | expression . DIV expression
+   43 arithmetic_assign_op_expression: IDENTIFIER MINASSIGN expression .
+   46 boolean_op_expression: expression . AND expression
+   47                      | expression . OR expression
+   48                      | expression . EQ expression
+   49                      | expression . NE expression
+   50 boolean_arithmetic_op_expression: expression . GT expression
+   51                                 | expression . GE expression
+   52                                 | expression . LT expression
+   53                                 | expression . LE expression
+
+    PLUS  shift, en ga naar toestand 49
+    MIN   shift, en ga naar toestand 50
+    MUL   shift, en ga naar toestand 51
+    DIV   shift, en ga naar toestand 52
+    AND   shift, en ga naar toestand 53
+    OR    shift, en ga naar toestand 54
+    GT    shift, en ga naar toestand 55
+    GE    shift, en ga naar toestand 56
+    LT    shift, en ga naar toestand 57
+    LE    shift, en ga naar toestand 58
+    EQ    shift, en ga naar toestand 59
+    NE    shift, en ga naar toestand 60
+
+    PLUS        [reduceren via regel 43 (arithmetic_assign_op_expression)]
+    MIN         [reduceren via regel 43 (arithmetic_assign_op_expression)]
+    MUL         [reduceren via regel 43 (arithmetic_assign_op_expression)]
+    DIV         [reduceren via regel 43 (arithmetic_assign_op_expression)]
+    AND         [reduceren via regel 43 (arithmetic_assign_op_expression)]
+    OR          [reduceren via regel 43 (arithmetic_assign_op_expression)]
+    GT          [reduceren via regel 43 (arithmetic_assign_op_expression)]
+    GE          [reduceren via regel 43 (arithmetic_assign_op_expression)]
+    LT          [reduceren via regel 43 (arithmetic_assign_op_expression)]
+    LE          [reduceren via regel 43 (arithmetic_assign_op_expression)]
+    EQ          [reduceren via regel 43 (arithmetic_assign_op_expression)]
+    NE          [reduceren via regel 43 (arithmetic_assign_op_expression)]
+    $standaard  reduceren via regel 43 (arithmetic_assign_op_expression)
+
+
+toestand 75
+
+   38 arithmetic_op_expression: expression . PLUS expression
+   39                         | expression . MIN expression
+   40                         | expression . MUL expression
+   41                         | expression . DIV expression
+   44 arithmetic_assign_op_expression: IDENTIFIER MULASSIGN expression .
+   46 boolean_op_expression: expression . AND expression
+   47                      | expression . OR expression
+   48                      | expression . EQ expression
+   49                      | expression . NE expression
+   50 boolean_arithmetic_op_expression: expression . GT expression
+   51                                 | expression . GE expression
+   52                                 | expression . LT expression
+   53                                 | expression . LE expression
+
+    PLUS  shift, en ga naar toestand 49
+    MIN   shift, en ga naar toestand 50
+    MUL   shift, en ga naar toestand 51
+    DIV   shift, en ga naar toestand 52
+    AND   shift, en ga naar toestand 53
+    OR    shift, en ga naar toestand 54
+    GT    shift, en ga naar toestand 55
+    GE    shift, en ga naar toestand 56
+    LT    shift, en ga naar toestand 57
+    LE    shift, en ga naar toestand 58
+    EQ    shift, en ga naar toestand 59
+    NE    shift, en ga naar toestand 60
+
+    PLUS        [reduceren via regel 44 (arithmetic_assign_op_expression)]
+    MIN         [reduceren via regel 44 (arithmetic_assign_op_expression)]
+    MUL         [reduceren via regel 44 (arithmetic_assign_op_expression)]
+    DIV         [reduceren via regel 44 (arithmetic_assign_op_expression)]
+    AND         [reduceren via regel 44 (arithmetic_assign_op_expression)]
+    OR          [reduceren via regel 44 (arithmetic_assign_op_expression)]
+    GT          [reduceren via regel 44 (arithmetic_assign_op_expression)]
+    GE          [reduceren via regel 44 (arithmetic_assign_op_expression)]
+    LT          [reduceren via regel 44 (arithmetic_assign_op_expression)]
+    LE          [reduceren via regel 44 (arithmetic_assign_op_expression)]
+    EQ          [reduceren via regel 44 (arithmetic_assign_op_expression)]
+    NE          [reduceren via regel 44 (arithmetic_assign_op_expression)]
+    $standaard  reduceren via regel 44 (arithmetic_assign_op_expression)
+
+
+toestand 76
+
+   38 arithmetic_op_expression: expression . PLUS expression
+   39                         | expression . MIN expression
+   40                         | expression . MUL expression
+   41                         | expression . DIV expression
+   45 arithmetic_assign_op_expression: IDENTIFIER DIVASSIGN expression .
+   46 boolean_op_expression: expression . AND expression
+   47                      | expression . OR expression
+   48                      | expression . EQ expression
+   49                      | expression . NE expression
+   50 boolean_arithmetic_op_expression: expression . GT expression
+   51                                 | expression . GE expression
+   52                                 | expression . LT expression
+   53                                 | expression . LE expression
+
+    PLUS  shift, en ga naar toestand 49
+    MIN   shift, en ga naar toestand 50
+    MUL   shift, en ga naar toestand 51
+    DIV   shift, en ga naar toestand 52
+    AND   shift, en ga naar toestand 53
+    OR    shift, en ga naar toestand 54
+    GT    shift, en ga naar toestand 55
+    GE    shift, en ga naar toestand 56
+    LT    shift, en ga naar toestand 57
+    LE    shift, en ga naar toestand 58
+    EQ    shift, en ga naar toestand 59
+    NE    shift, en ga naar toestand 60
+
+    PLUS        [reduceren via regel 45 (arithmetic_assign_op_expression)]
+    MIN         [reduceren via regel 45 (arithmetic_assign_op_expression)]
+    MUL         [reduceren via regel 45 (arithmetic_assign_op_expression)]
+    DIV         [reduceren via regel 45 (arithmetic_assign_op_expression)]
+    AND         [reduceren via regel 45 (arithmetic_assign_op_expression)]
+    OR          [reduceren via regel 45 (arithmetic_assign_op_expression)]
+    GT          [reduceren via regel 45 (arithmetic_assign_op_expression)]
+    GE          [reduceren via regel 45 (arithmetic_assign_op_expression)]
+    LT          [reduceren via regel 45 (arithmetic_assign_op_expression)]
+    LE          [reduceren via regel 45 (arithmetic_assign_op_expression)]
+    EQ          [reduceren via regel 45 (arithmetic_assign_op_expression)]
+    NE          [reduceren via regel 45 (arithmetic_assign_op_expression)]
+    $standaard  reduceren via regel 45 (arithmetic_assign_op_expression)
+
+
+toestand 77
+
+   36 expression: LPAREN expression RPAREN .
+
+    $standaard  reduceren via regel 36 (expression)
+
+
+toestand 78
+
+   38 arithmetic_op_expression: expression . PLUS expression
+   38                         | expression PLUS expression .
+   39                         | expression . MIN expression
+   40                         | expression . MUL expression
+   41                         | expression . DIV expression
+   46 boolean_op_expression: expression . AND expression
+   47                      | expression . OR expression
+   48                      | expression . EQ expression
+   49                      | expression . NE expression
+   50 boolean_arithmetic_op_expression: expression . GT expression
+   51                                 | expression . GE expression
+   52                                 | expression . LT expression
+   53                                 | expression . LE expression
+
+    AND  shift, en ga naar toestand 53
+    OR   shift, en ga naar toestand 54
+    GT   shift, en ga naar toestand 55
+    GE   shift, en ga naar toestand 56
+    LT   shift, en ga naar toestand 57
+    LE   shift, en ga naar toestand 58
+    EQ   shift, en ga naar toestand 59
+    NE   shift, en ga naar toestand 60
+
+    $standaard  reduceren via regel 38 (arithmetic_op_expression)
+
+
+toestand 79
+
+   38 arithmetic_op_expression: expression . PLUS expression
+   39                         | expression . MIN expression
+   39                         | expression MIN expression .
+   40                         | expression . MUL expression
+   41                         | expression . DIV expression
+   46 boolean_op_expression: expression . AND expression
+   47                      | expression . OR expression
+   48                      | expression . EQ expression
+   49                      | expression . NE expression
+   50 boolean_arithmetic_op_expression: expression . GT expression
+   51                                 | expression . GE expression
+   52                                 | expression . LT expression
+   53                                 | expression . LE expression
+
+    AND  shift, en ga naar toestand 53
+    OR   shift, en ga naar toestand 54
+    GT   shift, en ga naar toestand 55
+    GE   shift, en ga naar toestand 56
+    LT   shift, en ga naar toestand 57
+    LE   shift, en ga naar toestand 58
+    EQ   shift, en ga naar toestand 59
+    NE   shift, en ga naar toestand 60
+
+    $standaard  reduceren via regel 39 (arithmetic_op_expression)
+
+
+toestand 80
+
+   38 arithmetic_op_expression: expression . PLUS expression
+   39                         | expression . MIN expression
+   40                         | expression . MUL expression
+   40                         | expression MUL expression .
+   41                         | expression . DIV expression
+   46 boolean_op_expression: expression . AND expression
+   47                      | expression . OR expression
+   48                      | expression . EQ expression
+   49                      | expression . NE expression
+   50 boolean_arithmetic_op_expression: expression . GT expression
+   51                                 | expression . GE expression
+   52                                 | expression . LT expression
+   53                                 | expression . LE expression
+
+    PLUS  shift, en ga naar toestand 49
+    MIN   shift, en ga naar toestand 50
+    AND   shift, en ga naar toestand 53
+    OR    shift, en ga naar toestand 54
+    GT    shift, en ga naar toestand 55
+    GE    shift, en ga naar toestand 56
+    LT    shift, en ga naar toestand 57
+    LE    shift, en ga naar toestand 58
+    EQ    shift, en ga naar toestand 59
+    NE    shift, en ga naar toestand 60
+
+    $standaard  reduceren via regel 40 (arithmetic_op_expression)
+
+
+toestand 81
+
+   38 arithmetic_op_expression: expression . PLUS expression
+   39                         | expression . MIN expression
+   40                         | expression . MUL expression
+   41                         | expression . DIV expression
+   41                         | expression DIV expression .
+   46 boolean_op_expression: expression . AND expression
+   47                      | expression . OR expression
+   48                      | expression . EQ expression
+   49                      | expression . NE expression
+   50 boolean_arithmetic_op_expression: expression . GT expression
+   51                                 | expression . GE expression
+   52                                 | expression . LT expression
+   53                                 | expression . LE expression
+
+    PLUS  shift, en ga naar toestand 49
+    MIN   shift, en ga naar toestand 50
+    AND   shift, en ga naar toestand 53
+    OR    shift, en ga naar toestand 54
+    GT    shift, en ga naar toestand 55
+    GE    shift, en ga naar toestand 56
+    LT    shift, en ga naar toestand 57
+    LE    shift, en ga naar toestand 58
+    EQ    shift, en ga naar toestand 59
+    NE    shift, en ga naar toestand 60
+
+    $standaard  reduceren via regel 41 (arithmetic_op_expression)
+
+
+toestand 82
+
+   38 arithmetic_op_expression: expression . PLUS expression
+   39                         | expression . MIN expression
+   40                         | expression . MUL expression
+   41                         | expression . DIV expression
+   46 boolean_op_expression: expression . AND expression
+   46                      | expression AND expression .
+   47                      | expression . OR expression
+   48                      | expression . EQ expression
+   49                      | expression . NE expression
+   50 boolean_arithmetic_op_expression: expression . GT expression
+   51                                 | expression . GE expression
+   52                                 | expression . LT expression
+   53                                 | expression . LE expression
+
+    OR  shift, en ga naar toestand 54
+
+    AND  fout (niet associatief)
+
+    $standaard  reduceren via regel 46 (boolean_op_expression)
+
+
+toestand 83
+
+   38 arithmetic_op_expression: expression . PLUS expression
+   39                         | expression . MIN expression
+   40                         | expression . MUL expression
+   41                         | expression . DIV expression
+   46 boolean_op_expression: expression . AND expression
+   47                      | expression . OR expression
+   47                      | expression OR expression .
+   48                      | expression . EQ expression
+   49                      | expression . NE expression
+   50 boolean_arithmetic_op_expression: expression . GT expression
+   51                                 | expression . GE expression
+   52                                 | expression . LT expression
+   53                                 | expression . LE expression
+
+    OR  fout (niet associatief)
+
+    $standaard  reduceren via regel 47 (boolean_op_expression)
+
+
+toestand 84
+
+   38 arithmetic_op_expression: expression . PLUS expression
+   39                         | expression . MIN expression
+   40                         | expression . MUL expression
+   41                         | expression . DIV expression
+   46 boolean_op_expression: expression . AND expression
+   47                      | expression . OR expression
+   48                      | expression . EQ expression
+   49                      | expression . NE expression
+   50 boolean_arithmetic_op_expression: expression . GT expression
+   50                                 | expression GT expression .
+   51                                 | expression . GE expression
+   52                                 | expression . LT expression
+   53                                 | expression . LE expression
+
+    AND  shift, en ga naar toestand 53
+    OR   shift, en ga naar toestand 54
+
+    GT  fout (niet associatief)
+    GE  fout (niet associatief)
+    LT  fout (niet associatief)
+    LE  fout (niet associatief)
+
+    $standaard  reduceren via regel 50 (boolean_arithmetic_op_expression)
+
+
+toestand 85
+
+   38 arithmetic_op_expression: expression . PLUS expression
+   39                         | expression . MIN expression
+   40                         | expression . MUL expression
+   41                         | expression . DIV expression
+   46 boolean_op_expression: expression . AND expression
+   47                      | expression . OR expression
+   48                      | expression . EQ expression
+   49                      | expression . NE expression
+   50 boolean_arithmetic_op_expression: expression . GT expression
+   51                                 | expression . GE expression
+   51                                 | expression GE expression .
+   52                                 | expression . LT expression
+   53                                 | expression . LE expression
+
+    AND  shift, en ga naar toestand 53
+    OR   shift, en ga naar toestand 54
+
+    GT  fout (niet associatief)
+    GE  fout (niet associatief)
+    LT  fout (niet associatief)
+    LE  fout (niet associatief)
+
+    $standaard  reduceren via regel 51 (boolean_arithmetic_op_expression)
+
+
+toestand 86
+
+   38 arithmetic_op_expression: expression . PLUS expression
+   39                         | expression . MIN expression
+   40                         | expression . MUL expression
+   41                         | expression . DIV expression
+   46 boolean_op_expression: expression . AND expression
+   47                      | expression . OR expression
+   48                      | expression . EQ expression
+   49                      | expression . NE expression
+   50 boolean_arithmetic_op_expression: expression . GT expression
+   51                                 | expression . GE expression
+   52                                 | expression . LT expression
+   52                                 | expression LT expression .
+   53                                 | expression . LE expression
+
+    AND  shift, en ga naar toestand 53
+    OR   shift, en ga naar toestand 54
+
+    GT  fout (niet associatief)
+    GE  fout (niet associatief)
+    LT  fout (niet associatief)
+    LE  fout (niet associatief)
+
+    $standaard  reduceren via regel 52 (boolean_arithmetic_op_expression)
+
+
+toestand 87
+
+   38 arithmetic_op_expression: expression . PLUS expression
+   39                         | expression . MIN expression
+   40                         | expression . MUL expression
+   41                         | expression . DIV expression
+   46 boolean_op_expression: expression . AND expression
+   47                      | expression . OR expression
+   48                      | expression . EQ expression
+   49                      | expression . NE expression
+   50 boolean_arithmetic_op_expression: expression . GT expression
+   51                                 | expression . GE expression
+   52                                 | expression . LT expression
+   53                                 | expression . LE expression
+   53                                 | expression LE expression .
+
+    AND  shift, en ga naar toestand 53
+    OR   shift, en ga naar toestand 54
+
+    GT  fout (niet associatief)
+    GE  fout (niet associatief)
+    LT  fout (niet associatief)
+    LE  fout (niet associatief)
+
+    $standaard  reduceren via regel 53 (boolean_arithmetic_op_expression)
+
+
+toestand 88
+
+   38 arithmetic_op_expression: expression . PLUS expression
+   39                         | expression . MIN expression
+   40                         | expression . MUL expression
+   41                         | expression . DIV expression
+   46 boolean_op_expression: expression . AND expression
+   47                      | expression . OR expression
+   48                      | expression . EQ expression
+   48                      | expression EQ expression .
+   49                      | expression . NE expression
+   50 boolean_arithmetic_op_expression: expression . GT expression
+   51                                 | expression . GE expression
+   52                                 | expression . LT expression
+   53                                 | expression . LE expression
+
+    AND  shift, en ga naar toestand 53
+    OR   shift, en ga naar toestand 54
+    GT   shift, en ga naar toestand 55
+    GE   shift, en ga naar toestand 56
+    LT   shift, en ga naar toestand 57
+    LE   shift, en ga naar toestand 58
+
+    EQ  fout (niet associatief)
+    NE  fout (niet associatief)
+
+    $standaard  reduceren via regel 48 (boolean_op_expression)
+
+
+toestand 89
+
+   38 arithmetic_op_expression: expression . PLUS expression
+   39                         | expression . MIN expression
+   40                         | expression . MUL expression
+   41                         | expression . DIV expression
+   46 boolean_op_expression: expression . AND expression
+   47                      | expression . OR expression
+   48                      | expression . EQ expression
+   49                      | expression . NE expression
+   49                      | expression NE expression .
+   50 boolean_arithmetic_op_expression: expression . GT expression
+   51                                 | expression . GE expression
+   52                                 | expression . LT expression
+   53                                 | expression . LE expression
+
+    AND  shift, en ga naar toestand 53
+    OR   shift, en ga naar toestand 54
+    GT   shift, en ga naar toestand 55
+    GE   shift, en ga naar toestand 56
+    LT   shift, en ga naar toestand 57
+    LE   shift, en ga naar toestand 58
+
+    EQ  fout (niet associatief)
+    NE  fout (niet associatief)
+
+    $standaard  reduceren via regel 49 (boolean_op_expression)
+
+
+toestand 90
+
+   16 declaration_statement: VAR identifierlist INT SEMICOLON .
+
+    $standaard  reduceren via regel 16 (declaration_statement)
+
+
+toestand 91
+
+   18 declaration_statement: VAR identifierlist INT EQ . expressionlist SEMICOLON
+
+    IDENTIFIER   shift, en ga naar toestand 21
+    BOOLLITERAL  shift, en ga naar toestand 22
+    LPAREN       shift, en ga naar toestand 24
+    INTLITERAL   shift, en ga naar toestand 25
+
+    expressionlist                    ga naar toestand 102
+    expression                        ga naar toestand 41
+    function_expression               ga naar toestand 27
+    arithmetic_op_expression          ga naar toestand 28
+    arithmetic_assign_op_expression   ga naar toestand 29
+    boolean_op_expression             ga naar toestand 30
+    boolean_arithmetic_op_expression  ga naar toestand 31
+
+
+toestand 92
+
+   17 declaration_statement: VAR identifierlist BOOL SEMICOLON .
+
+    $standaard  reduceren via regel 17 (declaration_statement)
+
+
+toestand 93
+
+   19 declaration_statement: VAR identifierlist BOOL EQ . expressionlist SEMICOLON
+
+    IDENTIFIER   shift, en ga naar toestand 21
+    BOOLLITERAL  shift, en ga naar toestand 22
+    LPAREN       shift, en ga naar toestand 24
+    INTLITERAL   shift, en ga naar toestand 25
+
+    expressionlist                    ga naar toestand 103
+    expression                        ga naar toestand 41
+    function_expression               ga naar toestand 27
+    arithmetic_op_expression          ga naar toestand 28
+    arithmetic_assign_op_expression   ga naar toestand 29
+    boolean_op_expression             ga naar toestand 30
+    boolean_arithmetic_op_expression  ga naar toestand 31
+
+
+toestand 94
+
+   20 declaration_statement: VAR identifierlist EQ expressionlist . SEMICOLON
+   26 expressionlist: expressionlist . ',' expression
+
+    SEMICOLON  shift, en ga naar toestand 104
+    ','        shift, en ga naar toestand 71
+
+
+toestand 95
+
+   21 if_statement: IF LBRACE expression RBRACE . block_statement
+
+    LBRACE  shift, en ga naar toestand 6
+
+    block_statement  ga naar toestand 105
+
+
+toestand 96
+
+   22 for_statement: FOR LBRACE expression RBRACE . block_statement
+
+    LBRACE  shift, en ga naar toestand 6
+
+    block_statement  ga naar toestand 106
+
+
+toestand 97
+
+   14 print_statement: PRINT LPAREN expressionlist RPAREN .
+
+    $standaard  reduceren via regel 14 (print_statement)
+
+
+toestand 98
+
+   15 assignment_statement: identifierlist EQ expressionlist SEMICOLON .
+
+    $standaard  reduceren via regel 15 (assignment_statement)
+
+
+toestand 99
+
+   13 void_function_statement: IDENTIFIER LPAREN expressionlist RPAREN SEMICOLON .
+
+    $standaard  reduceren via regel 13 (void_function_statement)
+
+
+toestand 100
+
+   26 expressionlist: expressionlist ',' expression .
+   38 arithmetic_op_expression: expression . PLUS expression
+   39                         | expression . MIN expression
+   40                         | expression . MUL expression
+   41                         | expression . DIV expression
+   46 boolean_op_expression: expression . AND expression
+   47                      | expression . OR expression
+   48                      | expression . EQ expression
+   49                      | expression . NE expression
+   50 boolean_arithmetic_op_expression: expression . GT expression
+   51                                 | expression . GE expression
+   52                                 | expression . LT expression
+   53                                 | expression . LE expression
+
+    PLUS  shift, en ga naar toestand 49
+    MIN   shift, en ga naar toestand 50
+    MUL   shift, en ga naar toestand 51
+    DIV   shift, en ga naar toestand 52
+    AND   shift, en ga naar toestand 53
+    OR    shift, en ga naar toestand 54
+    GT    shift, en ga naar toestand 55
+    GE    shift, en ga naar toestand 56
+    LT    shift, en ga naar toestand 57
+    LE    shift, en ga naar toestand 58
+    EQ    shift, en ga naar toestand 59
+    NE    shift, en ga naar toestand 60
+
+    $standaard  reduceren via regel 26 (expressionlist)
+
+
+toestand 101
+
+   37 function_expression: IDENTIFIER LPAREN expressionlist RPAREN . SEMICOLON
+
+    SEMICOLON  shift, en ga naar toestand 107
+
+
+toestand 102
+
+   18 declaration_statement: VAR identifierlist INT EQ expressionlist . SEMICOLON
+   26 expressionlist: expressionlist . ',' expression
+
+    SEMICOLON  shift, en ga naar toestand 108
+    ','        shift, en ga naar toestand 71
+
+
+toestand 103
+
+   19 declaration_statement: VAR identifierlist BOOL EQ expressionlist . SEMICOLON
+   26 expressionlist: expressionlist . ',' expression
+
+    SEMICOLON  shift, en ga naar toestand 109
+    ','        shift, en ga naar toestand 71
+
+
+toestand 104
+
+   20 declaration_statement: VAR identifierlist EQ expressionlist SEMICOLON .
+
+    $standaard  reduceren via regel 20 (declaration_statement)
+
+
+toestand 105
+
+   21 if_statement: IF LBRACE expression RBRACE block_statement .
+
+    $standaard  reduceren via regel 21 (if_statement)
+
+
+toestand 106
+
+   22 for_statement: FOR LBRACE expression RBRACE block_statement .
+
+    $standaard  reduceren via regel 22 (for_statement)
+
+
+toestand 107
+
+   37 function_expression: IDENTIFIER LPAREN expressionlist RPAREN SEMICOLON .
+
+    $standaard  reduceren via regel 37 (function_expression)
+
+
+toestand 108
+
+   18 declaration_statement: VAR identifierlist INT EQ expressionlist SEMICOLON .
+
+    $standaard  reduceren via regel 18 (declaration_statement)
+
+
+toestand 109
+
+   19 declaration_statement: VAR identifierlist BOOL EQ expressionlist SEMICOLON .
+
+    $standaard  reduceren via regel 19 (declaration_statement)

@@ -11,20 +11,36 @@
 //TODO: error handling
 //TODO: for block statement: push and pop new symbol table on the stack
 
+struct ReturnValue{
+    int* intValue = nullptr;
+    bool* boolValue = nullptr;
 
+    ReturnValue(int i){
+        intValue = &i;
+    }
 
-typedef Stm_* Stm;
+    ReturnValue(bool b){
+        boolValue = &b;
+    }
 
-typedef Exp_<void>* Exp;
+    ReturnValue(){
+
+    }
+};
+
 
 struct Stm_ {
     virtual void interp() { return; };
 };
 
-template <typename T>
 struct Exp_ {
-    virtual T interp(){ return; };
+    virtual ReturnValue interp(){ return; };
 };
+
+typedef Stm_* Stm;
+
+typedef Exp_* Exp;
+
 
 bool returnEncountered = false;
 Exp returnExp = nullptr;
@@ -120,8 +136,22 @@ struct PrintStm : public Stm_{
     }
 
     void interp() override{
+
+        
         while(explist != nullptr){
-            std::cout << std::to_string(explist->head->interp()) << " ";
+
+            ReturnValue returnValue = explist->head->interp();
+            //Check the type of ReturnValue
+
+            if(returnValue.boolValue == nullptr){
+                std::cout << std::to_string(*returnValue.intValue) << " ";
+            }
+            else{
+                std::cout << std::to_string(*returnValue.boolValue) << " ";
+            }
+
+
+            
             explist = explist->next;
         }
         std::cout << "\n";
@@ -211,34 +241,38 @@ struct DeclarationStm : public Stm_{
                 if((idlist != nullptr && explist == nullptr) || (idlist == nullptr && explist != nullptr) ){
                     //throw error
                 }
+                
+                ReturnValue returnValue =  explist->head->interp();
 
                 //Since a declaration without a specified type is possible it needs runtime typechecking.
                 if(declaredType == INT){
-                    if(std::is_same<decltype(explist->head->interp()), int>::value){
-                        addSymbol(idlist->head, explist->head->interp());
+                    if(returnValue.boolValue == nullptr){
+                        addSymbol(idlist->head, returnValue.intValue);
                     }
                     else{
                         //throw error
                     }
                 }
                 else if(declaredType == BOOL){
-                    if(std::is_same<decltype(explist->head->interp()), bool>::value){
-                        addSymbol(idlist->head, explist->head->interp());
-                    }else{
+                    if(returnValue.boolValue == nullptr){
                         //throw error
+                    }else{
+                        addSymbol(idlist->head, returnValue.boolValue);
                     }
                 }
                 else if(declaredType == -1){
-                    addSymbol(idlist->head, explist->head->interp());
+                    if(returnValue.boolValue == nullptr){
+                        addSymbol(idlist->head, returnValue.intValue);
+                    }else{
+                        addSymbol(idlist->head, returnValue.boolValue);
+                    }
                 }
                 else{
                     //throw error
                 }
                 
                 idlist = idlist->next;
-                explist = explist->next;
-
-                
+                explist = explist->next;             
             }
         }  
     }
@@ -270,14 +304,21 @@ struct AssignStm : public Stm_
             if((idlist != nullptr && explist == nullptr) || (idlist == nullptr && explist != nullptr) ){
                 //throw error
             }
+            
+            ReturnValue lookupReturn = lookupSymbol(idlist->head);
+            ReturnValue interpReturn = explist->head->interp();
 
-            updateSymbol(idlist->head, explist->head->interp());
+            if((lookupReturn.boolValue == nullptr && interpReturn.intValue != nullptr) || (lookupReturn.intValue == nullptr && interpReturn.boolValue != nullptr)){
+                //type error
+            }
+            else{
+                updateSymbol(idlist->head, explist->head->interp());
+            }
 
             idlist = idlist->next;
             explist = explist->next;
         }
-        
-        
+  
     };
 };
 
@@ -310,10 +351,10 @@ struct BlockStm : public Stm_{
         while(stmlist != nullptr){
 
             if(std::is_same<decltype(stmlist->head), ReturnStm>::value){
-                    ReturnStm returnstm = (ReturnStm) stmlist->head;
+                    ReturnStm* returnstm = static_cast<ReturnStm*>(stmlist->head);
 
                     returnEncountered = true;
-                    returnExp = returnstm.expr;
+                    returnExp = returnstm->expr;
                     //returnstm.interp();
 
                     if(stmlist->next != nullptr){
@@ -367,21 +408,28 @@ struct VoidFunctionStm : public Stm_{
                     //Not enough arguments
                 }
 
+
+                ReturnValue returnValue = args->head->interp();
+
                 //Couldn't use typeinfo due to bogus inclusion error
                 //So I have to do it the stupid way
-                if(std::is_same<decltype(args->head->interp()), int>::value){
+                if(returnValue.intValue != nullptr){
                     if(paramTypes[i] != INT){
                         //wrong type
                     }
-                }
-                else if(std::is_same<decltype(args->head->interp()), bool>::value){
-                    if(paramTypes[i] != BOOL){
-                        //wrong type
-
+                    else{
+                        addSymbol(paramNames[i], returnValue);
                     }
                 }
-                
-                addSymbol(paramNames[i], args->head->interp());
+                else if(returnValue.boolValue != nullptr){
+                    if(paramTypes[i] != BOOL){                      
+                        //wrong type
+                    }
+                    else{
+                        addSymbol(paramNames[i], returnValue);
+                    }
+                }
+                              
                 i++;
                 args = args->next;
             }
@@ -389,68 +437,71 @@ struct VoidFunctionStm : public Stm_{
 
         //Executing the function
 
-        if(stmlist != nullptr){
-            while(stmlist != nullptr){
-               
-                if(std::is_same<decltype(stmlist->head), ReturnStm>::value){
-                    ReturnStm returnstm = (ReturnStm) stmlist->head;
+        
+        while(stmlist != nullptr){
+            
+            if(std::is_same<decltype(stmlist->head), ReturnStm>::value){
+                
+                ReturnStm* returnstm = static_cast<ReturnStm*>(stmlist->head);
+                ReturnValue returnValue = returnstm->expr->interp();
 
-                    //returnstm.interp();
+                //returnstm.interp();
 
-                    if(returnstm.expr != nullptr && returntype == -1){
+                if(returnstm->expr != nullptr && returntype == -1){
+                    //no return value in void defined function allowed
+                }
+
+                if(returnValue.boolValue != nullptr){
+                    if(returntype != BOOL){
+                        //wrong return type error
+                    }
+                }
+                else if(returnValue.intValue != nullptr){
+                    if(returntype != INT){
+                        //wrong return type error
+                    }
+                }
+
+                if(stmlist->next != nullptr){
+                    //Unreachable code error
+                }
+
+                return;
+            }
+            else {
+                stmlist->head->interp(); // Execute the nested block
+                if (returnEncountered) {
+                    
+                    ReturnValue returnValue = returnExp->interp();
+
+                    if(returnExp != nullptr && returntype == -1){
                         //no return in void function allowed
                     }
 
-                    if(std::is_same<decltype(returnstm.expr->interp()), bool>::value){
+                    if(returnValue.boolValue != nullptr){
                         if(returntype != BOOL){
                             //wrong return type error
                         }
                     }
-                    else if(std::is_same<decltype(returnstm.expr->interp()), int>::value){
+                    else if(returnValue.intValue != nullptr){
                         if(returntype != INT){
                             //wrong return type error
                         }
                     }
 
-                    if(stmlist->next != nullptr){
-                        //Unreachable code error
-                    }
+                    returnEncountered = false;
 
+                    // Bubble up the return statement
                     return;
                 }
-                else {
-                    stmlist->head->interp(); // Execute the nested block
-                    if (returnEncountered) {
-                        
-
-                        if(returnExp != nullptr && returntype == -1){
-                            //no return in void function allowed
-                        }
-
-                        if(std::is_same<decltype(returnExp->interp()), bool>::value){
-                            if(returntype != BOOL){
-                                //wrong return type error
-                            }
-                        }
-                        else if(std::is_same<decltype(returnExp->interp()), int>::value){
-                            if(returntype != INT){
-                                //wrong return type error
-                            }
-                        }
-
-                        returnEncountered = false;
-                        // Bubble up the return statement
-                        return;
-                    }
-                }
-
             }
-        }       
+
+        }
+              
     }
 
 };
 
-template <typename T>
 
 struct IncDecStm : public Stm_{
     int action;
@@ -463,22 +514,21 @@ struct IncDecStm : public Stm_{
 
     virtual void interp() override{
 
-        T value =  lookupSymbol(identifier);
+        ReturnValue returnValue =  lookupSymbol(identifier);
 
-        if(std::is_same<decltype(value), int>::value){
-            int castedValue = (int) value;
+        if(returnValue.intValue != nullptr){
             
             if(action == DEC){
-                castedValue--;
+                *returnValue.intValue--;
             }
             else if(action == INC){
-                castedValue++;
+                *returnValue.intValue++;
             }
 
-            updateSymbol(identifier, castedValue);
+            updateSymbol(identifier, returnValue);
         }
         else{
-            //Throw type error
+            //Throw type error because it can't be bool
         }
 
     }
@@ -495,14 +545,17 @@ struct If_stm : public Stm_{
     }
 
     virtual void interp() override{
-         if(std::is_same<decltype(exp->interp()), bool>::value){
-            if(exp->interp()){
+
+        ReturnValue returnValue = exp->interp();
+
+        if(returnValue.boolValue != nullptr){
+            if(returnValue.boolValue){
                 blockStm.interp();
             }
-         }
-         else{
+        }
+        else{
             //Wrong type error
-         }
+        }
     }
 };
 
@@ -516,64 +569,53 @@ struct For_stm : public Stm_{
     }
 
     virtual void interp() override{
-         if(std::is_same<decltype(exp->interp()), bool>::value){
-            while(exp->interp()){
+
+        ReturnValue returnValue = exp->interp();
+
+        if(returnValue.boolValue != nullptr){
+            while(returnValue.boolValue == false){
                 blockStm.interp();
+                returnValue = exp->interp();
             }
-         }
-         else{
-            //Wrong type error
-         }
+        }
+        else{
+        //Wrong type error
+        }
     }
 };
 
 
 //Expressions
-
-template <typename T>
-struct IdExp : public Exp_
+struct IntlitExp : public Exp_
 {
-    std::string id;
+    int intlit;
 
-    IdExp(std::string i) {
-        id = i;
-    };
-
-    ~IdExp();
-
-    virtual T interp() override {        
-        return lookupSymbol(id);
-    }
-};
-
-struct IntlitExp : public Exp_<int>
-{
-    int integer;
-
-    IntlitExp(int n) {
-        integer = n;
+    IntlitExp(int i) {
+        intlit = i;
     };
 
     ~IntlitExp();
 
   
-    virtual int interp() override{
-        return integer;
+    virtual ReturnValue interp() override{
+        return ReturnValue(intlit);
     }
 };
-struct BoollitExp : public Exp_<bool>
+
+struct BoollitExp : public Exp_
 {
-    bool boolean;
+    bool boollit;
 
     BoollitExp(bool b){
-        boolean = b;
+        boollit = b;
     }
 
-    virtual bool interp() override{
-        return boolean;
+    virtual ReturnValue interp() override{
+        return ReturnValue(b)
     }
 };
-struct ArithmeticOpExp : public Exp_<int>
+
+struct ArithmeticOpExp : public Exp_
 {
     Exp left, right;
     int oper;
@@ -586,29 +628,31 @@ struct ArithmeticOpExp : public Exp_<int>
 
     ~ArithmeticOpExp();
 
-    virtual int interp() override{
+    virtual ReturnValue interp() override{
         
-        float value_return;
-        int result_left = left->interp();
-        int result_right = right->interp();
+        int value_return;
+        ReturnValue result_left = left->interp();
+        ReturnValue result_right = right->interp();
 
-        if(oper == PLUS) {
-            value_return = result_left + result_right; 
-        }
-        else if(oper == MIN){
-            value_return = result_left - result_right;
-        }
-        else if (oper == MUL) {
-            value_return = result_left * result_right;
-        }
-        else if (oper == DIV){
-            value_return = result_left / result_right;
+        if(result_left.intValue != nullptr && result_left.intValue != nullptr ){
+            if(oper == PLUS) {
+                value_return = *result_left.intValue + *result_right.intValue; 
+            }
+            else if(oper == MIN){
+                value_return = *result_left.intValue - *result_right.intValue;
+            }
+            else if (oper == MUL) {
+                value_return = *result_left.intValue * *result_right.intValue;
+            }
+            else if (oper == DIV){
+                value_return = *result_left.intValue / *result_right.intValue;
+            }
         }
 
-        return value_return;
+        return ReturnValue(value_return);
     }
 };
-struct ArithmeticAssignOpExp : public Exp_<void>{
+struct ArithmeticAssignOpExp : public Exp_{
 
     std::string left;
     Exp right;
@@ -620,30 +664,36 @@ struct ArithmeticAssignOpExp : public Exp_<void>{
         oper = op;
     };
 
-    virtual void interp() override{
+    virtual ReturnValue interp() override{
 
-        int result_right = right->interp();
+        ReturnValue returnValue = right->interp();
 
-        int symbolVal = lookupSymbol<int>(left);
+        if(returnValue.intValue != nullptr){
+            int symbolVal = *lookupSymbol(left).intValue;
 
-        if (oper == PLUSASSIGN){
-            symbolVal += result_right;
-        }
-        else if (oper == MINASSIGN){
-            symbolVal -= result_right;
-        }
-        else if (oper == MULASSIGN){
-            symbolVal *= result_right;
-        }
-        else if (oper == DIVASSIGN){
-            symbolVal /= result_right;
-        }
+            if (oper == PLUSASSIGN){
+                symbolVal += *returnValue.intValue;
+            }
+            else if (oper == MINASSIGN){
+                symbolVal -= *returnValue.intValue;
+            }
+            else if (oper == MULASSIGN){
+                symbolVal *= *returnValue.intValue;
+            }
+            else if (oper == DIVASSIGN){
+                symbolVal /= *returnValue.intValue;
+            }
 
-        updateSymbol(left, symbolVal);    
+            updateSymbol(left, ReturnValue(symbolVal));
+        }
+        else{
+            //Type error
+        }   
     }
 
 };
-struct BooleanOpExp : public Exp_<bool>{
+
+struct BooleanOpExp : public Exp_{
 
     Exp left;
     Exp right;
@@ -655,28 +705,37 @@ struct BooleanOpExp : public Exp_<bool>{
         oper = op;
     };
 
-    virtual bool interp() override{
+    virtual ReturnValue interp() override{
 
         //Check if left and right types are equal
         //if not throw yyerror
 
-        if(oper == NE){
-            return left->interp() != right->interp();           
+        ReturnValue returnValueLeft = left->interp();
+        ReturnValue returnValueRight = right->interp();
+
+        if(returnValueLeft.boolValue != nullptr && returnValueRight.boolValue != nullptr)
+        {
+            if(oper == NE){
+                return *returnValueLeft.boolValue != *returnValueRight.boolValue;           
+            }
+            else if(oper == EQ){
+                return *returnValueLeft.boolValue == *returnValueRight.boolValue;
+            }
+            else if(oper == AND){
+                return *returnValueLeft.boolValue && *returnValueRight.boolValue;
+            }
+            else if(oper == OR){
+                return *returnValueLeft.boolValue || *returnValueRight.boolValue;
+            }
         }
-        else if(oper == EQ){
-            return left->interp() == right->interp();
-        }
-        else if(oper == AND){
-            return left->interp() && right->interp();
-        }
-        else if(oper == OR){
-            return left->interp() || right->interp();
+        else{
+            //Type error
         }
 
         return false;
     }
 };
-struct BooleanArithmeticOpExp : public Exp_<bool>{
+struct BooleanArithmeticOpExp : public Exp_{
 
     Exp left;
     Exp right;
@@ -688,60 +747,68 @@ struct BooleanArithmeticOpExp : public Exp_<bool>{
         oper = op;
     };
 
-    virtual bool interp() override{
+    virtual ReturnValue interp() override{
 
         //Check if left and right types are both numeric
         //if not throw yyerror
 
-        if(oper == GT){
-            return left->interp() > right->interp();           
+        ReturnValue returnValueLeft = left->interp();
+        ReturnValue returnValueRight = right->interp();
+
+        if(returnValueLeft.intValue != nullptr && returnValueRight.intValue != nullptr){
+
+            if(oper == GT){
+                return *returnValueLeft.intValue > *returnValueRight.intValue;           
+            }
+            else if(oper == LT){
+                return *returnValueLeft.intValue < *returnValueRight.intValue; 
+            }
+            else if(oper == GE){
+                return *returnValueLeft.intValue >= *returnValueRight.intValue; 
+            }
+            else if(oper == GT){
+                return *returnValueLeft.intValue <= *returnValueRight.intValue; 
+            }
         }
-        else if(oper == LT){
-            return left->interp() < right->interp();
-        }
-        else if(oper == GE){
-            return left->interp() >= right->interp();
-        }
-        else if(oper == GT){
-            return left->interp() <= right->interp();
+        else{
+            //Throw error
         }
 
         return false;
     }
 
 };
-struct NotExp : public Exp_<bool>{
+struct NotExp : public Exp_{
     Exp expr;
     
     NotExp(Exp ex){
         expr = ex;
     }
 
-    virtual bool interp() override{
+    virtual ReturnValue interp() override{
 
-        if(!(std::is_same<decltype(expr->interp()), int>::value)){
+        if(expr->interp().boolValue == nullptr){
             //type error
         }
 
-        return !(expr->interp());
+        return !(*expr->interp().boolValue);
     }
 };
 
-template <typename T>
-struct FunctionExp : public Exp_<T>{
+struct FunctionExp : public Exp_{
 
 
     ExpList arguments;
     std::string identifier;
 
 
-    FunctionExp(Explist args, std::string id){
+    FunctionExp(ExpList args, std::string id){
         arguments = args;
         identifier = id;
     }
 
 
-     virtual T interp() override{
+    virtual ReturnValue interp() override{
 
         //Call the function from the function table 
         Function function = lookupFunction(identifier);
@@ -770,6 +837,9 @@ struct FunctionExp : public Exp_<T>{
             int i = 0;
             while (args != nullptr)
             {
+
+                ReturnValue returnValue = args->head->interp();
+
                 if(i == paramNames.size() && args->next != nullptr){
                     //Too many arguments
                 }
@@ -777,21 +847,18 @@ struct FunctionExp : public Exp_<T>{
                     //Not enough arguments
                 }
 
-                //Couldn't use typeinfo due to bogus inclusion error
-                //So I have to do it the stupid way
-                if(std::is_same<decltype(args->head->interp()), int>::value){
+                if(returnValue.intValue != nullptr){
                     if(paramTypes[i] != INT){
                         //wrong type
                     }
                 }
-                else if(std::is_same<decltype(args->head->interp()), bool>::value){
+                else if(returnValue.boolValue != nullptr){
                     if(paramTypes[i] != BOOL){
                         //wrong type
-
                     }
                 }
                 
-                addSymbol(paramNames[i], args->head->interp());
+                addSymbol(paramNames[i], returnValue);
                 i++;
                 args = args->next;
             }
@@ -803,16 +870,17 @@ struct FunctionExp : public Exp_<T>{
             while(stmlist != nullptr){
                
                 if(std::is_same<decltype(stmlist->head), ReturnStm>::value){
-                    ReturnStm returnstm = (ReturnStm) stmlist->head;
+                    ReturnStm* returnstm = static_cast<ReturnStm*>(stmlist->head);
+                    ReturnValue returnValue = returnstm->expr->interp();
 
                     //returnstm.interp();
 
-                    if(std::is_same<decltype(returnstm.expr->interp()), bool>::value){
+                    if(returnValue.boolValue != nullptr){
                         if(returntype != BOOL){
                             //wrong return type error
                         }
                     }
-                    else if(std::is_same<decltype(returnstm.expr->interp()), int>::value){
+                    else if(returnValue.intValue != nullptr){
                         if(returntype != INT){
                             //wrong return type error
                         }
@@ -822,23 +890,25 @@ struct FunctionExp : public Exp_<T>{
                         //Unreachable code error
                     }
 
-                    return returnstm.expr->interp();
+                    return returnValue;
                 }
                 else {
                     stmlist->head->interp(); // Execute the nested block
                     if (returnEncountered) {
                         
-
+                        
                         if(returnExp != nullptr && returntype == -1){
                             //no return in void function allowed
                         }
 
-                        if(std::is_same<decltype(returnExp->interp()), bool>::value){
+                        ReturnValue returnValue = returnExp->interp();
+
+                        if(returnValue.boolValue != nullptr){
                             if(returntype != BOOL){
                                 //wrong return type error
                             }
                         }
-                        else if(std::is_same<decltype(returnExp->interp()), int>::value){
+                        else if(returnValue.intValue != nullptr){
                             if(returntype != INT){
                                 //wrong return type error
                             }
@@ -846,7 +916,7 @@ struct FunctionExp : public Exp_<T>{
 
                         returnEncountered = false;
                         // Bubble up the return statement
-                        return returnstm.expr->interp();
+                        return returnValue;
                     }
                 }
 
@@ -897,7 +967,7 @@ FunctionTable* functionTable;
 Function lookupFunction(std::string name) {
     Function* current = functionTable->head;
     while (current != nullptr) {
-        if (strcmp(current->name, name) == 0) {
+        if (current->name == name) {
             return *current;
         }
         current = current->next;

@@ -4,16 +4,14 @@
 #include <vector>
 //TODO: error handling
 //TODO: handle scoping, look at chatGPT as
-template <typename T>
 struct Symbol {
     std::string name;
-    T value;
+    ReturnValue value;
     Symbol* next;
 
-    Symbol(std::string n, T val, Symbol* nx){
+    Symbol(std::string n, ReturnValue val){
         name = n;
         value = val;
-        next = nx;
     }
 
     Symbol(){
@@ -23,7 +21,7 @@ struct Symbol {
 
 
 struct SymbolTable {
-    Symbol<int>* head; 
+    Symbol* head; 
 };
 
 std::vector<SymbolTable> symbolTableStack;
@@ -45,19 +43,17 @@ void popSymbolTable() {
     }
 }
 
-template <typename T>
-void addSymbol(std::string name, T value) {
-    Symbol<T>* newSymbol = new Symbol<T>(name, value); 
+void addSymbol(std::string name, ReturnValue value) {
+    Symbol* newSymbol = new Symbol(name, value); 
     symbolTable->head = newSymbol;
 }
 
-//TODO: catch runtime error
-template <typename T>
-void updateSymbol(std::string name, T value) {
+void updateSymbol(std::string name, ReturnValue value) {
     for (int i = symbolTableStack.size() - 1; i >= 0; --i) {
-        Symbol<T>* current = symbolTableStack[i]->head;
+        Symbol* current = symbolTableStack[i].head;
         while (current != nullptr) {
-            if (strcmp(current->name, name) == 0) {
+            if (current->name == name) 
+            {
                 current->value = value;
                 return;
             }
@@ -68,13 +64,11 @@ void updateSymbol(std::string name, T value) {
     printf("Variable '%s' does not exist in the symbol table.\n", name);
 }
 
-// Templated function to lookup a symbol
-template <typename T>
-T lookupSymbol(std::string name) {
+ReturnValue lookupSymbol(std::string name) {
     for (int i = symbolTableStack.size() - 1; i >= 0; --i) {
-        Symbol<T>* current = symbolTableStack[i]->head;
+        Symbol* current =  symbolTableStack[i].head;
         while (current != nullptr) {
-            if (strcmp(current->name, name) == 0) {
+            if (current->name == name) {
                 return current->value;
             }
             current = current->next;
