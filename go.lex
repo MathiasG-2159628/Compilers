@@ -4,6 +4,8 @@ go.lex: lex-file for go basisniveau
 */
 
 #include "tokens.h"
+#include <string>
+#include "go.tab.hpp"
 
   /* Keep track of current position of lex for error messages, i.e. 
      the position just *after* the last token read */

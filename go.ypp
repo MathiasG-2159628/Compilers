@@ -1,21 +1,35 @@
 %{
 #include <stdio.h>
-#include "structs.h"
-#include "symboltable.h"
+#include "structs.hpp"
+#include "symboltable.hpp"
 #include "yyfunctions.h"
 #include <string>
+#include "tokens.h"
+#include "ReturnValue.hpp" 
+
 
 Stm thesyntree;
 
 %}
+
+%code requires {
+    #include <string>
+    #include <stdio.h>
+    #include "structs.hpp"
+    #include "symboltable.hpp"
+    #include "yyfunctions.h"
+    #include <string>
+    #include "tokens.h"  
+    #include "ReturnValue.hpp" 
+}
 
 %union{
   //Literals and base classes
   std::string id;
   bool boollit;
   int intlit;
-  Stm_ stm;
-  Exp_ exp;
+  Stm stm;
+  Exp exp;
 
   //Lists
   ExpList explist;
@@ -23,30 +37,10 @@ Stm thesyntree;
   StmList stmlist;
   ParamList paramlist;
 
-  //Statements and statement related objects
+  //statement related objects
   Param_declaration param_declaration;
   Function_signature func_signature;
-  PrintStm printstm;
-  Function_DeclarationStm func_declarationstm;
-  DeclarationStm declarationstm;
-  AssignStm assignstm;
-  ReturnStm returnstm;
-  BlockStm blockstm;
-  VoidFunctionStm voidfunctionstm;
-  IncDecStm incdecstm;
-  If_stm if_stm;
-  For_stm for_stm;
 
-  //Expressions
-  IdExp idexp;
-  IntlitExp intlitexp;
-  BoollitExp boollitexp;
-  ArithmeticOpExp arithmeticopexp;
-  ArithmeticAssignOpExp arithmeticassignopexp;
-  BooleanOpExp booleanopexp;
-  BooleanArithmeticOpExp booleanarithmeticopexp;
-  NotExp nexp;
-  FunctionExp functionexp;
 }
 
 %token <id> IDENTIFIER 
@@ -77,24 +71,24 @@ Stm thesyntree;
 //Statements and statement related types
 %type <param_declaration> parameter_declaration
 %type <func_signature> function_signature
-%type <printstm> print_statement
-%type <func_declarationstm> function_declaration_statement
-%type <declarationstm> declaration_statement
-%type <assignstm> assignment_statement
-%type <returnstm> return_statement
-%type <blockstm> block_statement
-%type <voidfunctionstm> void_function_statement
-%type <incdecstm> increment_decrement_statement
-%type <if_stm> if_statement
-%type <for_stm> for_statement
+%type <stm> print_statement
+%type <stm> function_declaration_statement
+%type <stm> declaration_statement
+%type <stm> assignment_statement
+%type <stm> return_statement
+%type <stm> block_statement
+%type <stm> void_function_statement
+%type <stm> increment_decrement_statement
+%type <stm> if_statement
+%type <stm> for_statement
 
 //Expressions
-%type <functionexp> function_expression
-%type <arithmeticopexp> arithmetic_op_expression
-%type <arithmeticassignopexp> arithmetic_assign_op_expression
-%type <booleanopexp> boolean_op_expression
-%type <booleanarithmeticopexp> boolean_arithmetic_op_expression 
-%type <nexp> notexp
+%type <exp> function_expression
+%type <exp> arithmetic_op_expression
+%type <exp> arithmetic_assign_op_expression
+%type <exp> boolean_op_expression
+%type <exp> boolean_arithmetic_op_expression 
+%type <exp> notexp
 
 %%
 
@@ -176,8 +170,8 @@ expressionlist : expressionlist ',' expression {$$ = new ExpList($3, &$1);}
                | expression {$$ = new ExpList($1, nullptr);}
                ;
 
-expression : INTLITERAL {$$ = $1;} 
-           | BOOLLITERAL {$$ = $1;}
+expression : INTLITERAL {$$ = new IntlitExp($1);} 
+           | BOOLLITERAL {$$ = new BoollitExp($1);}
            | IDENTIFIER {
 
               ReturnValue returnValue = lookupSymbol($1);
@@ -234,14 +228,13 @@ boolean_arithmetic_op_expression:
 %%
 
 int main() {
-    pushSymbolTable();
+    pushSymbolTable(SymbolTable());
     yyparse();
     return 0;
 }
 
 int yyerror(std::string message) {
     printf("Error: %s\n", message);
-    yyabort();
     return 1;
 }
 

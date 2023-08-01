@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "symboltable.h"
+#include "symboltable.hpp"
 #include "tokens.h"
 #include "yyfunctions.h"
 #include <vector>
@@ -7,26 +7,12 @@
 #include <typeinfo>
 #include <iostream>
 #include <string>
+#include "ReturnValue.hPP"
 
 //TODO: error handling
 //TODO: for block statement: push and pop new symbol table on the stack
 
-struct ReturnValue{
-    int* intValue = nullptr;
-    bool* boolValue = nullptr;
 
-    ReturnValue(int i){
-        intValue = &i;
-    }
-
-    ReturnValue(bool b){
-        boolValue = &b;
-    }
-
-    ReturnValue(){
-
-    }
-};
 
 
 struct Stm_ {
@@ -60,6 +46,7 @@ struct ExpList {
 
     };
 };
+
 struct IdList{
     std::string head;
     IdList* next;
@@ -84,7 +71,9 @@ struct StmList{
         next = s;
     }
 
-    StmList(){};
+    StmList(){
+
+    };
 };
 
 
@@ -97,7 +86,9 @@ struct ParamList{
         next = n;
     }
 
-    ParamList();
+    ParamList(){
+
+    };
 };
 
 //Params
@@ -111,7 +102,9 @@ struct Param_declaration{
         type = t;
     }
 
-    Param_declaration();
+    Param_declaration(){
+
+    };
 };
 struct Function_signature{
     ParamList params;
@@ -122,7 +115,9 @@ struct Function_signature{
         type = t;
     }
 
-    Function_signature();
+    Function_signature(){
+
+    };
 };
 
 
@@ -133,6 +128,10 @@ struct PrintStm : public Stm_{
 
     PrintStm(ExpList* expl){
         explist = expl;
+    }
+
+    PrintStm(){
+
     }
 
     void interp() override{
@@ -149,9 +148,7 @@ struct PrintStm : public Stm_{
             else{
                 std::cout << std::to_string(*returnValue.boolValue) << " ";
             }
-
-
-            
+  
             explist = explist->next;
         }
         std::cout << "\n";
@@ -936,51 +933,3 @@ bool containsValue(const std::vector<std::string> vec, std::string value) {
     return false;
 }
 
-//Function table
-
-struct Function{
-
-    //call on this data whenever a function is called
-    Function* next;
-    std::string name;
-    std::vector<std::string> paramNames;
-    std::vector<int> paramTypes;
-    int functionType;
-    StmList stmlist;
-
-    Function(std::string n, std::vector<std::string> names, std::vector<int> types, int functype, StmList slist){
-        name = n;
-        paramNames = names;
-        paramTypes = types;
-        functionType = functype;
-        stmlist = slist;
-    }
-    
-};
-
-struct FunctionTable {
-    Function* head; 
-};
-
-FunctionTable* functionTable;
-
-Function lookupFunction(std::string name) {
-    Function* current = functionTable->head;
-    while (current != nullptr) {
-        if (current->name == name) {
-            return *current;
-        }
-        current = current->next;
-    }
-    
-
-    printf("Function '%s' is not present in the function table.\n", name);
-
-    return;
-}
-
-void addFunction(std::string name, Function* newFunction) {
-
-    newFunction->next = functionTable->head;
-    functionTable->head = newFunction;
-}
