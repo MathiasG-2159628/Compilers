@@ -1,6 +1,9 @@
 #include "structs.hpp"
 #include "functiontable.hpp"
 
+ReturnHandler::ReturnHandler(){
+
+}
 
 ExpList::ExpList(Exp h, ExpList* t) {
         head = h;
@@ -90,7 +93,7 @@ void Function_DeclarationStm::interp(){
     Function function(identifier, paramnames, paramtypes, returnType, stmlist);
     
     //Add function to table
-    addFunction(identifier, &function);
+    functionhandler.addFunction(identifier, &function);
 }
 
 
@@ -117,10 +120,10 @@ void DeclarationStm::interp(){
 
 
             if(declaredType == INT){
-                addSymbol(idlist->head, 0);
+                symbolhandler.addSymbol(idlist->head, 0);
             }
             else if(declaredType == BOOL){
-                addSymbol(idlist->head, true);
+                symbolhandler.addSymbol(idlist->head, true);
             }
             else{
                 //Throw error
@@ -144,7 +147,7 @@ void DeclarationStm::interp(){
             //Since a declaration without a specified type is possible it needs runtime typechecking.
             if(declaredType == INT){
                 if(returnValue.boolValue == nullptr){
-                    addSymbol(idlist->head, returnValue.intValue);
+                    symbolhandler.addSymbol(idlist->head, returnValue.intValue);
                 }
                 else{
                     //throw error
@@ -154,14 +157,14 @@ void DeclarationStm::interp(){
                 if(returnValue.boolValue == nullptr){
                     //throw error
                 }else{
-                    addSymbol(idlist->head, returnValue.boolValue);
+                    symbolhandler.addSymbol(idlist->head, returnValue.boolValue);
                 }
             }
             else if(declaredType == -1){
                 if(returnValue.boolValue == nullptr){
-                    addSymbol(idlist->head, returnValue.intValue);
+                    symbolhandler.addSymbol(idlist->head, returnValue.intValue);
                 }else{
-                    addSymbol(idlist->head, returnValue.boolValue);
+                    symbolhandler.addSymbol(idlist->head, returnValue.boolValue);
                 }
             }
             else{
@@ -199,14 +202,14 @@ void AssignStm::interp(){
             //throw error
         }
         
-        ReturnValue lookupReturn = lookupSymbol(idlist->head);
+        ReturnValue lookupReturn = symbolhandler.lookupSymbol(idlist->head);
         ReturnValue interpReturn = explist->head->interp();
 
         if((lookupReturn.boolValue == nullptr && interpReturn.intValue != nullptr) || (lookupReturn.intValue == nullptr && interpReturn.boolValue != nullptr)){
             //type error
         }
         else{
-            updateSymbol(idlist->head, explist->head->interp());
+            symbolhandler.updateSymbol(idlist->head, explist->head->interp());
         }
 
         idlist = idlist->next;
@@ -230,14 +233,14 @@ BlockStm::BlockStm(StmList *stl){
 
 void BlockStm::interp(){
        
-    pushSymbolTable(SymbolTable());
+    symbolhandler.pushSymbolTable(SymbolTable());
     while(stmlist != nullptr){
 
         if(std::is_same<decltype(stmlist->head), ReturnStm>::value){
                 ReturnStm* returnstm = static_cast<ReturnStm*>(stmlist->head);
 
-                returnEncountered = true;
-                returnExp = returnstm->expr;
+                returnhandler.returnEncountered = true;
+                returnhandler.returnExp =  returnstm->expr;
                 //returnstm.interp();
 
                 if(stmlist->next != nullptr){
@@ -247,7 +250,7 @@ void BlockStm::interp(){
                 return;
         }          
     }
-    popSymbolTable();
+    symbolhandler.popSymbolTable();
 }
 
 VoidFunctionStm::VoidFunctionStm(ExpList args, std::string id){
@@ -259,12 +262,12 @@ VoidFunctionStm::VoidFunctionStm(){};
 
 void VoidFunctionStm::interp(){
     //Call the function from the function table 
-    Function function = lookupFunction(identifier);
+    Function function = functionhandler.lookupFunction(identifier);
     int returntype = function.functionType;
     StmList* stmlist = &function.stmlist;
 
     //New scope definition
-    pushSymbolTable(SymbolTable());
+    symbolhandler.pushSymbolTable(SymbolTable());
 
     //Pushing the arguments onto the symbol table of the new scope
     ExpList* args = &arguments;
@@ -298,7 +301,7 @@ void VoidFunctionStm::interp(){
                     //wrong type
                 }
                 else{
-                    addSymbol(paramNames[i], returnValue);
+                    symbolhandler.addSymbol(paramNames[i], returnValue);
                 }
             }
             else if(returnValue.boolValue != nullptr){
@@ -306,7 +309,7 @@ void VoidFunctionStm::interp(){
                     //wrong type
                 }
                 else{
-                    addSymbol(paramNames[i], returnValue);
+                    symbolhandler.addSymbol(paramNames[i], returnValue);
                 }
             }
                             
@@ -350,11 +353,11 @@ void VoidFunctionStm::interp(){
         }
         else {
             stmlist->head->interp(); // Execute the nested block
-            if (returnEncountered) {
+            if (returnhandler.returnEncountered) {
                 
-                ReturnValue returnValue = returnExp->interp();
+                ReturnValue returnValue = returnhandler.returnExp->interp();
 
-                if(returnExp != nullptr && returntype == -1){
+                if(returnhandler.returnExp != nullptr && returntype == -1){
                     //no return in void function allowed
                 }
 
@@ -369,7 +372,7 @@ void VoidFunctionStm::interp(){
                     }
                 }
 
-                returnEncountered = false;
+                returnhandler.returnEncountered = false;
 
                 // Bubble up the return statement
                 return;
@@ -388,7 +391,7 @@ IncDecStm::IncDecStm(int ac, std::string id){
 }
 
 void IncDecStm::interp(){
-    ReturnValue returnValue = lookupSymbol(identifier);
+    ReturnValue returnValue = symbolhandler.lookupSymbol(identifier);
 
     if(returnValue.intValue != nullptr){
         
@@ -399,7 +402,7 @@ void IncDecStm::interp(){
             *returnValue.intValue++;
         }
 
-        updateSymbol(identifier, returnValue);
+        symbolhandler.updateSymbol(identifier, returnValue);
     }
     else{
         //Throw type error because it can't be bool
@@ -521,7 +524,7 @@ ReturnValue ArithmeticAssignOpExp::interp(){
     ReturnValue returnValue = right->interp();
 
     if(returnValue.intValue != nullptr){
-        int symbolVal = *lookupSymbol(left).intValue;
+        int symbolVal = *functionhandler.lookupSymbol(left).intValue;
 
         if (oper == PLUSASSIGN){
             symbolVal += *returnValue.intValue;
@@ -536,7 +539,7 @@ ReturnValue ArithmeticAssignOpExp::interp(){
             symbolVal /= *returnValue.intValue;
         }
 
-        updateSymbol(left, ReturnValue(symbolVal));
+        symbolhandler.updateSymbol(left, ReturnValue(symbolVal));
     }
     else{
         //Type error
@@ -642,14 +645,14 @@ FunctionExp::FunctionExp(ExpList args, std::string id){
     identifier = id;
 }
 
-ReturnStm FunctionExp::interp(){
+ReturnValue FunctionExp::interp(){
     //Call the function from the function table 
-    Function function = lookupFunction(identifier);
+    Function function = functionhandler.lookupFunction(identifier);
     int returntype = function.functionType;
     StmList* stmlist = &function.stmlist;
 
     //New scope definition
-    pushSymbolTable(SymbolTable());
+    symbolhandler.pushSymbolTable(SymbolTable());
 
     //Pushing the arguments onto the symbol table of the new scope
     ExpList* args = &arguments;
@@ -691,7 +694,7 @@ ReturnStm FunctionExp::interp(){
                 }
             }
             
-            addSymbol(paramNames[i], returnValue);
+            symbolhandler.addSymbol(paramNames[i], returnValue);
             i++;
             args = args->next;
         }
@@ -727,14 +730,14 @@ ReturnStm FunctionExp::interp(){
             }
             else {
                 stmlist->head->interp(); // Execute the nested block
-                if (returnEncountered) {
+                if (returnhandler.returnEncountered) {
                     
                     
-                    if(returnExp != nullptr && returntype == -1){
+                    if(returnhandler.returnExp != nullptr && returntype == -1){
                         //no return in void function allowed
                     }
 
-                    ReturnValue returnValue = returnExp->interp();
+                    ReturnValue returnValue = returnhandler.returnExp->interp();
 
                     if(returnValue.boolValue != nullptr){
                         if(returntype != BOOL){
@@ -747,7 +750,7 @@ ReturnStm FunctionExp::interp(){
                         }
                     }
 
-                    returnEncountered = false;
+                    returnhandler.returnEncountered = false;
                     // Bubble up the return statement
                     return returnValue;
                 }

@@ -13,7 +13,7 @@
 //TODO: for block statement: push and pop new symbol table on the stack
 
 
-
+extern ReturnHandler returnhandler;
 
 struct Stm_ {
     virtual void interp() { return; };
@@ -27,9 +27,12 @@ typedef Stm_* Stm;
 
 typedef Exp_* Exp;
 
+struct ReturnHandler{
+    bool returnEncountered = false;
+    Exp returnExp = nullptr;
 
-extern bool returnEncountered = false;
-extern Exp_ returnExpValue;
+    ReturnHandler();
+};
 
 
 //Lists

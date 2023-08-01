@@ -1,5 +1,7 @@
 #include "symboltable.hpp"
-#include <string
+#include <string>
+
+extern SymbolHandler symbolhandler;
 
 //Symbolhandler definitions
 
@@ -74,7 +76,7 @@ Symbol::Symbol(std::string n, ReturnValue val){
 }
 
 Symbol::Symbol(){
-    
+
 }
 
 
