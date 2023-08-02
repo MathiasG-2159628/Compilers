@@ -7,15 +7,15 @@ go.lex: lex-file for go basisniveau
 #include <string>
 #include "go.tab.hpp"
 
-
-
   /* Keep track of current position of lex for error messages, i.e. 
      the position just *after* the last token read */
   int line_nr = 1;
   int col_nr = 1; 
-  int lastTokenType = 0;
+  int lastTokenType = -1;
 
-%}
+%
+
+}
 
 semicolon             ";"
 integer               "int"
@@ -51,11 +51,10 @@ notequals             "!="
 intliteral            "-"?[0-9]+
 boolliteral          "true"|"false"
 identifier            [a-z]([a-z]|[0-9])*
-newline               "\n"
 print                 "fmt.Println"
 comma                ","
-function                 "func"
-
+func                 "func"
+newline               "\n"
 
 %%
 " "                       {}
@@ -117,14 +116,11 @@ function                 "func"
                             }
                           }
 
-{print}                   {lastTokenType = PRINT; return PRINT;}
+{func}                    {lastTokenType = FUNC; return FUNC;}
 {comma}                   {lastTokenType = COMMA; return COMMA;}
-{function}                    {lastTokenType = FUNC; return FUNC;}
+{print}                   {lastTokenType = PRINT; return PRINT;}  
 
- 
-
-
-.      {
+.            {
   if (yytext[0] < ' '){ /* non-printable char */
   
     /*yyerror*/ fprintf(stderr,"illegal character: ^%c",yytext[0] + '@'); 

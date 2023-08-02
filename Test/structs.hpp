@@ -1,13 +1,15 @@
+#ifndef STRUCTS_H
+#define STRUCTS_H
+
 #include <stdio.h>
 #include "symboltable.hpp"
-#include "tokens.h"
 #include "yyfunctions.h"
 #include <vector>
 #include <type_traits>
 #include <typeinfo>
 #include <iostream>
 #include <string>
-#include "ReturnValue.hPP"
+#include "ReturnValue.hpp"
 
 //TODO: error handling
 //TODO: for block statement: push and pop new symbol table on the stack
@@ -19,7 +21,10 @@ struct Stm_ {
 };
 
 struct Exp_ {
-    virtual ReturnValue interp(){ return; };
+
+    Exp_();
+
+    virtual ReturnValue interp(){ return ReturnValue(); };
 };
 
 typedef Stm_* Stm;
@@ -33,7 +38,7 @@ struct ReturnHandler{
     ReturnHandler();
 };
 
-extern ReturnHandler returnhandler;
+inline ReturnHandler returnhandler;
 
 
 //Lists
@@ -46,11 +51,12 @@ struct ExpList {
     ExpList();
 };
 
+
 struct IdList{
-    std::string head;
+    char* head;
     IdList* next;
 
-    IdList(std::string h, IdList* t);
+    IdList(char* h, IdList* t);
 
     IdList();
 
@@ -65,6 +71,16 @@ struct StmList{
     StmList();
 };
 
+//Params
+
+struct Param_declaration{
+    char* name;
+    int type;
+
+    Param_declaration(char* n, int t);
+
+    Param_declaration();
+};
 
 struct ParamList{
     Param_declaration head;
@@ -75,16 +91,8 @@ struct ParamList{
     ParamList();
 };
 
-//Params
 
-struct Param_declaration{
-    std::string name;
-    int type;
 
-    Param_declaration(std::string n, int t);
-
-    Param_declaration();
-};
 
 struct Function_signature{
     ParamList params;
@@ -111,9 +119,9 @@ struct PrintStm : public Stm_{
 struct Function_DeclarationStm : public Stm_{
     Function_signature signature;
     StmList stmlist;
-    std::string identifier;
+    char* identifier;
 
-    Function_DeclarationStm(Function_signature sig, StmList stml, std::string id);
+    Function_DeclarationStm(Function_signature sig, StmList stml, char* id);
 
     Function_DeclarationStm();
 
@@ -154,9 +162,7 @@ struct BlockStm : public Stm_{
     
     StmList* stmlist;
 
-    BlockStm(StmList *stl){
-        stmlist = stl;
-    }
+    BlockStm(StmList *stl);
 
     BlockStm();
 
@@ -165,9 +171,9 @@ struct BlockStm : public Stm_{
 
 struct VoidFunctionStm : public Stm_{
     ExpList arguments;
-    std::string identifier;
+    char* identifier;
 
-    VoidFunctionStm(ExpList args, std::string id);
+    VoidFunctionStm(ExpList args, char* id);
 
     VoidFunctionStm();
 
@@ -178,11 +184,11 @@ struct VoidFunctionStm : public Stm_{
 
 struct IncDecStm : public Stm_{
     int action;
-    std::string identifier;
+    char* identifier;
 
     IncDecStm();
 
-    IncDecStm(int ac, std::string id);
+    IncDecStm(int ac, char* id);
 
     virtual void interp() override;
 
@@ -248,11 +254,11 @@ struct ArithmeticOpExp : public Exp_
 
 struct ArithmeticAssignOpExp : public Exp_{
 
-    std::string left;
+    char* left;
     Exp right;
     int oper;
 
-    ArithmeticAssignOpExp(std::string l, int op, Exp r);
+    ArithmeticAssignOpExp(char* l, int op, Exp r);
 
     ArithmeticAssignOpExp();
 
@@ -301,13 +307,15 @@ struct FunctionExp : public Exp_{
 
 
     ExpList arguments;
-    std::string identifier;
+    char* identifier;
 
 
-    FunctionExp(ExpList args, std::string id);
+    FunctionExp(ExpList args, char* id);
 
     FunctionExp();
 
 
     virtual ReturnValue interp() override;
 };
+
+#endif

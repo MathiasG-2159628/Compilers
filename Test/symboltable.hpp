@@ -1,14 +1,17 @@
+#ifndef SYMBOLTABLE_H
+#define SYMBOLTABLE_H
+
 #include <string> 
 #include <typeinfo>
 #include <vector>
-#include "ReturnValue.hpp"
+#include "returnvalue.hpp"
 
 struct Symbol {
-    std::string name;
+    char* name;
     ReturnValue value;
     Symbol* next;
 
-    Symbol(std::string n, ReturnValue val);
+    Symbol(char* n, ReturnValue val);
 
     Symbol();
 };
@@ -29,16 +32,15 @@ struct SymbolHandler{
 
     void popSymbolTable();
 
-    void addSymbol(std::string name, ReturnValue value);
+    void addSymbol(char* name, ReturnValue value);
 
-    void updateSymbol(std::string name, ReturnValue value);
+    void updateSymbol(char* name, ReturnValue value);
 
-    ReturnValue lookupSymbol(std::string name);
+    ReturnValue lookupSymbol(char* name);
 };
 
+inline SymbolHandler symbolhandler;
 
-
-extern SymbolHandler symbolhandler;
-
+#endif
 
 

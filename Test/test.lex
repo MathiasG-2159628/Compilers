@@ -3,24 +3,21 @@
 go.lex: lex-file for go basisniveau
 */
 
+#include "lexer.h"
+#include "test.tab.hpp"
 #include "tokens.h"
-#include <string>
-#include "go.tab.hpp"
-
-
 
   /* Keep track of current position of lex for error messages, i.e. 
      the position just *after* the last token read */
   int line_nr = 1;
   int col_nr = 1; 
-  int lastTokenType = 0;
+  int lastTokenType;
 
 %}
 
 semicolon             ";"
 integer               "int"
 boolean               "bool"
-package               "package"
 return                "return"
 var                   "var"
 if                    "if"
@@ -50,11 +47,11 @@ equals                "=="
 notequals             "!="
 intliteral            "-"?[0-9]+
 boolliteral          "true"|"false"
-identifier            [a-z]([a-z]|[0-9])*
+identifier           [a-z]([a-z]|[0-9])*
 newline               "\n"
 print                 "fmt.Println"
 comma                ","
-function                 "func"
+funct            "func"
 
 
 %%
@@ -62,15 +59,14 @@ function                 "func"
 {semicolon}               {lastTokenType = SEMICOLON; return SEMICOLON;}
 {integer}                 {lastTokenType = INT; return INT;}
 {boolean}                 {lastTokenType = BOOL; return BOOL;}                
-{package}                 {lastTokenType = PACKAGE; return PACKAGE;}               
 {return}                  {lastTokenType = RETURN; return RETURN;}   
 {var}                     {lastTokenType = VAR; return VAR;}
 {if}                      {lastTokenType = IF; return IF;}
 {for}                     {lastTokenType = FOR; return FOR;}
 {leftparenthesis}         {lastTokenType = LPAREN; return LPAREN;}
 {rightparenthesis}        {lastTokenType = RPAREN; return RPAREN;}
-{leftbracket}             {lastTokenType = LEFTBRACKET; return LBRACE;}
-{rightbracket}            {lastTokenType = RIGHTBRACKET; return RBRACE;}
+{leftbracket}             {lastTokenType = LBRACE; return LBRACE;}
+{rightbracket}            {lastTokenType = RBRACE; return RBRACE;}
 {plus}                    {lastTokenType = PLUS; return PLUS;}
 {min}                     {lastTokenType = MIN; return MIN;}
 {mul}                     {lastTokenType = MUL; return MUL;}
@@ -92,25 +88,24 @@ function                 "func"
 {notequals}               {lastTokenType = NE;  return NE;}
 
 {intliteral}              {lastTokenType = INTLITERAL; 
-                          yyval.intlit = std::stoi(yytext)
+                          yylval.intlit = std::stoi(yytext);
                           return INTLITERAL;}
 {boolliteral}             {lastTokenType = BOOLLITERAL; 
-                          bool boollit;
 
                           if(yytext == "true"){
-                            yyval.boollit = true;
+                            yylval.boollit = true;
                           }
                           else{
-                            yyval.boollit = false;
+                            yylval.boollit = false;
                           }
 
                           return BOOLLITERAL;}
                           
-{identifier}              {lastTokenType = IDENTIFIER; 
-                            yyval.id = yytext;
-                            return IDENTIFIER;}
+{identifier}              {lastTokenType = IDEN; 
+                            yylval.id = yytext;
+                            return IDEN;}
 
-{newline}                 {if (lastTokenType == IDENTIFIER || lastTokenType == CONSTANT || lastTokenType == CLOSING_BRACKET) 
+{newline}                 {if (lastTokenType == IDEN || lastTokenType == RBRACE) 
                             {
                                 lastTokenType = -1; 
                                 return SEMICOLON; 
@@ -119,7 +114,7 @@ function                 "func"
 
 {print}                   {lastTokenType = PRINT; return PRINT;}
 {comma}                   {lastTokenType = COMMA; return COMMA;}
-{function}                    {lastTokenType = FUNC; return FUNC;}
+{funct}                {lastTokenType = FUNC; return FUNC;}
 
  
 

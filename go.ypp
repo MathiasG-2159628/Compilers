@@ -1,12 +1,4 @@
 %{
-#include <stdio.h>
-#include "structs.hpp"
-#include "symboltable.hpp"
-#include "yyfunctions.h"
-#include <string>
-#include "tokens.h"
-#include "ReturnValue.hpp" 
-
 
 Stm thesyntree;
 
@@ -45,8 +37,9 @@ Stm thesyntree;
 
 %token <id> IDENTIFIER 
 %token <boollit> BOOLLITERAL
+%token <intlit> INTLITERAL
 %token <intlit> SEMICOLON INT BOOL RETURN VAR IF FOR LPAREN RPAREN LBRACE RBRACE PLUS MIN MUL DIV PLUSASSIGN MINASSIGN 
-%token <intlit> MULASSIGN DIVASSIGN AND OR NOT INC DEC GT GE LT LE EQ NE INTLITERAL 
+%token <intlit> MULASSIGN DIVASSIGN AND OR NOT INC DEC GT GE LT LE EQ NE 
 %token <intlit> COMMA PRINT FUNC
 
 %left MUL DIV
@@ -228,7 +221,7 @@ boolean_arithmetic_op_expression:
 %%
 
 int main() {
-    pushSymbolTable(SymbolTable());
+    symbolhandler.pushSymbolTable(SymbolTable());
     yyparse();
     return 0;
 }
