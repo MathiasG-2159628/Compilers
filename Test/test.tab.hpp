@@ -35,7 +35,7 @@
 /* "%code requires" blocks.  */
 
 /* Line 1676 of yacc.c  */
-#line 18 "test.ypp"
+#line 23 "test.ypp"
 
     #include "structs.hpp"
     #include "symboltable.hpp"
@@ -98,7 +98,7 @@ typedef union YYSTYPE
 {
 
 /* Line 1676 of yacc.c  */
-#line 24 "test.ypp"
+#line 29 "test.ypp"
 
   //Literals and base classes
   char* id;

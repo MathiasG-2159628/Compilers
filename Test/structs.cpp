@@ -1,6 +1,7 @@
 #include "structs.hpp"
 #include "functiontable.hpp"
 #include "tokens.h"
+#include <iostream>
 
 bool containsValue(const std::vector<char*> vec, char* value) {
     for (const auto& element : vec) {
@@ -35,6 +36,8 @@ IdList::IdList(char* h, IdList* t) {
 
 
 StmList::StmList(Stm h, StmList* s){
+
+
     head = h;
     next = s;
 }

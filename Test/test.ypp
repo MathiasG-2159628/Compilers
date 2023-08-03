@@ -15,6 +15,11 @@
 
 %}
 
+//TODO: implement the rest and implement package main functionality
+// -> make initial program statement consisting of a statement list 
+// these statements will be executed 
+// after that is done lookup the main function in the function table and execute everything
+
 %code requires {
     #include "structs.hpp"
     #include "symboltable.hpp"
@@ -92,8 +97,12 @@
 %type <exp> boolean_arithmetic_op_expression 
 %type <exp> notexp
 
+%start program
+
 %%
 
+program : statementlist
+        ;
 
 statement :// declaration_statement 
           /* | assignment_statement  */
@@ -105,7 +114,7 @@ statement :// declaration_statement
           /* | voIDEN_function_statement */
           ;
 
-statementlist : statement statementlist {$$ = new StmList($1, &$2);}
+statementlist : statement statementlist {$$ = new StmList($1, $2);}
               | statement {$$ = new StmList($1, nullptr);}
               ;
 
@@ -148,10 +157,10 @@ parameter_declaration : IDEN INT {$$ = new Param_declaration($1, $2);}
                       | IDEN BOOL {$$ = new Param_declaration($1, $2);}
                       ; */
 
-if_statement : IF LBRACE expression RBRACE block_statement{$$ = new If_stm($3, $5); thesyntree = &$$;} //Else not implemented
+if_statement : IF LPAREN expression RPAREN block_statement{$$ = new If_stm($3, $5); thesyntree = $$;} //Else not implemented
              ;
 
-for_statement : FOR LBRACE expression RBRACE block_statement{$$ = new For_stm($3, $5); thesyntree = &$$;}
+for_statement : FOR LPAREN expression RPAREN block_statement{$$ = new For_stm($3, $5); thesyntree = $$;}
               ;
 
 /* return_statement : RETURN SEMICOLON {$$ = new ReturnStm(nullptr); thesyntree = $$}
@@ -159,7 +168,7 @@ for_statement : FOR LBRACE expression RBRACE block_statement{$$ = new For_stm($3
                    
                  ; */
 
-block_statement : LBRACE statementlist RBRACE{$$ = new BlockStm($2); thesyntree = &$$;}
+block_statement : LBRACE statementlist RBRACE{$$ = new BlockStm($2); thesyntree = $$;}
                 ;
 /* 
 increment_decrement_statement : IDEN INC SEMICOLON {$$ = new IncDecStm($2, $1);}                
@@ -168,7 +177,7 @@ increment_decrement_statement : IDEN INC SEMICOLON {$$ = new IncDecStm($2, $1);}
 
 //EXPRESSIONS
 
-expressionlist : expressionlist ',' expression {$$ = new ExpList($3, $1);}
+expressionlist : expressionlist COMMA expression {$$ = new ExpList($3, $1);}
                | expression {$$ = new ExpList($1, nullptr);}
                ;
 
@@ -230,10 +239,13 @@ boolean_arithmetic_op_expression:
 %%
 
 int main() {
-    std::cerr << "starting";
+    std::cout << "Enter input" << "\n\n";
     symbolhandler.pushSymbolTable(SymbolTable());
 
     yyparse();
+
+    thesyntree->interp();  
+
     return 0;
 }
 
