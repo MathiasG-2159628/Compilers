@@ -2,6 +2,7 @@
 
   #include <string>
   #include <stdio.h>
+  #include <iostream>
   #include "structs.hpp"
   #include "symboltable.hpp"
   #include <string>
@@ -9,6 +10,7 @@
   #include "tokens.h"
   #include "lexer.h"
   #include "functiontable.hpp"
+  #include "lex.yy.c"
 
 
   Stm thesyntree;
@@ -41,7 +43,9 @@
   ExpList* explist;
   // IDENList IDENlist;
   StmList* stmlist;
-  // ParamList paramlist;
+  // ParamList paramlist
+
+  BlockStm blockstm;
 
   //statement related objects
   // Param_declaration param_declaration;
@@ -83,7 +87,7 @@
 %type <stm> declaration_statement
 %type <stm> assignment_statement
 %type <stm> return_statement */
-%type <stm> block_statement
+%type <blockstm> block_statement
 /* %type <stm> voIDEN_function_statement
 %type <stm> increment_decrement_statement */
 %type <stm> if_statement
@@ -106,16 +110,17 @@ program : statementlist
 
 statement :// declaration_statement 
           /* | assignment_statement  */
-          /* | if_statement
-          | for_statement */
+            if_statement
+          /* | for_statement  */
           /* | return_statement
           | block_statement */
-          print_statement
+          | print_statement
+          /*arithmetic_assign_op_statement*/
           /* | voIDEN_function_statement */
           ;
 
 statementlist : statement statementlist {$$ = new StmList($1, $2);}
-              | statement {$$ = new StmList($1, nullptr);}
+              | statement {$$ = new Stm();}
               ;
 
 /* IDENlist : IDEN IDENlist {$$ = new IDENList($1, &$2);}
@@ -157,7 +162,7 @@ parameter_declaration : IDEN INT {$$ = new Param_declaration($1, $2);}
                       | IDEN BOOL {$$ = new Param_declaration($1, $2);}
                       ; */
 
-if_statement : IF LPAREN expression RPAREN block_statement{$$ = new If_stm($3, $5); thesyntree = $$;} //Else not implemented
+if_statement : IF LPAREN expression RPAREN block_statement{std::cerr << "IF LPAREN expression RPAREN block_statement"; $$ = new If_stm($3, $5); thesyntree = $$;} //Else not implemented
              ;
 
 for_statement : FOR LPAREN expression RPAREN block_statement{$$ = new For_stm($3, $5); thesyntree = $$;}
@@ -174,6 +179,14 @@ block_statement : LBRACE statementlist RBRACE{$$ = new BlockStm($2); thesyntree 
 increment_decrement_statement : IDEN INC SEMICOLON {$$ = new IncDecStm($2, $1);}                
                               | IDEN DEC SEMICOLON {$$ = new IncDecStm($2, $1);}
                               ; */
+
+
+/* arithmetic_assign_op_statement :
+             IDEN PLUSASSIGN expression   {$$ = new ArithmeticAssignOpStm($1, $2, $3); } 
+           | IDEN MINASSIGN expression    {$$ = new ArithmeticAssignOpStm($1, $2, $3); }
+           | IDEN MULASSIGN expression    {$$ = new ArithmeticAssignOpStm($1, $2, $3); }
+           | IDEN DIVASSIGN expression    {$$ = new ArithmeticAssignOpStm($1, $2, $3); }  */
+
 
 //EXPRESSIONS
 
@@ -197,7 +210,6 @@ expression : INTLITERAL {$$ = new IntlitExp($1);}
             }
            /* | function_expression */
            | arithmetic_op_expression
-           /* | arithmetic_assign_op_expression */
            | boolean_op_expression
            | boolean_arithmetic_op_expression
            | LPAREN expression RPAREN               
@@ -216,12 +228,6 @@ arithmetic_op_expression :
            | expression MUL expression    {$$ = new ArithmeticOpExp($1, $2, $3); }
            | expression DIV expression    {$$ = new ArithmeticOpExp($1, $2, $3); }
 
-/* arithmetic_assign_op_expression :
-             IDEN PLUSASSIGN expression   {$$ = new ArithmeticAssignOpExp($1, $2, $3); } 
-           | IDEN MINASSIGN expression    {$$ = new ArithmeticAssignOpExp($1, $2, $3); }
-           | IDEN MULASSIGN expression    {$$ = new ArithmeticAssignOpExp($1, $2, $3); }
-           | IDEN DIVASSIGN expression    {$$ = new ArithmeticAssignOpExp($1, $2, $3); } */
-
 boolean_op_expression : 
              expression AND expression    {$$ = new BooleanOpExp($1, $2, $3); }
            | expression OR expression     {$$ = new BooleanOpExp($1, $2, $3); }
@@ -238,9 +244,43 @@ boolean_arithmetic_op_expression:
 
 %%
 
-int main() {
+
+
+int main(int argc, char* argv[]) {
+    
+    char *tokens[] = {
+    "SEMICOLON",
+    "ID",
+    "INT", "BOOL",
+    "PACKAGE", "RETURN", "VAR", "IF", "FOR",
+    "LPAREN", "RPAREN", "LBRACE", "RBRACE",
+    "PLUS", "MIN", "MUL", "DIV", 
+    "PLUSASSIGN", "MINASSIGN", "MULASSIGN", "DIVASSIGN",
+    "AND", "OR", "NOT",
+    "INC", "DEC",
+    "GT", "GE", "LT", "LE", "EQ", "NE",
+    "INTLITERAL", "BOOLLITERAL"
+    }; 
+
+
+    int tokenid;
+
     std::cout << "Enter input" << "\n\n";
     symbolhandler.pushSymbolTable(SymbolTable());
+
+    yyin = fopen("./gotest.txt", "r");
+ 
+    //Print the tokens
+    while (tokenid=yylex())
+    {
+        /* Token codes start from 250 */ 
+        std::cout <<  tokens[tokenid-250];
+
+        /* Append value */
+        if ( (tokenid == IDEN) || (tokenid == INT) || (tokenid == BOOL) )  std::cout << "=\"%s\"", yytext;
+    }
+      
+    std::cout << "\n";
 
     yyparse();
 
@@ -250,7 +290,8 @@ int main() {
 }
 
  void yyerror (char *s) {
-    std::cerr << s;
+
+    std::cerr << s << " " << yytext;
  }
 
 

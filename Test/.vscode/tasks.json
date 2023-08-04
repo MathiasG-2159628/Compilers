@@ -4,6 +4,7 @@
             "type": "cppbuild",
             "label": "C/C++: g++.exe build active file",
             "command": "D:\\cygwin64\\bin\\g++.exe",
+            "externalConsole": true,
             "args": [
                 "-fdiagnostics-color=always",
                 "-g",

@@ -158,16 +158,19 @@ struct ReturnStm : public Stm_
     ReturnStm(Exp e);
 };
 
-struct BlockStm : public Stm_{
+
+struct BlockStm_ : public Stm_{
     
     StmList* stmlist;
 
-    BlockStm(StmList *stl);
+    BlockStm_(StmList *stl);
 
-    BlockStm();
+    BlockStm_();
 
     virtual void interp() override;
 };
+
+typedef BlockStm_* BlockStm;
 
 struct VoidFunctionStm : public Stm_{
     ExpList arguments;
@@ -216,6 +219,20 @@ struct For_stm : public Stm_{
     virtual void interp() override;
 };
 
+struct ArithmeticAssignOpStm : public Stm_ {
+
+    char* left;
+    Exp right;
+    int oper;
+
+    ArithmeticAssignOpStm(char* l, int op, Exp r);
+
+    ArithmeticAssignOpStm();
+
+    virtual void interp() override;
+
+};
+
 
 //Expressions
 struct IntlitExp : public Exp_
@@ -251,20 +268,7 @@ struct ArithmeticOpExp : public Exp_
 
     virtual ReturnValue interp() override;
 };
-
-struct ArithmeticAssignOpExp : public Exp_{
-
-    char* left;
-    Exp right;
-    int oper;
-
-    ArithmeticAssignOpExp(char* l, int op, Exp r);
-
-    ArithmeticAssignOpExp();
-
-    virtual ReturnValue interp() override;
-
-};
+ 
 
 struct BooleanOpExp : public Exp_{
 

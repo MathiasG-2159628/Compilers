@@ -1,7 +1,9 @@
 #include "structs.hpp"
 #include "functiontable.hpp"
+#include "symboltable.hpp"
 #include "tokens.h"
 #include <iostream>
+
 
 bool containsValue(const std::vector<char*> vec, char* value) {
     for (const auto& element : vec) {
@@ -249,15 +251,15 @@ ReturnStm::ReturnStm(Exp e){
 }
 
 
-BlockStm::BlockStm(){
+BlockStm_::BlockStm_(){
 
 }
 
-BlockStm::BlockStm(StmList *stl){
+BlockStm_::BlockStm_(StmList *stl){
     stmlist = stl;
 }
 
-void BlockStm::interp(){
+void BlockStm_::interp(){
        
     symbolhandler.pushSymbolTable(SymbolTable());
     while(stmlist != nullptr){
@@ -448,7 +450,7 @@ void If_stm::interp(){
 
     if(returnValue.boolValue != nullptr){
         if(returnValue.boolValue){
-            blockStm.interp();
+            blockStm->interp();
         }
     }
     else{
@@ -469,13 +471,49 @@ void For_stm::interp(){
 
     if(returnValue.boolValue != nullptr){
         while(!returnValue.boolValue){
-            blockStm.interp();
+            blockStm->interp();
             returnValue = exp->interp();
         }
     }
     else{
     //Wrong type error
     }
+}
+
+
+ArithmeticAssignOpStm::ArithmeticAssignOpStm() {  };
+
+ArithmeticAssignOpStm::ArithmeticAssignOpStm(char* l, int op, Exp r) {
+    left = l;
+    right = r;
+    oper = op;
+};
+
+void ArithmeticAssignOpStm::interp() {
+    ReturnValue returnValue = right->interp();
+
+    if (returnValue.intValue != nullptr) {
+        int symbolVal = *symbolhandler.lookupSymbol(left).intValue;
+
+        if (oper == PLUSASSIGN) {
+            symbolVal += *returnValue.intValue;
+        }
+        else if (oper == MINASSIGN) {
+            symbolVal -= *returnValue.intValue;
+        }
+        else if (oper == MULASSIGN) {
+            symbolVal *= *returnValue.intValue;
+        }
+        else if (oper == DIVASSIGN) {
+            symbolVal /= *returnValue.intValue;
+        }
+
+        symbolhandler.updateSymbol(left, ReturnValue(symbolVal));
+    }
+    else {
+        //Type error
+    }
+
 }
 
 
@@ -536,42 +574,6 @@ ReturnValue ArithmeticOpExp::interp(){
 
     return ReturnValue(value_return);
 }
-
-
-ArithmeticAssignOpExp::ArithmeticAssignOpExp(){}
-
-ArithmeticAssignOpExp::ArithmeticAssignOpExp(char* l, int op, Exp r) {
-    left = l;
-    right = r;
-    oper = op;
-};
-
-ReturnValue ArithmeticAssignOpExp::interp(){
-    ReturnValue returnValue = right->interp();
-
-    if(returnValue.intValue != nullptr){
-        int symbolVal = *symbolhandler.lookupSymbol(left).intValue;
-
-        if (oper == PLUSASSIGN){
-            symbolVal += *returnValue.intValue;
-        }
-        else if (oper == MINASSIGN){
-            symbolVal -= *returnValue.intValue;
-        }
-        else if (oper == MULASSIGN){
-            symbolVal *= *returnValue.intValue;
-        }
-        else if (oper == DIVASSIGN){
-            symbolVal /= *returnValue.intValue;
-        }
-
-        symbolhandler.updateSymbol(left, ReturnValue(symbolVal));
-    }
-    else{
-        //Type error
-    }   
-}
-
 
 BooleanOpExp::BooleanOpExp(){}
 

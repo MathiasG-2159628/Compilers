@@ -35,7 +35,7 @@
 /* "%code requires" blocks.  */
 
 /* Line 1676 of yacc.c  */
-#line 23 "test.ypp"
+#line 25 "test.ypp"
 
     #include "structs.hpp"
     #include "symboltable.hpp"
@@ -98,7 +98,7 @@ typedef union YYSTYPE
 {
 
 /* Line 1676 of yacc.c  */
-#line 29 "test.ypp"
+#line 31 "test.ypp"
 
   //Literals and base classes
   char* id;
@@ -114,7 +114,9 @@ typedef union YYSTYPE
   ExpList* explist;
   // IDENList IDENlist;
   StmList* stmlist;
-  // ParamList paramlist;
+  // ParamList paramlist
+
+  BlockStm blockstm;
 
   //statement related objects
   // Param_declaration param_declaration;
@@ -124,7 +126,7 @@ typedef union YYSTYPE
 
 
 /* Line 1676 of yacc.c  */
-#line 128 "test.tab.hpp"
+#line 130 "test.tab.hpp"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
