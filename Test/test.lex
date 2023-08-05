@@ -52,6 +52,7 @@ newline               "\n"
 print                 "fmt.Println"
 comma                ","
 funct            "func"
+package          "package"
 
 
 %%
@@ -115,8 +116,8 @@ funct            "func"
 {print}                   {lastTokenType = PRINT; return PRINT;}
 {comma}                   {lastTokenType = COMMA; return COMMA;}
 {funct}                {lastTokenType = FUNC; return FUNC;}
+{package}               {lastTokenType = PACKAGE; return PACKAGE;}
 
- 
 
 
 .      {

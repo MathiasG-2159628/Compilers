@@ -42,7 +42,6 @@
 %token  MULASSIGN DIVASSIGN AND OR NOT INC DEC GT GE LT LE EQ NE 
 %token  COMMA PRINT FUNC
 
-
 %left MUL DIV
 %left PLUS MIN
 %nonassoc EQ NE
@@ -68,6 +67,7 @@
 %type <stm> if_statement
 %type <stm> for_statement
 
+
 //Expressions
 
 %start statement
@@ -78,41 +78,53 @@
         | error
         ; */
 
-statement : LPAREN SEMICOLON {std::cout << "test succeeded";}
-          | block_statement
+
+statement : block_statement
           | if_statement
           | for_statement
           | print_statement
           ;
 
-statementlist : statement statementlist {$$ = new StmList($1, $2);}
-              | statement {$$ = new StmList($1, nullptr);}
+statementlist : statement statementlist {std::cout << "statementlist: statement statementlist \n"; 
+                                        $$ = new StmList($1, $2);}
+              | statement {std::cout << "statementlist: statement statementlist \n"; 
+                                        $$ = new StmList($1, nullptr);}
               ; 
 
 
-print_statement : PRINT LPAREN expressionlist RPAREN {$$ = new PrintStm($3); thesyntree = $$;}
+print_statement : PRINT LPAREN expressionlist RPAREN SEMICOLON{std::cout << "print_statement : PRINT LPAREN expressionlist RPAREN \n"; 
+                                                      $$ = new PrintStm($3); thesyntree = $$;}
 
 
-if_statement : IF LPAREN expression RPAREN block_statement{std::cout << "IF LPAREN expression RPAREN block_statement"; $$ = new If_stm($3, $5); thesyntree = $$;} //Else not implemented
+if_statement : IF LPAREN expression RPAREN block_statement{std::cout << "IF LPAREN expression RPAREN block_statement \n"; 
+                                                          $$ = new If_stm($3, $5); thesyntree = $$;} //Else not implemented
              ;
 
-for_statement : FOR LPAREN expression RPAREN block_statement{$$ = new For_stm($3, $5); thesyntree = $$;}
+for_statement : FOR LPAREN expression RPAREN block_statement{std::cout << "for_statement : FOR LPAREN expression RPAREN block_statement \n"; 
+                                                            $$ = new For_stm($3, $5); thesyntree = $$;}
               ;
 
-block_statement : LBRACE statementlist RBRACE{$$ = new BlockStm($2); thesyntree = $$;}
+block_statement : LBRACE statementlist RBRACE{std::cout << "LBRACE statementlist RBRACE \n";
+                                              $$ = new BlockStm($2); thesyntree = $$;}
+                |  LBRACE RBRACE{std::cout << "LBRACE RBRACE \n";
+                                              $$ = new BlockStm(nullptr); thesyntree = $$;}
                 ;
 
 
 
 //EXPRESSIONS
 
-expressionlist : expressionlist COMMA expression {$$ = new ExpList($3, $1);}
-               | expression {$$ = new ExpList($1, nullptr);}
+expressionlist : expressionlist COMMA expression {std::cout << "expressionlist COMMA expression  \n";
+                                                 $$ = new ExpList($3, $1);}
+               | expression {std::cout << "expression  \n";
+                            $$ = new ExpList($1, nullptr);}
                ;
 
-expression : INTLITERAL {$$ = new IntlitExp($1);} 
-           | BOOLLITERAL {$$ = new BoollitExp($1);}
-           | LPAREN expression RPAREN               
+expression : INTLITERAL {std::cout << "INTLITERAL  \n";
+                        $$ = new IntlitExp($1);} 
+           | BOOLLITERAL {std::cout << "BOOLLITERAL  \n";
+                         $$ = new BoollitExp($1);}
+           | LPAREN expression RPAREN  {std::cout << "LPAREN expression RPAREN  \n";}              
            ;
 %%
 
@@ -137,26 +149,17 @@ int main(int argc, char* argv[]) {
 
     int tokenid;
 
-    std::cout << "Reading tokens: " << "\n\n";
     symbolhandler.pushSymbolTable(SymbolTable());
 
     yyin = fopen("./gotest.txt", "r");
  
-    //Print the tokens
-    while (tokenid=yylex())
-    {
-        /* Token codes start from 250 */ 
-        std::cout <<  tokens[tokenid-250];
-
-        /* Append value */
-        if ( (tokenid == IDEN) || (tokenid == INT) || (tokenid == BOOL) )  std::cout << "=\"%s\"", yytext;
-    }
-      
     std::cout << "\n";
     std::cout << "Parsing instructions: " << "\n\n";
     yyparse();
 
-    //thesyntree->interp();  
+    std::cout << "\n\n Interpreting AST: \n";
+
+    thesyntree->interp();  
 
     return 0;
 }

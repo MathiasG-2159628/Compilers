@@ -446,6 +446,9 @@ If_stm::If_stm(Exp ex, Stm bstm){
 }
 
 void If_stm::interp(){
+
+    std::cout << "Interpreting if-statement \n\n"
+
     ReturnValue returnValue = exp->interp();
 
     if(returnValue.boolValue != nullptr){
