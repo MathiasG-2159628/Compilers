@@ -251,15 +251,15 @@ ReturnStm::ReturnStm(Exp e){
 }
 
 
-BlockStm_::BlockStm_(){
+BlockStm::BlockStm(){
 
 }
 
-BlockStm_::BlockStm_(StmList *stl){
+BlockStm::BlockStm(StmList* stl){
     stmlist = stl;
 }
 
-void BlockStm_::interp(){
+void BlockStm::interp(){
        
     symbolhandler.pushSymbolTable(SymbolTable());
     while(stmlist != nullptr){
@@ -440,9 +440,9 @@ void IncDecStm::interp(){
 
 If_stm::If_stm(){}
 
-If_stm::If_stm(Exp ex, BlockStm bstm){
+If_stm::If_stm(Exp ex, Stm bstm){
         exp = ex;
-        blockStm = bstm;
+        blockStm = static_cast<BlockStm*>(bstm);
 }
 
 void If_stm::interp(){
@@ -451,7 +451,7 @@ void If_stm::interp(){
     if(returnValue.boolValue != nullptr){
         if(returnValue.boolValue){
             blockStm->interp();
-        }
+        } 
     }
     else{
         //Wrong type error
@@ -461,9 +461,9 @@ void If_stm::interp(){
 
 For_stm::For_stm(){}
 
-For_stm::For_stm(Exp ex, BlockStm bstm){
+For_stm::For_stm(Exp ex, Stm bstm){
     exp = ex;
-    blockStm = bstm;
+    blockStm = static_cast<BlockStm*>(bstm);
 }
 
 void For_stm::interp(){

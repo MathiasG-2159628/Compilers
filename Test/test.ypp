@@ -12,7 +12,6 @@
   #include "functiontable.hpp"
   #include "lex.yy.c"
 
-
   Stm thesyntree;
 
 %}
@@ -22,43 +21,27 @@
 // these statements will be executed 
 // after that is done lookup the main function in the function table and execute everything
 
-%code requires {
-    #include "structs.hpp"
-    #include "symboltable.hpp"
-    #include "ReturnValue.hpp" 
-}
 
 %union{
   //Literals and base classes
   char* id;
 
-  
   bool boollit;
   int intlit;
   Stm stm;
   Exp exp;
-
-
   //Lists
   ExpList* explist;
-  // IDENList IDENlist;
   StmList* stmlist;
-  // ParamList paramlist
-
-  BlockStm blockstm;
-
-  //statement related objects
-  // Param_declaration param_declaration;
-  // Function_signature func_signature;
-
 }
 
 %token <id> IDEN 
 %token <boollit> BOOLLITERAL
 %token <intlit> INTLITERAL
-%token <intlit> SEMICOLON INT BOOL RETURN VAR IF FOR LPAREN RPAREN LBRACE RBRACE PLUS MIN MUL DIV PLUSASSIGN MINASSIGN 
-%token <intlit> MULASSIGN DIVASSIGN AND OR NOT INC DEC GT GE LT LE EQ NE 
-%token <intlit> COMMA PRINT FUNC
+%token  SEMICOLON INT BOOL RETURN VAR IF FOR LPAREN RPAREN LBRACE RBRACE PLUS MIN MUL DIV PLUSASSIGN MINASSIGN 
+%token  MULASSIGN DIVASSIGN AND OR NOT INC DEC GT GE LT LE EQ NE 
+%token  COMMA PRINT FUNC
+
 
 %left MUL DIV
 %left PLUS MIN
@@ -75,117 +58,50 @@
 
 //Lists
 %type <explist> expressionlist
-/* %type <IDENlist> IDENlist */
-%type <stmlist> statementlist
-/* %type <paramlist> parameterlist */
 
-//Statements and statement related types
-/* %type <param_declaration> parameter_declaration
-%type <func_signature> function_signature */
+%type <stmlist> statementlist
+
 %type <stm> print_statement
-/* %type <stm> function_declaration_statement
-%type <stm> declaration_statement
-%type <stm> assignment_statement
-%type <stm> return_statement */
-%type <blockstm> block_statement
-/* %type <stm> voIDEN_function_statement
-%type <stm> increment_decrement_statement */
+
+%type <stm> block_statement 
+
 %type <stm> if_statement
 %type <stm> for_statement
 
 //Expressions
-/* %type <exp> function_expression */
-%type <exp> arithmetic_op_expression
-/* %type <exp> arithmetic_assign_op_expression */
-%type <exp> boolean_op_expression
-%type <exp> boolean_arithmetic_op_expression 
-%type <exp> notexp
 
-%start program
+%start statement
 
 %%
 
-program : statementlist
-        ;
+/* program : statementlist
+        | error
+        ; */
 
-statement :// declaration_statement 
-          /* | assignment_statement  */
-            if_statement
-          /* | for_statement  */
-          /* | return_statement
-          | block_statement */
+statement : LPAREN SEMICOLON {std::cout << "test succeeded";}
+          | block_statement
+          | if_statement
+          | for_statement
           | print_statement
-          /*arithmetic_assign_op_statement*/
-          /* | voIDEN_function_statement */
           ;
 
 statementlist : statement statementlist {$$ = new StmList($1, $2);}
-              | statement {$$ = new Stm();}
-              ;
+              | statement {$$ = new StmList($1, nullptr);}
+              ; 
 
-/* IDENlist : IDEN IDENlist {$$ = new IDENList($1, &$2);}
-               | IDEN {$$ = new IDENList($1, nullptr);}
-               ; */
-
-/* voIDEN_function_statement : IDEN LPAREN expressionlist RPAREN SEMICOLON {$$ = new VoIDENFunctionStm($3, $1); thesyntree = $$;}
-                        ; */
 
 print_statement : PRINT LPAREN expressionlist RPAREN {$$ = new PrintStm($3); thesyntree = $$;}
 
-//Check if these lists are of equal size
-/* assignment_statement : IDENlist EQ expressionlist SEMICOLON {$$ = new AssignStm(&$1, &$3); thesyntree = $$;}
-           ; */
 
-/* declaration_statement : VAR IDENlist INT SEMICOLON {$$ = new DeclarationStm($3, $2, nullptr); thesyntree = $$;}
-                      | VAR IDENlist BOOL SEMICOLON {$$ = new DeclarationStm($3, $2, nullptr); thesyntree = $$;}
-                      | VAR IDENlist INT EQ expressionlist SEMICOLON {$$ = new DeclarationStm($3, $2, $5); thesyntree = $$;}
-                      | VAR IDENlist BOOL EQ expressionlist SEMICOLON {$$ = new DeclarationStm($3, $2, $5); thesyntree = $$;}
-                      | VAR IDENlist EQ expressionlist SEMICOLON{$$ = new DeclarationStm(-1, $2, $5); thesyntree = $$;}
-                      ; */
-
-/* 
-function_declaration_statement : FUNC IDEN function_signature LBRACE statementlist RBRACE{$$ = new Function_DeclarationStm($3, $5, $2); thesyntree = $$;}
-            ; */
-
-/* function_signature : LPAREN parameterlist RPAREN INT {$$ = new Function_signature($2, $4);}
-                   | LPAREN parameterlist RPAREN BOOL {$$ = new Function_signature($2, $4);}
-                   | LPAREN parameterlist RPAREN {$$ = new Function_signature($2, -1);}
-                   ; */
-
-
-/* parameterlist : parameter_declaration {$$ = new ParamList($1, nullptr);}
-              | parameterlist COMMA parameter_declaration {$$ = new ParamList($1, $3);}
-              | {$$ = nullptr;}
-              ;
-
-parameter_declaration : IDEN INT {$$ = new Param_declaration($1, $2);}
-                      | IDEN BOOL {$$ = new Param_declaration($1, $2);}
-                      ; */
-
-if_statement : IF LPAREN expression RPAREN block_statement{std::cerr << "IF LPAREN expression RPAREN block_statement"; $$ = new If_stm($3, $5); thesyntree = $$;} //Else not implemented
+if_statement : IF LPAREN expression RPAREN block_statement{std::cout << "IF LPAREN expression RPAREN block_statement"; $$ = new If_stm($3, $5); thesyntree = $$;} //Else not implemented
              ;
 
 for_statement : FOR LPAREN expression RPAREN block_statement{$$ = new For_stm($3, $5); thesyntree = $$;}
               ;
 
-/* return_statement : RETURN SEMICOLON {$$ = new ReturnStm(nullptr); thesyntree = $$}
-                 | RETURN expression SEMICOLON {$$ = new ReturnStm($2); thesyntree = $$;}
-                   
-                 ; */
-
 block_statement : LBRACE statementlist RBRACE{$$ = new BlockStm($2); thesyntree = $$;}
                 ;
-/* 
-increment_decrement_statement : IDEN INC SEMICOLON {$$ = new IncDecStm($2, $1);}                
-                              | IDEN DEC SEMICOLON {$$ = new IncDecStm($2, $1);}
-                              ; */
 
-
-/* arithmetic_assign_op_statement :
-             IDEN PLUSASSIGN expression   {$$ = new ArithmeticAssignOpStm($1, $2, $3); } 
-           | IDEN MINASSIGN expression    {$$ = new ArithmeticAssignOpStm($1, $2, $3); }
-           | IDEN MULASSIGN expression    {$$ = new ArithmeticAssignOpStm($1, $2, $3); }
-           | IDEN DIVASSIGN expression    {$$ = new ArithmeticAssignOpStm($1, $2, $3); }  */
 
 
 //EXPRESSIONS
@@ -196,52 +112,8 @@ expressionlist : expressionlist COMMA expression {$$ = new ExpList($3, $1);}
 
 expression : INTLITERAL {$$ = new IntlitExp($1);} 
            | BOOLLITERAL {$$ = new BoollitExp($1);}
-           | IDEN {
-
-              ReturnValue returnValue = symbolhandler.lookupSymbol($1);
-
-              if(returnValue.intValue == nullptr){
-                $$ = new BoollitExp(*returnValue.boolValue);
-              }
-              else{
-                $$ = new IntlitExp(*returnValue.intValue);
-              }
-            
-            }
-           /* | function_expression */
-           | arithmetic_op_expression
-           | boolean_op_expression
-           | boolean_arithmetic_op_expression
            | LPAREN expression RPAREN               
            ;
-
-
-notexp : NOT expression SEMICOLON {$$ = new NotExp($2);}
-       ;
-/* 
-function_expression : IDEN LPAREN expressionlist RPAREN SEMICOLON{$$ = new FunctionExp($3, $1);}
-           ; */
-
-arithmetic_op_expression : 
-             expression PLUS expression   {$$ = new ArithmeticOpExp($1, $2, $3); }
-           | expression MIN expression    {$$ = new ArithmeticOpExp($1, $2, $3); }
-           | expression MUL expression    {$$ = new ArithmeticOpExp($1, $2, $3); }
-           | expression DIV expression    {$$ = new ArithmeticOpExp($1, $2, $3); }
-
-boolean_op_expression : 
-             expression AND expression    {$$ = new BooleanOpExp($1, $2, $3); }
-           | expression OR expression     {$$ = new BooleanOpExp($1, $2, $3); }
-           | expression EQ expression     {$$ = new BooleanOpExp($1, $2, $3); } 
-           | expression NE expression     {$$ = new BooleanOpExp($1, $2, $3); }
-
-boolean_arithmetic_op_expression:
-             expression GT expression     {$$ = new BooleanArithmeticOpExp($1, $2, $3); }
-           | expression GE expression     { $$ = new BooleanArithmeticOpExp($1, $2, $3); }
-           | expression LT expression     { $$ = new BooleanArithmeticOpExp($1, $2, $3); }
-           | expression LE expression     { $$ = new BooleanArithmeticOpExp($1, $2, $3); }
-
-         
-
 %%
 
 
@@ -265,7 +137,7 @@ int main(int argc, char* argv[]) {
 
     int tokenid;
 
-    std::cout << "Enter input" << "\n\n";
+    std::cout << "Reading tokens: " << "\n\n";
     symbolhandler.pushSymbolTable(SymbolTable());
 
     yyin = fopen("./gotest.txt", "r");
@@ -281,17 +153,14 @@ int main(int argc, char* argv[]) {
     }
       
     std::cout << "\n";
-
+    std::cout << "Parsing instructions: " << "\n\n";
     yyparse();
 
-    thesyntree->interp();  
+    //thesyntree->interp();  
 
     return 0;
 }
 
- void yyerror (char *s) {
-
-    std::cerr << s << " " << yytext;
- }
-
-
+void yyerror (char *s) {
+    std::cerr << s << " " << yytext << std::endl;
+}

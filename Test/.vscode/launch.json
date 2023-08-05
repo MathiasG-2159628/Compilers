@@ -5,7 +5,7 @@
       "name": "C/C++ Runner: Debug Session",
       "type": "cppdbg",
       "request": "launch",
-      "args": [" ./gotest.txt"],
+      "args": [],
       "stopAtEntry": false,
       "externalConsole": true,
       "cwd": "d:/UHasselt/Compilers/Project/Test",

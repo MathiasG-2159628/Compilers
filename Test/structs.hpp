@@ -159,18 +159,17 @@ struct ReturnStm : public Stm_
 };
 
 
-struct BlockStm_ : public Stm_{
+struct BlockStm : public Stm_{
     
     StmList* stmlist;
 
-    BlockStm_(StmList *stl);
+    BlockStm();
 
-    BlockStm_();
+    BlockStm(StmList* stl);
 
     virtual void interp() override;
 };
 
-typedef BlockStm_* BlockStm;
 
 struct VoidFunctionStm : public Stm_{
     ExpList arguments;
@@ -199,9 +198,9 @@ struct IncDecStm : public Stm_{
 
 struct If_stm : public Stm_{
     Exp exp;
-    BlockStm blockStm;
+    BlockStm* blockStm;
 
-    If_stm(Exp ex, BlockStm bstm);
+    If_stm(Exp ex, Stm bstm);
 
     If_stm();
 
@@ -210,9 +209,9 @@ struct If_stm : public Stm_{
 
 struct For_stm : public Stm_{
     Exp exp;
-    BlockStm blockStm;
+    BlockStm* blockStm;
 
-    For_stm(Exp ex, BlockStm bstm);
+    For_stm(Exp ex, Stm bstm);
 
     For_stm();
 
