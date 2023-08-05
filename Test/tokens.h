@@ -41,5 +41,6 @@
 #define PRINT 292
 #define FUNC 293
 #define PACKAGE 294
+#define IS 295
 
 #endif

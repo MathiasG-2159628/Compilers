@@ -6,6 +6,7 @@ go.lex: lex-file for go basisniveau
 #include "lexer.h"
 #include "test.tab.hpp"
 #include "tokens.h"
+#include <cstring>
 
   /* Keep track of current position of lex for error messages, i.e. 
      the position just *after* the last token read */
@@ -53,6 +54,7 @@ print                 "fmt.Println"
 comma                ","
 funct            "func"
 package          "package"
+is               "="
 
 
 %%
@@ -93,7 +95,7 @@ package          "package"
                           return INTLITERAL;}
 {boolliteral}             {lastTokenType = BOOLLITERAL; 
 
-                          if(yytext == "true"){
+                          if(strcmp(yytext, "true") == 0){
                             yylval.boollit = true;
                           }
                           else{
@@ -117,7 +119,7 @@ package          "package"
 {comma}                   {lastTokenType = COMMA; return COMMA;}
 {funct}                {lastTokenType = FUNC; return FUNC;}
 {package}               {lastTokenType = PACKAGE; return PACKAGE;}
-
+{is}                   {lastTokenType = IS; return IS;}
 
 
 .      {

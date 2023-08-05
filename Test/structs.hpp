@@ -17,7 +17,7 @@
 
 
 struct Stm_ {
-    virtual void interp() { return; };
+    virtual void interp() {};
 };
 
 struct Exp_ {

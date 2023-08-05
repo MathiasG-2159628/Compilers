@@ -282,13 +282,13 @@ static void yy_fatal_error YY_PROTO(( yyconst char msg[] ));
 	*yy_cp = '\0'; \
 	yy_c_buf_p = yy_cp;
 
-#define YY_NUM_RULES 41
-#define YY_END_OF_BUFFER 42
+#define YY_NUM_RULES 42
+#define YY_END_OF_BUFFER 43
 static yyconst short int yy_accept[87] =
     {   0,
-        0,    0,   42,   40,   35,    1,   23,   40,    9,   10,
+        0,    0,   43,   41,   35,    1,   23,   41,    9,   10,
        15,   13,   37,   14,   16,   32,    2,   28,   40,   26,
-       34,   34,   34,   34,   34,   34,   34,   34,   11,   40,
+       34,   34,   34,   34,   34,   34,   34,   34,   11,   41,
        12,   31,   21,   19,   24,   17,   25,   32,   18,   20,
        29,   30,   27,   34,   34,   34,   34,   34,   34,    7,
        34,   34,   34,   34,   34,   22,   34,   34,   34,    8,
@@ -425,6 +425,7 @@ go.lex: lex-file for go basisniveau
 #include "lexer.h"
 #include "test.tab.hpp"
 #include "tokens.h"
+#include <cstring>
 
   /* Keep track of current position of lex for error messages, i.e. 
      the position just *after* the last token read */
@@ -432,7 +433,7 @@ go.lex: lex-file for go basisniveau
   int col_nr = 1; 
   int lastTokenType;
 
-#line 436 "lex.yy.c"
+#line 437 "lex.yy.c"
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -583,9 +584,9 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
 
-#line 58 "test.lex"
+#line 60 "test.lex"
 
-#line 589 "lex.yy.c"
+#line 590 "lex.yy.c"
 
 	if ( yy_init )
 		{
@@ -670,172 +671,172 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 59 "test.lex"
+#line 61 "test.lex"
 {}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 60 "test.lex"
+#line 62 "test.lex"
 {lastTokenType = SEMICOLON; return SEMICOLON;}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 61 "test.lex"
+#line 63 "test.lex"
 {lastTokenType = INT; return INT;}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 62 "test.lex"
+#line 64 "test.lex"
 {lastTokenType = BOOL; return BOOL;}                
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 63 "test.lex"
+#line 65 "test.lex"
 {lastTokenType = RETURN; return RETURN;}   
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 64 "test.lex"
+#line 66 "test.lex"
 {lastTokenType = VAR; return VAR;}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 65 "test.lex"
+#line 67 "test.lex"
 {lastTokenType = IF; return IF;}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 66 "test.lex"
+#line 68 "test.lex"
 {lastTokenType = FOR; return FOR;}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 67 "test.lex"
+#line 69 "test.lex"
 {lastTokenType = LPAREN; return LPAREN;}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 68 "test.lex"
+#line 70 "test.lex"
 {lastTokenType = RPAREN; return RPAREN;}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 69 "test.lex"
+#line 71 "test.lex"
 {lastTokenType = LBRACE; return LBRACE;}
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 70 "test.lex"
+#line 72 "test.lex"
 {lastTokenType = RBRACE; return RBRACE;}
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 71 "test.lex"
+#line 73 "test.lex"
 {lastTokenType = PLUS; return PLUS;}
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 72 "test.lex"
+#line 74 "test.lex"
 {lastTokenType = MIN; return MIN;}
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 73 "test.lex"
+#line 75 "test.lex"
 {lastTokenType = MUL; return MUL;}
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 74 "test.lex"
+#line 76 "test.lex"
 {lastTokenType = DIV; return DIV;}
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 75 "test.lex"
+#line 77 "test.lex"
 {lastTokenType = PLUSASSIGN; return PLUSASSIGN;}
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 76 "test.lex"
+#line 78 "test.lex"
 {lastTokenType = MINASSIGN; return MINASSIGN;}
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 77 "test.lex"
+#line 79 "test.lex"
 {lastTokenType = MULASSIGN; return MULASSIGN;}
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 78 "test.lex"
+#line 80 "test.lex"
 {lastTokenType = DIVASSIGN; return DIVASSIGN;}
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 79 "test.lex"
+#line 81 "test.lex"
 {lastTokenType = AND; return AND;}
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 80 "test.lex"
+#line 82 "test.lex"
 {lastTokenType = OR; return OR;}
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 81 "test.lex"
+#line 83 "test.lex"
 {lastTokenType = NOT; return NOT;}
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 82 "test.lex"
+#line 84 "test.lex"
 {lastTokenType = INC; return INC;}
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 83 "test.lex"
+#line 85 "test.lex"
 {lastTokenType = DEC; return DEC;}
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 84 "test.lex"
+#line 86 "test.lex"
 {lastTokenType = GT; return GT;}
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 85 "test.lex"
+#line 87 "test.lex"
 {lastTokenType = GE; return GE;}
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 86 "test.lex"
+#line 88 "test.lex"
 {lastTokenType = LT; return LT;}
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 87 "test.lex"
+#line 89 "test.lex"
 {lastTokenType = LE; return LE;}
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 88 "test.lex"
+#line 90 "test.lex"
 {lastTokenType = EQ; return EQ;}
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 89 "test.lex"
+#line 91 "test.lex"
 {lastTokenType = NE;  return NE;}
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 91 "test.lex"
+#line 93 "test.lex"
 {lastTokenType = INTLITERAL; 
                           yylval.intlit = std::stoi(yytext);
                           return INTLITERAL;}
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 94 "test.lex"
+#line 96 "test.lex"
 {lastTokenType = BOOLLITERAL; 
 
-                          if(yytext == "true"){
+                          if(strcmp(yytext, "true") == 0){
                             yylval.boollit = true;
                           }
                           else{
@@ -846,14 +847,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 105 "test.lex"
+#line 107 "test.lex"
 {lastTokenType = IDEN; 
                             yylval.id = yytext;
                             return IDEN;}
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 109 "test.lex"
+#line 111 "test.lex"
 {if (lastTokenType == IDEN || lastTokenType == RBRACE) 
                             {
                                 lastTokenType = -1; 
@@ -863,27 +864,32 @@ YY_RULE_SETUP
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 116 "test.lex"
+#line 118 "test.lex"
 {lastTokenType = PRINT; return PRINT;}
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 117 "test.lex"
+#line 119 "test.lex"
 {lastTokenType = COMMA; return COMMA;}
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 118 "test.lex"
+#line 120 "test.lex"
 {lastTokenType = FUNC; return FUNC;}
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 119 "test.lex"
+#line 121 "test.lex"
 {lastTokenType = PACKAGE; return PACKAGE;}
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 123 "test.lex"
+#line 122 "test.lex"
+{lastTokenType = IS; return IS;}
+	YY_BREAK
+case 41:
+YY_RULE_SETUP
+#line 125 "test.lex"
 {
   if (yytext[0] < ' '){ /* non-printable char */
   
@@ -904,12 +910,12 @@ YY_RULE_SETUP
   fprintf(stderr," at line %d column %d\n", line_nr, (col_nr-1));
 			       }
 	YY_BREAK
-case 41:
+case 42:
 YY_RULE_SETUP
-#line 142 "test.lex"
+#line 144 "test.lex"
 ECHO;
 	YY_BREAK
-#line 913 "lex.yy.c"
+#line 919 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1795,7 +1801,7 @@ int main()
 	return 0;
 	}
 #endif
-#line 142 "test.lex"
+#line 144 "test.lex"
 
 
 /* Function called by (f)lex when EOF is read. If yywrap returns a

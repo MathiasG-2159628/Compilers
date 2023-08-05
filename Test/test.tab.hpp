@@ -74,7 +74,9 @@
      NE = 290,
      COMMA = 291,
      PRINT = 292,
-     FUNC = 293
+     FUNC = 293,
+     PACKAGE = 294,
+     IS = 295
    };
 #endif
 
@@ -94,14 +96,16 @@ typedef union YYSTYPE
   int intlit;
   Stm stm;
   Exp exp;
+
   //Lists
   ExpList* explist;
   StmList* stmlist;
+  IdList*  idlist;
 
 
 
 /* Line 1676 of yacc.c  */
-#line 105 "test.tab.hpp"
+#line 109 "test.tab.hpp"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

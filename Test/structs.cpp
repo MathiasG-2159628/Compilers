@@ -3,6 +3,7 @@
 #include "symboltable.hpp"
 #include "tokens.h"
 #include <iostream>
+#include <algorithm>
 
 
 bool containsValue(const std::vector<char*> vec, char* value) {
@@ -68,21 +69,36 @@ PrintStm::PrintStm(ExpList* expl){
 }
 
 void PrintStm::interp(){
-     while(explist != nullptr){
+
+    std::vector<std::string> printStrings;
+
+    while(explist != nullptr){
 
             ReturnValue returnValue = explist->head->interp();
             //Check the type of ReturnValue
 
             if(returnValue.boolValue == nullptr){
-                std::cout << std::to_string(*returnValue.intValue) << " ";
-            }
+                printStrings.push_back(std::to_string(*returnValue.intValue));
+            } 
             else{
-                std::cout << std::to_string(*returnValue.boolValue) << " ";
+                if(*returnValue.boolValue == 1){
+                    printStrings.push_back("true");
+                }
+                else{
+                    printStrings.push_back("false");
+                }                
             }
   
             explist = explist->next;
-        }
-        std::cout << "\n";
+    }
+    
+    std::reverse(printStrings.begin(), printStrings.end());
+    
+    for(auto&& i: printStrings){
+        std::cout << i << " ";
+    }
+
+    std::cout << "\n";
 }
 
 
@@ -269,14 +285,18 @@ void BlockStm::interp(){
 
                 returnhandler.returnEncountered = true;
                 returnhandler.returnExp =  returnstm->expr;
-                //returnstm.interp();
 
                 if(stmlist->next != nullptr){
                     //Unreachable code error
                 }
 
                 return;
-        }          
+        }
+        else{
+            stmlist->head->interp();
+        }
+
+        stmlist = stmlist->next;      
     }
     symbolhandler.popSymbolTable();
 }
@@ -447,17 +467,20 @@ If_stm::If_stm(Exp ex, Stm bstm){
 
 void If_stm::interp(){
 
-    std::cout << "Interpreting if-statement \n\n"
-
     ReturnValue returnValue = exp->interp();
+    
+    // std::cout << *returnValue.boolValue << " " << returnValue.intValue << " ";
+
+
 
     if(returnValue.boolValue != nullptr){
-        if(returnValue.boolValue){
+
+        if(*returnValue.boolValue == 1){            
             blockStm->interp();
-        } 
+        }
     }
     else{
-        //Wrong type error
+        std::cout << "\nType error\n";
     }
 }
 
