@@ -152,46 +152,53 @@ DeclarationStm::DeclarationStm(){
 }
 
 void DeclarationStm::interp(){
+ 
+    std::cout << "INTERPRETING DECLR STM" << std::endl;
+
     std::vector<char*> declared_ids;
     if(explist == nullptr){
         //Default assignment of value, but only if a type is specified
         while(idlist != nullptr){
             
             if(containsValue(declared_ids, idlist->head)){
-                //error
+                std::cout << "Error: duplicate indentifier in declaration" << std::endl;
             }
             declared_ids.push_back(idlist->head);
 
 
             if(declaredType == INT){
                 symbolhandler.addSymbol(idlist->head, 0);
+                std::cout << "Added int value " << idlist->head << " to symbol table" << std::endl;
             }
             else if(declaredType == BOOL){
                 symbolhandler.addSymbol(idlist->head, true);
+                std::cout << "Added bool value " << idlist->head << " to symbol table" << std::endl;
             }
             else{
-                //Throw error
+                std::cout << "Type error" << std::endl;
             }
         }
     }
     else{
-            while(idlist != nullptr){
+        while(idlist != nullptr){
             
             if(containsValue(declared_ids, idlist->head)){
-                //error
+                std::cout << "Error: duplicate indentifier in declaration" << std::endl;
             }
             declared_ids.push_back(idlist->head);
 
             if((idlist != nullptr && explist == nullptr) || (idlist == nullptr && explist != nullptr) ){
-                //throw error
+                std::cout << "Error: argument count not matching" << std::endl;
             }
             
             ReturnValue returnValue =  explist->head->interp();
+            std::cout << "VALUE OF INT: " << *returnValue.intValue;
 
             //Since a declaration without a specified type is possible it needs runtime typechecking.
             if(declaredType == INT){
                 if(returnValue.boolValue == nullptr){
-                    symbolhandler.addSymbol(idlist->head, returnValue.intValue);
+                    symbolhandler.addSymbol(idlist->head, returnValue);
+                    std::cout << "Added int value " << idlist->head << " to symbol table with value " << *returnValue.intValue << std::endl;
                 }
                 else{
                     //throw error
@@ -202,17 +209,21 @@ void DeclarationStm::interp(){
                     //throw error
                 }else{
                     symbolhandler.addSymbol(idlist->head, returnValue.boolValue);
+                    std::cout << "Added bool value " << idlist->head << " to symbol table" << std::endl;
                 }
             }
             else if(declaredType == -1){
                 if(returnValue.boolValue == nullptr){
                     symbolhandler.addSymbol(idlist->head, returnValue.intValue);
+                    std::cout << "Added int value " << idlist->head << " to symbol table" << std::endl;
+
                 }else{
                     symbolhandler.addSymbol(idlist->head, returnValue.boolValue);
+                    std::cout << "Added bool value " << idlist->head << " to symbol table" << std::endl;
                 }
             }
             else{
-                //throw error
+                std::cout << "type error " << declaredType << std::endl;
             }
             
             idlist = idlist->next;
@@ -813,5 +824,20 @@ ReturnValue FunctionExp::interp(){
         }
     } 
 }
+ 
 
+IdExp::IdExp(){
 
+}
+
+IdExp::IdExp(char* id){
+    identifier = id;
+    std::cout << "CONSTRUCTED IDENTIFIER "  << identifier << std::endl;
+
+}
+
+ReturnValue IdExp::interp(){
+    std::cout << "INTERPRETING ID EXP " << identifier << std::endl;
+
+    return symbolhandler.lookupSymbol(identifier);
+}

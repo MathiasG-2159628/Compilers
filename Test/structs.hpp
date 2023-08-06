@@ -307,16 +307,23 @@ struct NotExp : public Exp_{
 };
 
 struct FunctionExp : public Exp_{
-
-
     ExpList arguments;
     char* identifier;
-
 
     FunctionExp(ExpList args, char* id);
 
     FunctionExp();
 
+    virtual ReturnValue interp() override;
+};
+
+struct IdExp: public Exp_{
+    char* identifier;
+    Exp expr;
+
+    IdExp(char* id);
+
+    IdExp();
 
     virtual ReturnValue interp() override;
 };
