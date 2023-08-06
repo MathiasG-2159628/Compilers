@@ -493,8 +493,8 @@ static const yytype_uint8 yyrline[] =
 {
        0,    80,    80,    81,    83,    84,    85,    86,    87,    88,
       92,    98,   106,   108,   112,   114,   118,   122,   126,   130,
-     132,   134,   136,   138,   143,   149,   151,   155,   157,   159,
-     164
+     132,   134,   136,   138,   143,   150,   152,   156,   158,   160,
+     165
 };
 #endif
 
@@ -1560,13 +1560,14 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 143 "test.ypp"
-    {(yyval.stm) = new AssignStm((yyvsp[(1) - (4)].idlist), (yyvsp[(3) - (4)].explist)); thesyntree = (yyval.stm);;}
+    {std::cout << "assignment_statement : identifierlist IS expressionlist SEMICOLON \n";
+                                                                  (yyval.stm) = new AssignStm((yyvsp[(1) - (4)].idlist), (yyvsp[(3) - (4)].explist)); thesyntree = (yyval.stm);;}
     break;
 
   case 25:
 
 /* Line 1455 of yacc.c  */
-#line 149 "test.ypp"
+#line 150 "test.ypp"
     {std::cout << "expressionlist COMMA expression  \n";
                                                  (yyval.explist) = new ExpList((yyvsp[(3) - (3)].exp), (yyvsp[(1) - (3)].explist));;}
     break;
@@ -1574,7 +1575,7 @@ yyreduce:
   case 26:
 
 /* Line 1455 of yacc.c  */
-#line 151 "test.ypp"
+#line 152 "test.ypp"
     {std::cout << "expression  \n";
                             (yyval.explist) = new ExpList((yyvsp[(1) - (1)].exp), nullptr);;}
     break;
@@ -1582,7 +1583,7 @@ yyreduce:
   case 27:
 
 /* Line 1455 of yacc.c  */
-#line 155 "test.ypp"
+#line 156 "test.ypp"
     {std::cout << "expression : INTLITERAL " << yylval.intlit << "\n";
                         (yyval.exp) = new IntlitExp(yylval.intlit);;}
     break;
@@ -1590,7 +1591,7 @@ yyreduce:
   case 28:
 
 /* Line 1455 of yacc.c  */
-#line 157 "test.ypp"
+#line 158 "test.ypp"
     {std::cout << "expression : BOOLLITERAL " << yylval.boollit << "\n";
                          (yyval.exp) = new BoollitExp(yylval.boollit);;}
     break;
@@ -1598,7 +1599,7 @@ yyreduce:
   case 29:
 
 /* Line 1455 of yacc.c  */
-#line 159 "test.ypp"
+#line 160 "test.ypp"
     {std::cout << "expression : IDEN " << yylval.id << "\n";
                   char* identifier = new char[std::strlen(yylval.id) + 1];
                   std::strcpy(identifier, yylval.id);
@@ -1609,14 +1610,14 @@ yyreduce:
   case 30:
 
 /* Line 1455 of yacc.c  */
-#line 164 "test.ypp"
+#line 165 "test.ypp"
     {std::cout << "LPAREN expression RPAREN  \n";;}
     break;
 
 
 
 /* Line 1455 of yacc.c  */
-#line 1620 "test.tab.cpp"
+#line 1621 "test.tab.cpp"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1828,7 +1829,7 @@ yyreturn:
 
 
 /* Line 1675 of yacc.c  */
-#line 168 "test.ypp"
+#line 169 "test.ypp"
 
 
 

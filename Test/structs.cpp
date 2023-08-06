@@ -258,22 +258,29 @@ void AssignStm::interp(){
     while(idlist != nullptr){
 
         if(containsValue(assigned_ids, idlist->head)){
-            //error
+            std::cout << "Duplicate identifier in assign statement";
         }
         
         assigned_ids.push_back(idlist->head);
 
-        if((idlist != nullptr && explist == nullptr) || (idlist == nullptr && explist != nullptr) ){
-            //throw error
+        if(idlist->next != nullptr && explist->next == nullptr){
+            std::cout << "Error: argument count not matching" << std::endl;
+        }
+
+        if(idlist->next == nullptr && explist->next != nullptr){
+            std::cout << "Error: argument count not matching" << std::endl;
         }
         
         ReturnValue lookupReturn = symbolhandler.lookupSymbol(idlist->head);
         ReturnValue interpReturn = explist->head->interp();
 
-        if((lookupReturn.boolValue == nullptr && interpReturn.intValue != nullptr) || (lookupReturn.intValue == nullptr && interpReturn.boolValue != nullptr)){
-            //type error
+        std::cout << "INT VAL: " << *interpReturn.intValue << std::endl;
+
+        if(lookupReturn.boolValue == nullptr && interpReturn.boolValue != nullptr || lookupReturn.intValue == nullptr && interpReturn.intValue != nullptr){
+            std::cout << "Unmatching types" << std::endl;
         }
         else{
+            std::cout << "Updating symbol" << std::endl;
             symbolhandler.updateSymbol(idlist->head, explist->head->interp());
         }
 

@@ -140,7 +140,8 @@ declaration_statement :
                       ;
 
 
-assignment_statement : identifierlist IS expressionlist SEMICOLON {$$ = new AssignStm($1, $3); thesyntree = $$;}
+assignment_statement : identifierlist IS expressionlist SEMICOLON {std::cout << "assignment_statement : identifierlist IS expressionlist SEMICOLON \n";
+                                                                  $$ = new AssignStm($1, $3); thesyntree = $$;}
            ;
 
 

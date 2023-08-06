@@ -30,6 +30,8 @@ void SymbolHandler::popSymbolTable() {
 
 void SymbolHandler::addSymbol(char* name, ReturnValue value) {
     Symbol* newSymbol = new Symbol(name, value); 
+    newSymbol->next = symbolTable->head;
+
     symbolTable->head = newSymbol;
 };
 
