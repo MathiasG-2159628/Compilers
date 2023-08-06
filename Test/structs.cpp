@@ -4,11 +4,12 @@
 #include "tokens.h"
 #include <iostream>
 #include <algorithm>
+#include <cstring>
 
 
 bool containsValue(const std::vector<char*> vec, char* value) {
     for (const auto& element : vec) {
-        if (element == value) {
+        if (!strcmp(element, value)) {
             return true;
         }
     }
@@ -187,7 +188,13 @@ void DeclarationStm::interp(){
             }
             declared_ids.push_back(idlist->head);
 
-            if((idlist != nullptr && explist == nullptr) || (idlist == nullptr && explist != nullptr) ){
+
+            //TODO: fix too many arguments
+            if((idlist->next != nullptr && explist->next == nullptr) ){
+                std::cout << "Error: argument count not matching" << std::endl;
+            }
+
+            if(idlist->next == nullptr && explist->next != nullptr){
                 std::cout << "Error: argument count not matching" << std::endl;
             }
             
