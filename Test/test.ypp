@@ -88,6 +88,7 @@ statement : block_statement
           | assignment_statement
           ;
 
+//This parsing works in the wrong order, but in declarationstm the values are assigned to the right vals
 identifierlist: IDEN {
                   std::cout << "identifierlist : IDEN " << $1 << "\n";
                   char* identifier = new char[std::strlen($1) + 1];

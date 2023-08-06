@@ -1,1 +1,1 @@
-if(true){var a,b,c int = 4,5,6;}
+if(true){var a,b,c int = 4,5,6; {var a = 9; fmt.Println(a);}}

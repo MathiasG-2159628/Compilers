@@ -1,5 +1,7 @@
 #include "symboltable.hpp"
 #include <string>
+#include <iostream>
+#include <cstring>
 
 extern SymbolHandler symbolhandler;
 
@@ -10,6 +12,7 @@ SymbolHandler::SymbolHandler(){
 }
 
 void SymbolHandler::pushSymbolTable(SymbolTable st) {
+    std::cout << "Symbol table pushed" << std::endl;
     symbolTableStack.emplace_back(st);
     symbolTable = &symbolTableStack.back();
 }
@@ -34,7 +37,8 @@ void SymbolHandler::updateSymbol(char* name, ReturnValue value) {
         for (int i = symbolTableStack.size() - 1; i >= 0; --i) {
             Symbol* current = symbolTableStack[i].head;
             while (current != nullptr) {
-                if (current->name == name) 
+                //strcmp returns 0 if succeded
+                if (!strcmp(current->name, name)) 
                 {
                     current->value = value;
                     return;
@@ -50,7 +54,8 @@ ReturnValue SymbolHandler::lookupSymbol(char* name){
         for (int i = symbolTableStack.size() - 1; i >= 0; --i) {
             Symbol* current =  symbolTableStack[i].head;
             while (current != nullptr) {
-                if (current->name == name) {
+                //strcmp returns 0 if succeded
+                if (!strcmp(current->name, name)) {
                     return current->value;
                 }
                 current = current->next;

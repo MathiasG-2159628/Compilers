@@ -2,11 +2,11 @@
 #include <iostream>
 
 ReturnValue::ReturnValue(int i){
-    intValue = &i;
+    intValue = new int(i);
 }
 
 ReturnValue::ReturnValue(bool b){
-    boolValue = &b;
+    boolValue = new bool(b);
 
 }
 

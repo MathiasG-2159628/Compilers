@@ -492,9 +492,9 @@ static const yytype_int8 yyrhs[] =
 static const yytype_uint8 yyrline[] =
 {
        0,    80,    80,    81,    83,    84,    85,    86,    87,    88,
-      91,    97,   105,   107,   111,   113,   117,   121,   125,   129,
-     131,   133,   135,   137,   142,   148,   150,   154,   156,   158,
-     163
+      92,    98,   106,   108,   112,   114,   118,   122,   126,   130,
+     132,   134,   136,   138,   143,   149,   151,   155,   157,   159,
+     164
 };
 #endif
 
@@ -1439,7 +1439,7 @@ yyreduce:
         case 10:
 
 /* Line 1455 of yacc.c  */
-#line 91 "test.ypp"
+#line 92 "test.ypp"
     {
                   std::cout << "identifierlist : IDEN " << (yyvsp[(1) - (1)].id) << "\n";
                   char* identifier = new char[std::strlen((yyvsp[(1) - (1)].id)) + 1];
@@ -1451,7 +1451,7 @@ yyreduce:
   case 11:
 
 /* Line 1455 of yacc.c  */
-#line 97 "test.ypp"
+#line 98 "test.ypp"
     {
                   std::cout << "identifierlist : identifierlist COMMA IDEN " << (yyvsp[(3) - (3)].id) << "\n";
                   char* identifier = new char[std::strlen((yyvsp[(3) - (3)].id)) + 1];
@@ -1463,7 +1463,7 @@ yyreduce:
   case 12:
 
 /* Line 1455 of yacc.c  */
-#line 105 "test.ypp"
+#line 106 "test.ypp"
     {std::cout << "statementlist: statement statementlist \n"; 
                                         (yyval.stmlist) = new StmList((yyvsp[(1) - (2)].stm), (yyvsp[(2) - (2)].stmlist));;}
     break;
@@ -1471,7 +1471,7 @@ yyreduce:
   case 13:
 
 /* Line 1455 of yacc.c  */
-#line 107 "test.ypp"
+#line 108 "test.ypp"
     {std::cout << "statementlist: statement \n"; 
                                         (yyval.stmlist) = new StmList((yyvsp[(1) - (1)].stm), nullptr);;}
     break;
@@ -1479,7 +1479,7 @@ yyreduce:
   case 14:
 
 /* Line 1455 of yacc.c  */
-#line 111 "test.ypp"
+#line 112 "test.ypp"
     {std::cout << "LBRACE statementlist RBRACE \n";
                                               (yyval.stm) = new BlockStm((yyvsp[(2) - (3)].stmlist)); thesyntree = (yyval.stm);;}
     break;
@@ -1487,7 +1487,7 @@ yyreduce:
   case 15:
 
 /* Line 1455 of yacc.c  */
-#line 113 "test.ypp"
+#line 114 "test.ypp"
     {std::cout << "LBRACE RBRACE \n";
                                               (yyval.stm) = new BlockStm(nullptr); thesyntree = (yyval.stm);;}
     break;
@@ -1495,7 +1495,7 @@ yyreduce:
   case 16:
 
 /* Line 1455 of yacc.c  */
-#line 117 "test.ypp"
+#line 118 "test.ypp"
     {std::cout << "IF LPAREN expression RPAREN block_statement \n"; 
                                                           (yyval.stm) = new If_stm((yyvsp[(3) - (5)].exp), (yyvsp[(5) - (5)].stm)); thesyntree = (yyval.stm);;}
     break;
@@ -1503,7 +1503,7 @@ yyreduce:
   case 17:
 
 /* Line 1455 of yacc.c  */
-#line 121 "test.ypp"
+#line 122 "test.ypp"
     {std::cout << "for_statement : FOR LPAREN expression RPAREN block_statement \n"; 
                                                             (yyval.stm) = new For_stm((yyvsp[(3) - (5)].exp), (yyvsp[(5) - (5)].stm)); thesyntree = (yyval.stm);;}
     break;
@@ -1511,7 +1511,7 @@ yyreduce:
   case 18:
 
 /* Line 1455 of yacc.c  */
-#line 125 "test.ypp"
+#line 126 "test.ypp"
     {std::cout << "print_statement : PRINT LPAREN expressionlist RPAREN \n"; 
                                                       (yyval.stm) = new PrintStm((yyvsp[(3) - (5)].explist)); thesyntree = (yyval.stm);;}
     break;
@@ -1519,7 +1519,7 @@ yyreduce:
   case 19:
 
 /* Line 1455 of yacc.c  */
-#line 129 "test.ypp"
+#line 130 "test.ypp"
     {std::cout << "declaration_statement : VAR identifierlist IS expressionlist SEMICOLON \n";
                                                                       (yyval.stm) = new DeclarationStm(-1, (yyvsp[(2) - (5)].idlist), (yyvsp[(4) - (5)].explist)); thesyntree = (yyval.stm);;}
     break;
@@ -1527,7 +1527,7 @@ yyreduce:
   case 20:
 
 /* Line 1455 of yacc.c  */
-#line 131 "test.ypp"
+#line 132 "test.ypp"
     {std::cout << "declaration_statement : VAR identifierlist type IS expressionlist SEMICOLON \n";
                                                                             (yyval.stm) = new DeclarationStm(BOOL, (yyvsp[(2) - (6)].idlist), (yyvsp[(5) - (6)].explist)); thesyntree = (yyval.stm);;}
     break;
@@ -1535,7 +1535,7 @@ yyreduce:
   case 21:
 
 /* Line 1455 of yacc.c  */
-#line 133 "test.ypp"
+#line 134 "test.ypp"
     {std::cout << "declaration_statement : VAR identifierlist type IS expressionlist SEMICOLON \n";
                                                                             (yyval.stm) = new DeclarationStm(INT, (yyvsp[(2) - (6)].idlist), (yyvsp[(5) - (6)].explist)); thesyntree = (yyval.stm);;}
     break;
@@ -1543,7 +1543,7 @@ yyreduce:
   case 22:
 
 /* Line 1455 of yacc.c  */
-#line 135 "test.ypp"
+#line 136 "test.ypp"
     {std::cout << "declaration_statement : VAR identifierlist type SEMICOLON \n";
                                     (yyval.stm) = new DeclarationStm(BOOL, (yyvsp[(2) - (4)].idlist), nullptr); thesyntree = (yyval.stm);;}
     break;
@@ -1551,7 +1551,7 @@ yyreduce:
   case 23:
 
 /* Line 1455 of yacc.c  */
-#line 137 "test.ypp"
+#line 138 "test.ypp"
     {std::cout << "declaration_statement : VAR identifierlist type SEMICOLON \n";
                                     (yyval.stm) = new DeclarationStm(INT, (yyvsp[(2) - (4)].idlist), nullptr); thesyntree = (yyval.stm);;}
     break;
@@ -1559,14 +1559,14 @@ yyreduce:
   case 24:
 
 /* Line 1455 of yacc.c  */
-#line 142 "test.ypp"
+#line 143 "test.ypp"
     {(yyval.stm) = new AssignStm((yyvsp[(1) - (4)].idlist), (yyvsp[(3) - (4)].explist)); thesyntree = (yyval.stm);;}
     break;
 
   case 25:
 
 /* Line 1455 of yacc.c  */
-#line 148 "test.ypp"
+#line 149 "test.ypp"
     {std::cout << "expressionlist COMMA expression  \n";
                                                  (yyval.explist) = new ExpList((yyvsp[(3) - (3)].exp), (yyvsp[(1) - (3)].explist));;}
     break;
@@ -1574,7 +1574,7 @@ yyreduce:
   case 26:
 
 /* Line 1455 of yacc.c  */
-#line 150 "test.ypp"
+#line 151 "test.ypp"
     {std::cout << "expression  \n";
                             (yyval.explist) = new ExpList((yyvsp[(1) - (1)].exp), nullptr);;}
     break;
@@ -1582,7 +1582,7 @@ yyreduce:
   case 27:
 
 /* Line 1455 of yacc.c  */
-#line 154 "test.ypp"
+#line 155 "test.ypp"
     {std::cout << "expression : INTLITERAL " << yylval.intlit << "\n";
                         (yyval.exp) = new IntlitExp(yylval.intlit);;}
     break;
@@ -1590,7 +1590,7 @@ yyreduce:
   case 28:
 
 /* Line 1455 of yacc.c  */
-#line 156 "test.ypp"
+#line 157 "test.ypp"
     {std::cout << "expression : BOOLLITERAL " << yylval.boollit << "\n";
                          (yyval.exp) = new BoollitExp(yylval.boollit);;}
     break;
@@ -1598,7 +1598,7 @@ yyreduce:
   case 29:
 
 /* Line 1455 of yacc.c  */
-#line 158 "test.ypp"
+#line 159 "test.ypp"
     {std::cout << "expression : IDEN " << yylval.id << "\n";
                   char* identifier = new char[std::strlen(yylval.id) + 1];
                   std::strcpy(identifier, yylval.id);
@@ -1609,7 +1609,7 @@ yyreduce:
   case 30:
 
 /* Line 1455 of yacc.c  */
-#line 163 "test.ypp"
+#line 164 "test.ypp"
     {std::cout << "LPAREN expression RPAREN  \n";;}
     break;
 
@@ -1828,7 +1828,7 @@ yyreturn:
 
 
 /* Line 1675 of yacc.c  */
-#line 167 "test.ypp"
+#line 168 "test.ypp"
 
 
 

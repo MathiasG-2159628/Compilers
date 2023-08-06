@@ -167,11 +167,11 @@ void DeclarationStm::interp(){
 
 
             if(declaredType == INT){
-                symbolhandler.addSymbol(idlist->head, 0);
+                symbolhandler.addSymbol(idlist->head, ReturnValue(0));
                 std::cout << "Added int value " << idlist->head << " to symbol table" << std::endl;
             }
             else if(declaredType == BOOL){
-                symbolhandler.addSymbol(idlist->head, true);
+                symbolhandler.addSymbol(idlist->head, ReturnValue(true));
                 std::cout << "Added bool value " << idlist->head << " to symbol table" << std::endl;
             }
             else{
@@ -192,12 +192,13 @@ void DeclarationStm::interp(){
             }
             
             ReturnValue returnValue =  explist->head->interp();
-            std::cout << "VALUE OF INT: " << *returnValue.intValue;
+            
 
-            //Since a declaration without a specified type is possible it needs runtime typechecking.
             if(declaredType == INT){
+
                 if(returnValue.boolValue == nullptr){
                     symbolhandler.addSymbol(idlist->head, returnValue);
+
                     std::cout << "Added int value " << idlist->head << " to symbol table with value " << *returnValue.intValue << std::endl;
                 }
                 else{
@@ -205,21 +206,23 @@ void DeclarationStm::interp(){
                 }
             }
             else if(declaredType == BOOL){
+
                 if(returnValue.boolValue == nullptr){
                     //throw error
                 }else{
-                    symbolhandler.addSymbol(idlist->head, returnValue.boolValue);
-                    std::cout << "Added bool value " << idlist->head << " to symbol table" << std::endl;
+                    symbolhandler.addSymbol(idlist->head, returnValue);
+                    std::cout << "Added bool value " << idlist->head << " to symbol table with value " << *returnValue.boolValue<< std::endl;
                 }
             }
             else if(declaredType == -1){
                 if(returnValue.boolValue == nullptr){
-                    symbolhandler.addSymbol(idlist->head, returnValue.intValue);
-                    std::cout << "Added int value " << idlist->head << " to symbol table" << std::endl;
+                    symbolhandler.addSymbol(idlist->head, returnValue);
+                    std::cout << "Added int value " << idlist->head << " to symbol table with value " << *returnValue.intValue << std::endl;
 
                 }else{
-                    symbolhandler.addSymbol(idlist->head, returnValue.boolValue);
+                    symbolhandler.addSymbol(idlist->head, returnValue);
                     std::cout << "Added bool value " << idlist->head << " to symbol table" << std::endl;
+                    std::cout << "Added bool value " << idlist->head << " to symbol table with value " << *returnValue.boolValue<< std::endl;
                 }
             }
             else{
