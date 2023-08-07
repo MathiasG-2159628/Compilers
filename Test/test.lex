@@ -106,7 +106,7 @@ is               "="
                           return BOOLLITERAL;}
                           
 {identifier}              {lastTokenType = IDEN; 
-                            yylval.id = yytext;
+                            yylval.id = strdup(yytext);
                             return IDEN;}
 
 {newline}                 { 

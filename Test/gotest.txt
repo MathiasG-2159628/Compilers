@@ -1,6 +1,5 @@
 if(true){
     var a = 2;
-    if(a <= 8){
-        fmt.Println(5555);
-    }
+    a++;
+    fmt.Println(a);   
 }

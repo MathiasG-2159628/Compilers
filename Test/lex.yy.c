@@ -850,7 +850,7 @@ case 34:
 YY_RULE_SETUP
 #line 108 "test.lex"
 {lastTokenType = IDEN; 
-                            yylval.id = yytext;
+                            yylval.id = strdup(yytext);
                             return IDEN;}
 	YY_BREAK
 case 35:

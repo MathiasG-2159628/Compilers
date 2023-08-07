@@ -50,6 +50,7 @@
 %nonassoc GT GE LT LE
 %nonassoc AND
 %nonassoc OR
+%nonassoc INC DEC
 
 
 
@@ -69,6 +70,8 @@
 %type <stm> for_statement
 %type <stm> declaration_statement
 %type <stm> assignment_statement
+%type <stm> arithmetic_assign_op_statement
+%type <stm> inc_dec_statement
 
 //Expressions
 %type <exp> arithmetic_op_expression
@@ -94,6 +97,7 @@ statement : block_statement
           | print_statement
           | declaration_statement
           | assignment_statement
+          | inc_dec_statement
           ;
 
 //This parsing works in the wrong order, but in declarationstm the values are assigned to the right vals
@@ -154,6 +158,29 @@ assignment_statement : identifierlist IS expressionlist SEMICOLON {std::cout << 
            ;
 
 
+arithmetic_assign_op_statement :
+             IDEN PLUSASSIGN expression   {$$ = new ArithmeticAssignOpStm($1, PLUSASSIGN, $3); } 
+           | IDEN MINASSIGN expression    {$$ = new ArithmeticAssignOpStm($1, MINASSIGN, $3); }
+           | IDEN MULASSIGN expression    {$$ = new ArithmeticAssignOpStm($1, MULASSIGN, $3); }
+           | IDEN DIVASSIGN expression    {$$ = new ArithmeticAssignOpStm($1, DIVASSIGN, $3); }
+           ;
+
+inc_dec_statement : 
+              IDEN INC SEMICOLON {
+                      
+                      char* identifier = new char[std::strlen(yyval.id) + 1];
+                      std::strcpy(identifier, yyval.id);
+                      std::cout << "inc_dec_statement : IDEN " << identifier << "INC SEMICOLON " << std::endl;
+                      $$ = new IncDecStm(INC,identifier);
+                      }
+              | IDEN DEC SEMICOLON{
+                      std::cout << "inc_dec_statement : IDEN DEC SEMICOLON " << std::endl;
+                      char* identifier = new char[std::strlen($1) + 1];
+                      std::strcpy(identifier, $1);
+                      $$ = new IncDecStm(DEC,identifier);
+                      }
+              ;
+
 //EXPRESSIONS
 
 expressionlist : expressionlist COMMA expression {std::cout << "expressionlist COMMA expression  \n";
@@ -182,18 +209,21 @@ arithmetic_op_expression :
            | expression MIN expression    {$$ = new ArithmeticOpExp($1, MIN, $3); std::cout << "arithmetic_op_expression : expression MIN expression" << std::endl;}
            | expression MUL expression    {$$ = new ArithmeticOpExp($1, MUL, $3); std::cout << "arithmetic_op_expression : expression MUL expression" << std::endl;}
            | expression DIV expression    {$$ = new ArithmeticOpExp($1, DIV, $3); std::cout << "arithmetic_op_expression : expression DIV expression" << std::endl;}
+           ;
 
-boolean_op_expression : 
+boolean_op_expression: 
              expression AND expression    {$$ = new BooleanOpExp($1, AND, $3); std::cout << "boolean_op_expression : expression AND expression" << std::endl;}
            | expression OR expression     {$$ = new BooleanOpExp($1, OR, $3); std::cout << "boolean_op_expression : expression OR expression" << std::endl;}
            | expression EQ expression     {$$ = new BooleanOpExp($1, EQ, $3); std::cout << "boolean_op_expression : expression EQ expression" << std::endl;} 
            | expression NE expression     {$$ = new BooleanOpExp($1, NE, $3); std::cout << "boolean_op_expression : expression NE expression" << std::endl;}
+           ;
 
 boolean_arithmetic_op_expression:
              expression GT expression     {$$ = new BooleanArithmeticOpExp($1, GT, $3); std::cout << "boolean_arithmetic_op_expression : expression GT expression" << std::endl;}
            | expression GE expression     { $$ = new BooleanArithmeticOpExp($1, GE, $3); std::cout << "boolean_arithmetic_op_expression : expression GE expression" << std::endl;}
            | expression LT expression     { $$ = new BooleanArithmeticOpExp($1, LT, $3); std::cout << "boolean_arithmetic_op_expression : expression LT expression" << std::endl;}
            | expression LE expression     { $$ = new BooleanArithmeticOpExp($1, LE, $3); std::cout << "boolean_arithmetic_op_expression : expression LE expression" << std::endl;}
+           ;
 
   
 %%
