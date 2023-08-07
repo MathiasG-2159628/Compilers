@@ -7,6 +7,7 @@ go.lex: lex-file for go basisniveau
 #include "test.tab.hpp"
 #include "tokens.h"
 #include <cstring>
+#include <iostream>
 
   /* Keep track of current position of lex for error messages, i.e. 
      the position just *after* the last token read */
@@ -108,7 +109,8 @@ is               "="
                             yylval.id = yytext;
                             return IDEN;}
 
-{newline}                 {if (lastTokenType == IDEN || lastTokenType == RBRACE) 
+{newline}                 { 
+                            if (lastTokenType == IDEN) 
                             {
                                 lastTokenType = -1; 
                                 return SEMICOLON; 

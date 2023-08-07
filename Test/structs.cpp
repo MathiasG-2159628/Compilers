@@ -646,6 +646,7 @@ ReturnValue BooleanOpExp::interp(){
 
         if(returnValueLeft.boolValue != nullptr && returnValueRight.boolValue != nullptr)
         {
+            std::cout << "OPERATING!!!!!!!!!!!!!!!!!!!!!";
             if(oper == NE){
                 return *returnValueLeft.boolValue != *returnValueRight.boolValue;           
             }
@@ -659,8 +660,16 @@ ReturnValue BooleanOpExp::interp(){
                 return *returnValueLeft.boolValue || *returnValueRight.boolValue;
             }
         }
+        else if(returnValueLeft.intValue != nullptr && returnValueRight.intValue != nullptr){
+            if(oper == NE){
+                return *returnValueLeft.intValue != *returnValueRight.intValue;           
+            }
+            else if(oper == EQ){
+                return *returnValueLeft.intValue == *returnValueRight.intValue;
+            }
+        }
         else{
-            //Type error
+            std::cout << "Error: types not matching" << std::endl;
         }
 
         return false;
@@ -693,7 +702,7 @@ ReturnValue BooleanArithmeticOpExp::interp(){
         else if(oper == GE){
             return *returnValueLeft.intValue >= *returnValueRight.intValue; 
         }
-        else if(oper == GT){
+        else if(oper == LE){
             return *returnValueLeft.intValue <= *returnValueRight.intValue; 
         }
     }

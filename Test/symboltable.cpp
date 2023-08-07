@@ -54,9 +54,13 @@ void SymbolHandler::updateSymbol(char* name, ReturnValue value) {
 
 ReturnValue SymbolHandler::lookupSymbol(char* name){
         for (int i = symbolTableStack.size() - 1; i >= 0; --i) {
+
+            //TODO: IF SYMBOL IS NOT FOUND IN CURRENT SCOPE, SEARCH THROUGH PREVIOUS SCOPES
+
             Symbol* current =  symbolTableStack[i].head;
+
             while (current != nullptr) {
-                //strcmp returns 0 if succeded
+              //strcmp returns 0 if succeded
                 if (!strcmp(current->name, name)) {
                     return current->value;
                 }
