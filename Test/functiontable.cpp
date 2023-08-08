@@ -1,4 +1,5 @@
 #include "functiontable.hpp"
+#include <cstring>
 
 //Functionhandler definitions
 
@@ -16,7 +17,7 @@ FunctionHandler::FunctionHandler(){
 Function FunctionHandler::lookupFunction(char* name){
     Function* current = functionTable->head;
         while (current != nullptr) {
-            if (current->name == name) {
+            if (!strcmp(current->name, name)) {
                 return *current;
             }
             current = current->next;

@@ -134,11 +134,9 @@ void Function_DeclarationStm::interp(){
 
         paramlist = paramlist->next;
     }
-
-    Function function(identifier, paramnames, paramtypes, returnType, stmlist);
     
     //Add function to table
-    functionhandler.addFunction(identifier, &function);
+    functionhandler.addFunction(identifier, new Function(identifier, paramnames, paramtypes, returnType, stmlist));
 }
 
 
@@ -304,7 +302,8 @@ BlockStm::BlockStm(StmList* stl){
 }
 
 void BlockStm::interp(){
-    
+    if(stmlist == nullptr) return;
+
     StmList* list = new StmList();
     list->head = stmlist->head;
     list->next = stmlist->next;
@@ -350,10 +349,14 @@ VoidFunctionStm::VoidFunctionStm(ExpList* args, char* id){
 VoidFunctionStm::VoidFunctionStm(){};
 
 void VoidFunctionStm::interp(){
+    std::cout << "interpreting void function stm " << std::endl;
     //Call the function from the function table 
     Function function = functionhandler.lookupFunction(identifier);
+    std::cout << "TESTPOINT" << std::endl;
     int returntype = function.functionType;
     StmList* stmlist = function.stmlist;
+
+     
 
     //New scope definition
     symbolhandler.pushSymbolTable(SymbolTable());
@@ -363,12 +366,7 @@ void VoidFunctionStm::interp(){
     std::vector<char*> paramNames = function.paramNames;
     std::vector<int> paramTypes = function.paramTypes;
 
-    if(args != nullptr){
-
-        if(paramNames.size() == 0 ){
-            //Too many arguments error
-            //(function has no arguments)
-        }
+    if(args != nullptr && function.paramNames.size() == 0){
 
         int i = 0;
         while (args->next != nullptr)
@@ -405,6 +403,9 @@ void VoidFunctionStm::interp(){
             i++;
             args = args->next;
         }
+    }
+    else{
+       std::cout << "too many arguments" << std::endl;
     }
 
     //Executing the function

@@ -1,5 +1,9 @@
-{
-    func poo(){ fmt.Println(9);}
+if(true){
 
-    fmt.Println(10);  
+    func poo(){
+            fmt.Println(3);
+    } 
+
+    poo();
+
 }

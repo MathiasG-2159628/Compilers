@@ -82,6 +82,7 @@
 %type <stm> inc_dec_statement
 %type <stm> return_statement
 %type <stm> function_declaration_statement
+%type <stm> void_function_statement
 
 //Expressions
 %type <exp> arithmetic_op_expression
@@ -115,6 +116,7 @@ statement : block_statement
           | inc_dec_statement
           | return_statement
           | function_declaration_statement
+          | void_function_statement
           ;
 
 //This parsing works in the wrong order, but in declarationstm the values are assigned to the right vals
@@ -145,7 +147,7 @@ block_statement : LBRACE statementlist RBRACE{std::cout << "LBRACE statementlist
                 ;
 
 if_statement : IF LPAREN expression RPAREN block_statement{std::cout << "IF LPAREN expression RPAREN block_statement \n"; 
-                                                          $$ = new If_stm($3, $5); thesyntree = $$;} //Else not implemented
+                                                          $$ = new If_stm($3, $5); thesyntree = $$;}
              ;
 
 for_statement : FOR LPAREN expression RPAREN block_statement{std::cout << "for_statement : FOR LPAREN expression RPAREN block_statement \n"; 
@@ -190,8 +192,8 @@ arithmetic_assign_op_statement :
 inc_dec_statement : 
               IDEN INC SEMICOLON {
                       
-                      char* identifier = new char[std::strlen(yyval.id) + 1];
-                      std::strcpy(identifier, yyval.id);
+                      char* identifier = new char[std::strlen(yylval.id) + 1];
+                      std::strcpy(identifier, yylval.id);
                       std::cout << "inc_dec_statement : IDEN " << identifier << "INC SEMICOLON " << std::endl;
                       $$ = new IncDecStm(INC,identifier);
                       }
@@ -215,16 +217,31 @@ return_statement : RETURN SEMICOLON {
 
 
 function_declaration_statement : FUNC IDEN function_signature LBRACE statementlist RBRACE{
-                                std::cout << "function_declaration_statement : FUNC IDEN function_signature LBRACE statementlist RBRACE " << std::endl;
-                                $$ = new Function_DeclarationStm($3, $5, $2); thesyntree = $$;}
-                                | FUNC IDEN function_signature LBRACE RBRACE{
-                                std::cout << "function_declaration_statement : FUNC IDEN function_signature LBRACE statementlist RBRACE " << std::endl;
-                                $$ = new Function_DeclarationStm($3, nullptr, $2); thesyntree = $$;}
-            ;
+                                char* identifier = new char[std::strlen(yylval.id) + 1];
+                                std::strcpy(identifier, yylval.id);
+                                std::cout << "function_declaration_statement : FUNC IDEN " << identifier << " function_signature LBRACE statementlist RBRACE " << std::endl;
+                                $$ = new Function_DeclarationStm($3, $5, identifier); 
+                                thesyntree = $$;}
+
+                                | FUNC IDEN function_signature LBRACE RBRACE{  
+                                char* identifier = new char[std::strlen(yylval.id) + 1];
+                                std::strcpy(identifier, yylval.id);
+                                std::cout << "DECLARING FUNCTION " << identifier << " " << std::endl;                             
+
+                                std::cout << "function_declaration_statement : FUNC IDEN " << identifier << " function_signature LBRACE statementlist RBRACE " << std::endl;
+                                 
+                                $$ = new Function_DeclarationStm($3, nullptr, identifier); 
+                               
+                                thesyntree = $$;
+                                }
+                                ;
 
 function_signature : LPAREN parameterlist RPAREN INT {
                   std::cout << "function_signature : LPAREN parameterlist RPAREN INT " << std::endl;
-                  $$ = new Function_signature($2, INT);}
+                  
+
+                  $$ = new Function_signature($2, INT);
+                  }
 
                    | LPAREN parameterlist RPAREN BOOL {
                     std::cout << "function_signature : LPAREN parameterlist RPAREN BOOL " << std::endl;
@@ -253,9 +270,28 @@ parameterlist : parameter_declaration {
                 $$ = new ParamList($3, $1);}
               ;
 
-parameter_declaration : IDEN INT {$$ = new Param_declaration($1, INT);}
-                      | IDEN BOOL {$$ = new Param_declaration($1, BOOL);}
+parameter_declaration : IDEN INT {
+                                char* identifier = new char[std::strlen(yylval.id) + 1];
+                                std::strcpy(identifier, yylval.id);
+                                $$ = new Param_declaration(identifier, INT);}
+                      | IDEN BOOL {  
+                                char* identifier = new char[std::strlen(yylval.id) + 1];
+                                std::strcpy(identifier, yylval.id);
+                                $$ = new Param_declaration(identifier, BOOL);}
                       ;
+
+
+void_function_statement : IDEN LPAREN expressionlist RPAREN SEMICOLON {
+                          char* identifier = new char[std::strlen(yylval.id) + 1];
+                          std::strcpy(identifier, yylval.id);
+                          $$ = new VoidFunctionStm($3, identifier); thesyntree = $$;}
+
+                        |  IDEN LPAREN RPAREN SEMICOLON {
+                          char* identifier = new char[std::strlen(yylval.id) + 1];
+                          std::strcpy(identifier, yylval.id);
+                          $$ = new VoidFunctionStm(nullptr, identifier); thesyntree = $$;}
+
+                        ;
 
 //EXPRESSIONS
 

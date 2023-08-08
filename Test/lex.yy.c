@@ -861,11 +861,12 @@ YY_RULE_SETUP
 #line 111 "test.lex"
 {lastTokenType = IDEN; 
                             yylval.id = strdup(yytext);
+                            std::cout << "TEXT: " << yytext << std::endl;
                             return IDEN;}
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 115 "test.lex"
+#line 116 "test.lex"
 { 
                             if (lastTokenType == IDEN) 
                             {
@@ -876,22 +877,22 @@ YY_RULE_SETUP
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 123 "test.lex"
+#line 124 "test.lex"
 {lastTokenType = PRINT; return PRINT;}
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 124 "test.lex"
+#line 125 "test.lex"
 {lastTokenType = COMMA; return COMMA;}
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 125 "test.lex"
+#line 126 "test.lex"
 {lastTokenType = IS; return IS;}
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 128 "test.lex"
+#line 129 "test.lex"
 {
   if (yytext[0] < ' '){ /* non-printable char */
   
@@ -914,10 +915,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 147 "test.lex"
+#line 148 "test.lex"
 ECHO;
 	YY_BREAK
-#line 921 "lex.yy.c"
+#line 922 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1803,7 +1804,7 @@ int main()
 	return 0;
 	}
 #endif
-#line 147 "test.lex"
+#line 148 "test.lex"
 
 
 /* Function called by (f)lex when EOF is read. If yywrap returns a
