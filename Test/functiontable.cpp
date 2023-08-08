@@ -37,7 +37,7 @@ FunctionTable::FunctionTable(){
 
 //Function definitions
 
-Function::Function(char* n, std::vector<char*> names, std::vector<int> types, int functype, StmList slist){
+Function::Function(char* n, std::vector<char*> names, std::vector<int> types, int functype, StmList* slist){
         name = n;
         paramNames = names;
         paramTypes = types;

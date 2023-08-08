@@ -286,15 +286,15 @@ static void yy_fatal_error YY_PROTO(( yyconst char msg[] ));
 #define YY_END_OF_BUFFER 43
 static yyconst short int yy_accept[87] =
     {   0,
-        0,    0,   43,   41,   35,    1,   23,   41,    9,   10,
-       15,   13,   37,   14,   16,   32,    2,   28,   40,   26,
-       34,   34,   34,   34,   34,   34,   34,   34,   11,   41,
+        0,    0,   43,   41,   37,    1,   23,   41,    9,   10,
+       15,   13,   39,   14,   16,   32,    2,   28,   40,   26,
+       36,   36,   36,   36,   36,   36,   36,   36,   11,   41,
        12,   31,   21,   19,   24,   17,   25,   32,   18,   20,
-       29,   30,   27,   34,   34,   34,   34,   34,   34,    7,
-       34,   34,   34,   34,   34,   22,   34,   34,   34,    8,
-       34,    3,   34,   34,   34,    6,    4,   34,    0,   34,
-       34,   34,   33,    0,   34,   34,    0,   34,    5,    0,
-       34,    0,    0,    0,   36,    0
+       29,   30,   27,   36,   36,   36,   36,   36,   36,    7,
+       36,   36,   36,   36,   36,   22,   36,   36,   36,    8,
+       36,    3,   36,   36,   36,    6,    4,   36,    0,   34,
+       36,   36,   33,    0,   36,   36,    0,   36,    5,    0,
+       35,    0,    0,    0,   38,    0
     } ;
 
 static yyconst int yy_ec[256] =
@@ -849,13 +849,23 @@ YY_RULE_SETUP
 case 34:
 YY_RULE_SETUP
 #line 108 "test.lex"
+{lastTokenType = FUNC; return FUNC;}
+	YY_BREAK
+case 35:
+YY_RULE_SETUP
+#line 109 "test.lex"
+{lastTokenType = PACKAGE; return PACKAGE;}
+	YY_BREAK
+case 36:
+YY_RULE_SETUP
+#line 111 "test.lex"
 {lastTokenType = IDEN; 
                             yylval.id = strdup(yytext);
                             return IDEN;}
 	YY_BREAK
-case 35:
+case 37:
 YY_RULE_SETUP
-#line 112 "test.lex"
+#line 115 "test.lex"
 { 
                             if (lastTokenType == IDEN) 
                             {
@@ -864,34 +874,24 @@ YY_RULE_SETUP
                             }
                           }
 	YY_BREAK
-case 36:
-YY_RULE_SETUP
-#line 120 "test.lex"
-{lastTokenType = PRINT; return PRINT;}
-	YY_BREAK
-case 37:
-YY_RULE_SETUP
-#line 121 "test.lex"
-{lastTokenType = COMMA; return COMMA;}
-	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 122 "test.lex"
-{lastTokenType = FUNC; return FUNC;}
+#line 123 "test.lex"
+{lastTokenType = PRINT; return PRINT;}
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 123 "test.lex"
-{lastTokenType = PACKAGE; return PACKAGE;}
+#line 124 "test.lex"
+{lastTokenType = COMMA; return COMMA;}
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 124 "test.lex"
+#line 125 "test.lex"
 {lastTokenType = IS; return IS;}
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 127 "test.lex"
+#line 128 "test.lex"
 {
   if (yytext[0] < ' '){ /* non-printable char */
   
@@ -914,7 +914,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 146 "test.lex"
+#line 147 "test.lex"
 ECHO;
 	YY_BREAK
 #line 921 "lex.yy.c"
@@ -1803,7 +1803,7 @@ int main()
 	return 0;
 	}
 #endif
-#line 146 "test.lex"
+#line 147 "test.lex"
 
 
 /* Function called by (f)lex when EOF is read. If yywrap returns a

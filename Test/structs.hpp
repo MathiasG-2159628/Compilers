@@ -83,10 +83,10 @@ struct Param_declaration{
 };
 
 struct ParamList{
-    Param_declaration head;
+    Param_declaration* head;
     ParamList* next;
 
-    ParamList(Param_declaration h, ParamList* n);
+    ParamList(Param_declaration* h, ParamList* n);
 
     ParamList();
 };
@@ -95,10 +95,10 @@ struct ParamList{
 
 
 struct Function_signature{
-    ParamList params;
+    ParamList* params;
     int type;
 
-    Function_signature(ParamList p, int t);
+    Function_signature(ParamList* p, int t);
 
     Function_signature();
 };
@@ -117,11 +117,11 @@ struct PrintStm : public Stm_{
 };
 
 struct Function_DeclarationStm : public Stm_{
-    Function_signature signature;
-    StmList stmlist;
+    Function_signature* signature;
+    StmList* stmlist;
     char* identifier;
 
-    Function_DeclarationStm(Function_signature sig, StmList stml, char* id);
+    Function_DeclarationStm(Function_signature* sig, StmList* stml, char* id);
 
     Function_DeclarationStm();
 
@@ -172,10 +172,10 @@ struct BlockStm : public Stm_{
 
 
 struct VoidFunctionStm : public Stm_{
-    ExpList arguments;
+    ExpList* arguments;
     char* identifier;
 
-    VoidFunctionStm(ExpList args, char* id);
+    VoidFunctionStm(ExpList* args, char* id);
 
     VoidFunctionStm();
 

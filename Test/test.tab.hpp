@@ -101,11 +101,16 @@ typedef union YYSTYPE
   ExpList* explist;
   StmList* stmlist;
   IdList*  idlist;
+  ParamList* paramlist;
+
+  //Function related stuff
+  Param_declaration* paramdecl;
+  Function_signature* funcsig;
 
 
 
 /* Line 1676 of yacc.c  */
-#line 109 "test.tab.hpp"
+#line 114 "test.tab.hpp"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

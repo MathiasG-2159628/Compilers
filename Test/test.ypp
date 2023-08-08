@@ -35,14 +35,21 @@
   ExpList* explist;
   StmList* stmlist;
   IdList*  idlist;
+  ParamList* paramlist;
+
+  //Function related stuff
+  Param_declaration* paramdecl;
+  Function_signature* funcsig;
 }
 
 %token <id> IDEN 
 %token <boollit> BOOLLITERAL
 %token <intlit> INTLITERAL
+
 %token  SEMICOLON INT BOOL RETURN VAR IF FOR LPAREN RPAREN LBRACE RBRACE PLUS MIN MUL DIV PLUSASSIGN MINASSIGN 
 %token  MULASSIGN DIVASSIGN AND OR NOT INC DEC GT GE LT LE EQ NE 
 %token  COMMA PRINT FUNC PACKAGE IS
+
 
 %left MUL DIV
 %left PLUS MIN
@@ -62,6 +69,7 @@
 %type <explist> expressionlist
 %type <stmlist> statementlist
 %type <idlist> identifierlist
+%type <paramlist> parameterlist
 
 //Statements
 %type <stm> print_statement
@@ -72,18 +80,24 @@
 %type <stm> assignment_statement
 %type <stm> arithmetic_assign_op_statement
 %type <stm> inc_dec_statement
+%type <stm> return_statement
+%type <stm> function_declaration_statement
 
 //Expressions
 %type <exp> arithmetic_op_expression
 %type <exp> boolean_op_expression
 %type <exp> boolean_arithmetic_op_expression 
 
+//Function related stuff
+%type <funcsig>   function_signature
+%type <paramdecl> parameter_declaration
 
 %start program
 
 %%
 
 //TODO: WRITE PROGRAM STRUCT THAT DOESN'T CAUSE THE STATEMENTS TO BE EXECUTED
+//TODO: NOT EXP
 program : statementlist
         | ;
 
@@ -97,7 +111,10 @@ statement : block_statement
           | print_statement
           | declaration_statement
           | assignment_statement
+          | arithmetic_assign_op_statement
           | inc_dec_statement
+          | return_statement
+          | function_declaration_statement
           ;
 
 //This parsing works in the wrong order, but in declarationstm the values are assigned to the right vals
@@ -155,14 +172,19 @@ declaration_statement :
 
 assignment_statement : identifierlist IS expressionlist SEMICOLON {std::cout << "assignment_statement : identifierlist IS expressionlist SEMICOLON \n";
                                                                   $$ = new AssignStm($1, $3); thesyntree = $$;}
-           ;
+                     ;
 
 
 arithmetic_assign_op_statement :
-             IDEN PLUSASSIGN expression   {$$ = new ArithmeticAssignOpStm($1, PLUSASSIGN, $3); } 
-           | IDEN MINASSIGN expression    {$$ = new ArithmeticAssignOpStm($1, MINASSIGN, $3); }
-           | IDEN MULASSIGN expression    {$$ = new ArithmeticAssignOpStm($1, MULASSIGN, $3); }
-           | IDEN DIVASSIGN expression    {$$ = new ArithmeticAssignOpStm($1, DIVASSIGN, $3); }
+
+             IDEN MULASSIGN expression SEMICOLON   { std::cout << "arithmetic_assign_op_statement : IDEN MULASSIGN expression" << std::endl;
+                                          $$ = new ArithmeticAssignOpStm($1, MULASSIGN, $3); }
+           | IDEN DIVASSIGN expression SEMICOLON  { std::cout << "arithmetic_assign_op_statement : IDEN DIVASSIGN expression" << std::endl;                                       
+                                          $$ = new ArithmeticAssignOpStm($1, DIVASSIGN, $3); }
+           | IDEN PLUSASSIGN expression SEMICOLON  { std::cout << "arithmetic_assign_op_statement : IDEN PLUSASSIGN expression" << std::endl;
+                                          $$ = new ArithmeticAssignOpStm($1, PLUSASSIGN, $3); } 
+           | IDEN MINASSIGN expression SEMICOLON   { std::cout << "arithmetic_assign_op_statement : IDEN MINASSIGN expression" << std::endl;
+                                          $$ = new ArithmeticAssignOpStm($1, MINASSIGN, $3); }
            ;
 
 inc_dec_statement : 
@@ -181,6 +203,60 @@ inc_dec_statement :
                       }
               ;
 
+return_statement : RETURN SEMICOLON {
+                  std::cout << "return_statement : RETURN SEMICOLON " << std::endl;
+                  $$ = new ReturnStm(nullptr); 
+                  thesyntree = $$;}
+                 | RETURN expression SEMICOLON {
+                  std::cout << "return_statement : RETURN expression SEMICOLON  " << std::endl;
+                  $$ = new ReturnStm($2); 
+                  thesyntree = $$;}               
+                 ;
+
+
+function_declaration_statement : FUNC IDEN function_signature LBRACE statementlist RBRACE{
+                                std::cout << "function_declaration_statement : FUNC IDEN function_signature LBRACE statementlist RBRACE " << std::endl;
+                                $$ = new Function_DeclarationStm($3, $5, $2); thesyntree = $$;}
+                                | FUNC IDEN function_signature LBRACE RBRACE{
+                                std::cout << "function_declaration_statement : FUNC IDEN function_signature LBRACE statementlist RBRACE " << std::endl;
+                                $$ = new Function_DeclarationStm($3, nullptr, $2); thesyntree = $$;}
+            ;
+
+function_signature : LPAREN parameterlist RPAREN INT {
+                  std::cout << "function_signature : LPAREN parameterlist RPAREN INT " << std::endl;
+                  $$ = new Function_signature($2, INT);}
+
+                   | LPAREN parameterlist RPAREN BOOL {
+                    std::cout << "function_signature : LPAREN parameterlist RPAREN BOOL " << std::endl;
+                    $$ = new Function_signature($2, BOOL);}
+                   | LPAREN parameterlist RPAREN {
+                    std::cout << "function_signature : LPAREN parameterlist RPAREN " << std::endl;
+                    $$ = new Function_signature($2, -1);}
+                   | LPAREN RPAREN INT {
+                  std::cout << "function_signature : LPAREN RPAREN INT " << std::endl;
+                  $$ = new Function_signature(nullptr, INT);}
+                   | LPAREN RPAREN BOOL {
+                    std::cout << "function_signature : LPAREN RPAREN BOOL " << std::endl;
+                    $$ = new Function_signature(nullptr, BOOL);}
+                   | LPAREN RPAREN {
+                    std::cout << "function_signature : LPAREN RPAREN " << std::endl;
+                    $$ = new Function_signature(nullptr, -1);}
+                   ;
+
+
+parameterlist : parameter_declaration {
+                std::cout << "parameterlist : parameter_declaration " << std::endl;
+                $$ = new ParamList($1, nullptr);
+                }
+              | parameterlist COMMA parameter_declaration {
+                std::cout << "parameterlist : parameter_declaration " << std::endl;
+                $$ = new ParamList($3, $1);}
+              ;
+
+parameter_declaration : IDEN INT {$$ = new Param_declaration($1, INT);}
+                      | IDEN BOOL {$$ = new Param_declaration($1, BOOL);}
+                      ;
+
 //EXPRESSIONS
 
 expressionlist : expressionlist COMMA expression {std::cout << "expressionlist COMMA expression  \n";
@@ -198,17 +274,17 @@ expression : INTLITERAL {std::cout << "expression : INTLITERAL " << yylval.intli
                   std::strcpy(identifier, yylval.id);
                   $$ = new IdExp(identifier);
                   }        
-           | LPAREN expression RPAREN  {std::cout << "LPAREN expression RPAREN  \n";}  
+           | LPAREN expression RPAREN  {std::cout << "LPAREN expression RPAREN  \n"; $$ = $2;}  
            | arithmetic_op_expression    
            | boolean_op_expression
-           | boolean_arithmetic_op_expression        
+           | boolean_arithmetic_op_expression       
            ;
 
 arithmetic_op_expression : 
-             expression PLUS expression   {$$ = new ArithmeticOpExp($1, PLUS, $3); std::cout << "arithmetic_op_expression : expression PLUS expression" << std::endl;}
-           | expression MIN expression    {$$ = new ArithmeticOpExp($1, MIN, $3); std::cout << "arithmetic_op_expression : expression MIN expression" << std::endl;}
-           | expression MUL expression    {$$ = new ArithmeticOpExp($1, MUL, $3); std::cout << "arithmetic_op_expression : expression MUL expression" << std::endl;}
+             expression MUL expression    {$$ = new ArithmeticOpExp($1, MUL, $3); std::cout << "arithmetic_op_expression : expression MUL expression" << std::endl;}
            | expression DIV expression    {$$ = new ArithmeticOpExp($1, DIV, $3); std::cout << "arithmetic_op_expression : expression DIV expression" << std::endl;}
+           | expression PLUS expression   {$$ = new ArithmeticOpExp($1, PLUS, $3); std::cout << "arithmetic_op_expression : expression PLUS expression" << std::endl;}
+           | expression MIN expression    {$$ = new ArithmeticOpExp($1, MIN, $3); std::cout << "arithmetic_op_expression : expression MIN expression" << std::endl;} 
            ;
 
 boolean_op_expression: 

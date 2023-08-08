@@ -49,12 +49,12 @@ equals                "=="
 notequals             "!="
 intliteral            "-"?[0-9]+
 boolliteral          "true"|"false"
+funct               "func"
+package             "package"
 identifier           [a-z]([a-z]|[0-9])*
 newline               "\n"
 print                 "fmt.Println"
 comma                ","
-funct            "func"
-package          "package"
 is               "="
 
 
@@ -104,6 +104,9 @@ is               "="
                           }
 
                           return BOOLLITERAL;}
+
+{funct}                {lastTokenType = FUNC; return FUNC;}
+{package}               {lastTokenType = PACKAGE; return PACKAGE;}
                           
 {identifier}              {lastTokenType = IDEN; 
                             yylval.id = strdup(yytext);
@@ -119,8 +122,6 @@ is               "="
 
 {print}                   {lastTokenType = PRINT; return PRINT;}
 {comma}                   {lastTokenType = COMMA; return COMMA;}
-{funct}                {lastTokenType = FUNC; return FUNC;}
-{package}               {lastTokenType = PACKAGE; return PACKAGE;}
 {is}                   {lastTokenType = IS; return IS;}
 
 

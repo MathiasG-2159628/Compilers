@@ -5,7 +5,7 @@
 #include <iostream>
 #include <algorithm>
 #include <cstring>
-
+#include <type_traits>
 
 bool containsValue(const std::vector<char*> vec, char* value) {
     for (const auto& element : vec) {
@@ -49,7 +49,7 @@ StmList::StmList(Stm h, StmList* s){
 StmList::StmList(){}
 
 
-ParamList::ParamList(Param_declaration h, ParamList* n){
+ParamList::ParamList(Param_declaration* h, ParamList* n){
         head = h;
         next = n;
 }
@@ -107,13 +107,13 @@ Function_signature::Function_signature(){
 
 }
 
-Function_signature::Function_signature(ParamList p, int t){
+Function_signature::Function_signature(ParamList* p, int t){
     params = p;
     type = t;
 }
 
 
-Function_DeclarationStm::Function_DeclarationStm(Function_signature sig, StmList stml, char* id){
+Function_DeclarationStm::Function_DeclarationStm(Function_signature* sig, StmList* stml, char* id){
     signature = sig;
     stmlist = stml;
     identifier = id;
@@ -122,15 +122,15 @@ Function_DeclarationStm::Function_DeclarationStm(Function_signature sig, StmList
 Function_DeclarationStm::Function_DeclarationStm(){}
 
 void Function_DeclarationStm::interp(){
-    int returnType = signature.type;
-    ParamList* paramlist = &signature.params;
+    int returnType = signature->type;
+    ParamList* paramlist = signature->params;
 
     std::vector<int> paramtypes;
     std::vector<char*> paramnames;
 
     while(paramlist != nullptr){
-        paramtypes.push_back(paramlist->head.type);
-        paramnames.push_back(paramlist->head.name);
+        paramtypes.push_back(paramlist->head->type);
+        paramnames.push_back(paramlist->head->name);
 
         paramlist = paramlist->next;
     }
@@ -304,32 +304,45 @@ BlockStm::BlockStm(StmList* stl){
 }
 
 void BlockStm::interp(){
-       
-    symbolhandler.pushSymbolTable(SymbolTable());
-    while(stmlist != nullptr){
+    
+    StmList* list = new StmList();
+    list->head = stmlist->head;
+    list->next = stmlist->next;
 
-        if(std::is_same<decltype(stmlist->head), ReturnStm>::value){
-                ReturnStm* returnstm = static_cast<ReturnStm*>(stmlist->head);
+    symbolhandler.pushSymbolTable(SymbolTable());
+    while(list != nullptr){
+        std::cout << "EXECUTING BLOCKSTATEMENT" << " \n";
+        if(dynamic_cast<ReturnStm*>(list->head) != nullptr){
+
+                std::cout << "RETURN STATEMENT ENCOUNTERED" << " \n";
+
+                ReturnStm* returnstm = static_cast<ReturnStm*>(list->head);
 
                 returnhandler.returnEncountered = true;
                 returnhandler.returnExp =  returnstm->expr;
 
-                if(stmlist->next != nullptr){
+                if(list->next != nullptr){
                     //Unreachable code error
                 }
 
                 return;
         }
         else{
-            stmlist->head->interp();
+            //returnsm encounter
+            list->head->interp();
+            if(returnhandler.returnEncountered){
+
+                symbolhandler.popSymbolTable();
+                return;
+            }
         }
 
-        stmlist = stmlist->next;      
+        list = list->next;      
     }
     symbolhandler.popSymbolTable();
 }
 
-VoidFunctionStm::VoidFunctionStm(ExpList args, char* id){
+VoidFunctionStm::VoidFunctionStm(ExpList* args, char* id){
     arguments = args;
     identifier = id;
 }
@@ -340,13 +353,13 @@ void VoidFunctionStm::interp(){
     //Call the function from the function table 
     Function function = functionhandler.lookupFunction(identifier);
     int returntype = function.functionType;
-    StmList* stmlist = &function.stmlist;
+    StmList* stmlist = function.stmlist;
 
     //New scope definition
     symbolhandler.pushSymbolTable(SymbolTable());
 
     //Pushing the arguments onto the symbol table of the new scope
-    ExpList* args = &arguments;
+    ExpList* args = arguments;
     std::vector<char*> paramNames = function.paramNames;
     std::vector<int> paramTypes = function.paramTypes;
 
@@ -401,7 +414,7 @@ void VoidFunctionStm::interp(){
         
         if(std::is_same<decltype(stmlist->head), ReturnStm>::value){
             
-            ReturnStm* returnstm = static_cast<ReturnStm*>(stmlist->head);
+            ReturnStm* returnstm = dynamic_cast<ReturnStm*>(stmlist->head);
             ReturnValue returnValue = returnstm->expr->interp();
 
             //returnstm.interp();
@@ -456,6 +469,7 @@ void VoidFunctionStm::interp(){
         }
 
     }
+
 }
 
 
@@ -526,9 +540,13 @@ void For_stm::interp(){
     ReturnValue returnValue = exp->interp();
 
     if(returnValue.boolValue != nullptr){
-        while(!returnValue.boolValue){
+        std::cout << "GOING INTO LOOP" << " \n";
+        while(*returnValue.boolValue){
+            std::cout << "EXECUTING LOOP" << " \n";
+
             blockStm->interp();
             returnValue = exp->interp();
+            std::cout << "Value of a: " << *returnValue.boolValue;
         }
     }
     else{
@@ -610,8 +628,9 @@ ArithmeticOpExp::ArithmeticOpExp(Exp l, int op, Exp r){
 
 ReturnValue ArithmeticOpExp::interp(){
     int value_return;
-    ReturnValue result_left = left->interp();
     ReturnValue result_right = right->interp();
+    ReturnValue result_left = left->interp();
+    
 
     if(result_left.intValue != nullptr && result_left.intValue != nullptr ){
         if(oper == PLUS) {
@@ -742,7 +761,7 @@ ReturnValue FunctionExp::interp(){
     //Call the function from the function table 
     Function function = functionhandler.lookupFunction(identifier);
     int returntype = function.functionType;
-    StmList* stmlist = &function.stmlist;
+    StmList* stmlist = function.stmlist;
 
     //New scope definition
     symbolhandler.pushSymbolTable(SymbolTable());
@@ -798,7 +817,7 @@ ReturnValue FunctionExp::interp(){
     if(stmlist != nullptr){
         while(stmlist != nullptr){
             
-            if(std::is_same<decltype(stmlist->head), ReturnStm>::value){
+            if(dynamic_cast<ReturnStm*>(stmlist->head) != nullptr){
                 ReturnStm* returnstm = static_cast<ReturnStm*>(stmlist->head);
                 ReturnValue returnValue = returnstm->expr->interp();
 

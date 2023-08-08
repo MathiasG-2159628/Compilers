@@ -15,9 +15,9 @@ struct Function{
     std::vector<char*> paramNames;
     std::vector<int> paramTypes;
     int functionType;
-    StmList stmlist;
+    StmList* stmlist;
 
-    Function(char* n, std::vector<char*> names, std::vector<int> types, int functype, StmList slist);
+    Function(char* n, std::vector<char*> names, std::vector<int> types, int functype, StmList* slist);
 
     Function();
     

@@ -1,5 +1,5 @@
-if(true){
-    var a = 2;
-    a--;
-    fmt.Println(a);   
+{
+    func poo(){ fmt.Println(9);}
+
+    fmt.Println(10);  
 }

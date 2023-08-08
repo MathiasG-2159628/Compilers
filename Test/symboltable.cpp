@@ -26,6 +26,7 @@ void SymbolHandler::popSymbolTable() {
             symbolTable = nullptr;
         }
     }
+     std::cout << "Symbol table popped" << std::endl;
 }
 
 void SymbolHandler::addSymbol(char* name, ReturnValue value) {
