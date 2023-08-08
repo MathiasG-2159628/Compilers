@@ -471,14 +471,16 @@ void IncDecStm::interp(){
 
     if(returnValue.intValue != nullptr){
         
+        int value = *returnValue.intValue;
+
         if(action == DEC){
-            *returnValue.intValue--;
+            value -= 1;
         }
         else if(action == INC){
-            *returnValue.intValue++;
+            value += 1;
         }
 
-        symbolhandler.updateSymbol(identifier, returnValue);
+        symbolhandler.updateSymbol(identifier, ReturnValue(value));
     }
     else{
         //Throw type error because it can't be bool

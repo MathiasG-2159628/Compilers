@@ -1,5 +1,5 @@
 if(true){
     var a = 2;
-    a++;
+    a--;
     fmt.Println(a);   
 }
