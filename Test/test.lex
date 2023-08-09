@@ -57,7 +57,6 @@ print                 "fmt.Println"
 comma                ","
 is               "="
 
-
 %%
 " "                       {}
 {semicolon}               {lastTokenType = SEMICOLON; return SEMICOLON;}

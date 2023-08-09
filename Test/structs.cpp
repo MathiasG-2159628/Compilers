@@ -128,8 +128,6 @@ void Function_DeclarationStm::interp(){
     std::vector<int> paramtypes;
     std::vector<char*> paramnames;
 
- 
-
 
     while(paramlist != nullptr){
         paramtypes.push_back(paramlist->head->type);
@@ -369,6 +367,7 @@ void VoidFunctionStm::interp(){
     ExpList* args = arguments;
     std::vector<char*> paramNames = function.paramNames;
     std::vector<int> paramTypes = function.paramTypes;
+    std::vector<Exp> paramArgs;
 
    
     std::cout << "Printing param names " << std::endl;
@@ -380,30 +379,25 @@ void VoidFunctionStm::interp(){
     for(auto&& i: paramTypes){
         std::cout << i << " " << std::endl;
     }
+
+    while(args != nullptr){
+        paramArgs.push_back(args->head);
+        args = args->next;
+    }
     
 
-    if(args != nullptr || function.paramNames.size() != 0){
-
-        
+    if(paramArgs.size() == paramNames.size()){
         
         int i = 0;
-        while (args->next != nullptr)
+        for(int i=0; i < paramArgs.size() -1; i++)
         {
-            if(i == paramNames.size() && args->next != nullptr){
-                std::cout << "Too many arguments " << std::endl;
-            }
-            else if(i != paramNames.size() && args->next == nullptr){
-                std::cout << "Not enough arguments " << std::endl;
-            }
+         
+            ReturnValue returnValue = paramArgs[i]->interp();
 
-
-            ReturnValue returnValue = args->head->interp();
-
-            //Couldn't use typeinfo due to bogus inclusion error
-            //So I have to do it the stupid way
             if(returnValue.intValue != nullptr){
                 if(paramTypes[i] != INT){
                     std::cout << "Type error " << std::endl;
+                    break;
                 }
                 else{
                     symbolhandler.addSymbol(paramNames[i], returnValue);
@@ -417,39 +411,54 @@ void VoidFunctionStm::interp(){
                     symbolhandler.addSymbol(paramNames[i], returnValue);
                 }
             }
-                            
-            i++;
-            args = args->next;
         }
+    }
+    else if(paramArgs.size() < paramNames.size()){
+        std::cout << "Not enough arguments " << std::endl;
+    }
+    else{
+        std::cout << "Too many arguments " << std::endl;
     }
     
     //Executing the function
     while(stmlist != nullptr){
         
         if(dynamic_cast<ReturnStm*>(stmlist->head) != nullptr){
+
+            std::cout << "Testpoint" << std::endl;
+
             
             ReturnStm* returnstm = dynamic_cast<ReturnStm*>(stmlist->head);
+
+            
+            if(returnstm->expr != nullptr && returntype == -1){
+                std::cout << "Error: no return value in void defined function allowed" << std::endl;
+                return;
+            }
+
+            if(returnstm->expr == nullptr && returntype != -1){
+                std::cout << "Error: function needs a return type" << std::endl;
+                return;
+            }
+
             ReturnValue returnValue = returnstm->expr->interp();
 
             //returnstm.interp();
 
-            if(returnstm->expr != nullptr && returntype == -1){
-                //no return value in void defined function allowed
-            }
 
             if(returnValue.boolValue != nullptr){
-                if(returntype != BOOL){
-                    //wrong return type error
+                if(returntype != BOOL){           
+                    std::cout << "wrong return type error" << std::endl;
                 }
             }
             else if(returnValue.intValue != nullptr){
                 if(returntype != INT){
-                    //wrong return type error
+                    std::cout << "wrong return type error" << std::endl;
                 }
             }
 
             if(stmlist->next != nullptr){
-                //Unreachable code error
+                std::cout << "Unreachable code" << std::endl;
             }
 
             return;
@@ -461,17 +470,17 @@ void VoidFunctionStm::interp(){
                 ReturnValue returnValue = returnhandler.returnExp->interp();
 
                 if(returnhandler.returnExp != nullptr && returntype == -1){
-                    //no return in void function allowed
+                    std::cout << "No return statement in void function allowed" << std::endl;
                 }
 
                 if(returnValue.boolValue != nullptr){
                     if(returntype != BOOL){
-                        //wrong return type error
+                        std::cout << "Wrong return type error" << std::endl;
                     }
                 }
                 else if(returnValue.intValue != nullptr){
                     if(returntype != INT){
-                        //wrong return type error
+                        std::cout << "Wrong return type error" << std::endl;
                     }
                 }
 
@@ -482,6 +491,12 @@ void VoidFunctionStm::interp(){
             }
         }
 
+        stmlist = stmlist->next;
+
+    }
+
+    if(returntype != -1 && !returnhandler.returnEncountered){
+        std::cout << "Error: function needs a return type" << std::endl;
     }
 
 }
@@ -601,7 +616,30 @@ void ArithmeticAssignOpStm::interp() {
     else {
         //Type error
     }
+}
 
+
+ProgramStm::ProgramStm(StmList* stml){
+    stmlist = stml;
+}
+
+ProgramStm::ProgramStm(){};
+
+void ProgramStm::interp(){
+
+    while(stmlist != nullptr){
+
+        if(dynamic_cast<ReturnStm*>(stmlist->head) == nullptr && dynamic_cast<ReturnStm*>(stmlist->head) == nullptr){
+            std::cout << "Non-declaration statement outside function body" << std::endl;
+        }
+        else{
+            stmlist->head->interp();
+            stmlist = stmlist->next;
+        }
+    }
+
+    VoidFunctionStm mainfunc = VoidFunctionStm(nullptr, "main");
+    mainfunc.interp();
 }
 
 
@@ -681,7 +719,6 @@ ReturnValue BooleanOpExp::interp(){
 
         if(returnValueLeft.boolValue != nullptr && returnValueRight.boolValue != nullptr)
         {
-            std::cout << "OPERATING!!!!!!!!!!!!!!!!!!!!!";
             if(oper == NE){
                 return *returnValueLeft.boolValue != *returnValueRight.boolValue;           
             }
@@ -766,124 +803,158 @@ ReturnValue NotExp::interp(){
 
 FunctionExp::FunctionExp(){}
 
-FunctionExp::FunctionExp(ExpList args, char* id){
+FunctionExp::FunctionExp(ExpList* args, char* id){
     arguments = args;
     identifier = id;
 }
 
 ReturnValue FunctionExp::interp(){
+   std::cout << "interpreting void function stm " << std::endl;
     //Call the function from the function table 
     Function function = functionhandler.lookupFunction(identifier);
     int returntype = function.functionType;
     StmList* stmlist = function.stmlist;
 
+     
+
     //New scope definition
     symbolhandler.pushSymbolTable(SymbolTable());
 
     //Pushing the arguments onto the symbol table of the new scope
-    ExpList* args = &arguments;
+    ExpList* args = arguments;
     std::vector<char*> paramNames = function.paramNames;
     std::vector<int> paramTypes = function.paramTypes;
+    std::vector<Exp> paramArgs;
 
-    if(returntype == -1){
-        //a void function expression is not allowed
+   
+    std::cout << "Printing param names " << std::endl;
+    for(auto&& i: paramNames){
+        std::cout << i << " " << std::endl;
     }
 
-    if(args != nullptr){
+    std::cout << "Printing param types " << std::endl;
+    for(auto&& i: paramTypes){
+        std::cout << i << " " << std::endl;
+    }
 
-        if(paramNames.size() == 0 ){
-            //Too many arguments error
-            //(function has no arguments)
-        }
+    while(args != nullptr){
+        paramArgs.push_back(args->head);
+        args = args->next;
+    }
+    
 
+    if(paramArgs.size() == paramNames.size()){
+        
         int i = 0;
-        while (args != nullptr)
+        for(int i=0; i < paramArgs.size() -1; i++)
         {
-
-            ReturnValue returnValue = args->head->interp();
-
-            if(i == paramNames.size() && args->next != nullptr){
-                //Too many arguments
-            }
-            else if(i != paramNames.size() && args->next == nullptr){
-                //Not enough arguments
-            }
+         
+            ReturnValue returnValue = paramArgs[i]->interp();
 
             if(returnValue.intValue != nullptr){
                 if(paramTypes[i] != INT){
-                    //wrong type
+                    std::cout << "Type error " << std::endl;
+                    break;
+                }
+                else{
+                    symbolhandler.addSymbol(paramNames[i], returnValue);
                 }
             }
             else if(returnValue.boolValue != nullptr){
-                if(paramTypes[i] != BOOL){
-                    //wrong type
+                if(paramTypes[i] != BOOL){                      
+                    std::cout << "Type error " << std::endl;
+                }
+                else{
+                    symbolhandler.addSymbol(paramNames[i], returnValue);
                 }
             }
-            
-            symbolhandler.addSymbol(paramNames[i], returnValue);
-            i++;
-            args = args->next;
         }
     }
-
+    else if(paramArgs.size() < paramNames.size()){
+        std::cout << "Not enough arguments " << std::endl;
+    }
+    else{
+        std::cout << "Too many arguments " << std::endl;
+    }
+    
     //Executing the function
+    while(stmlist != nullptr){
+        
+        if(dynamic_cast<ReturnStm*>(stmlist->head) != nullptr){
 
-    if(stmlist != nullptr){
-        while(stmlist != nullptr){
+            std::cout << "Testpoint" << std::endl;
+
             
-            if(dynamic_cast<ReturnStm*>(stmlist->head) != nullptr){
-                ReturnStm* returnstm = static_cast<ReturnStm*>(stmlist->head);
-                ReturnValue returnValue = returnstm->expr->interp();
+            ReturnStm* returnstm = dynamic_cast<ReturnStm*>(stmlist->head);
 
-                //returnstm.interp();
+            
+            if(returnstm->expr != nullptr && returntype == -1){
+                std::cout << "Error: no return value in void defined function allowed" << std::endl;
+            }
+
+            if(returnstm->expr == nullptr && returntype != -1){
+                std::cout << "Error: function needs a return type" << std::endl;
+            }
+
+            ReturnValue returnValue = returnstm->expr->interp();
+
+            //returnstm.interp();
+
+
+            if(returnValue.boolValue != nullptr){
+                if(returntype != BOOL){           
+                    std::cout << "wrong return type error" << std::endl;
+                }
+            }
+            else if(returnValue.intValue != nullptr){
+                if(returntype != INT){
+                    std::cout << "wrong return type error" << std::endl;
+                }
+            }
+
+            if(stmlist->next != nullptr){
+                std::cout << "Unreachable code" << std::endl;
+            }
+
+            return returnValue;
+        }
+        else {
+            stmlist->head->interp(); // Execute the nested block
+            if (returnhandler.returnEncountered) {
+                
+                ReturnValue returnValue = returnhandler.returnExp->interp();
+
+                if(returnhandler.returnExp != nullptr && returntype == -1){
+                    std::cout << "No return statement in void function allowed" << std::endl;
+                }
 
                 if(returnValue.boolValue != nullptr){
                     if(returntype != BOOL){
-                        //wrong return type error
+                        std::cout << "Wrong return type error" << std::endl;
                     }
                 }
                 else if(returnValue.intValue != nullptr){
                     if(returntype != INT){
-                        //wrong return type error
+                        std::cout << "Wrong return type error" << std::endl;
                     }
                 }
 
-                if(stmlist->next != nullptr){
-                    //Unreachable code error
-                }
+                returnhandler.returnEncountered = false;
 
-                return returnValue;
+                // Bubble up the return statement
+                return returnhandler.returnExp->interp();
             }
-            else {
-                stmlist->head->interp(); // Execute the nested block
-                if (returnhandler.returnEncountered) {
-                    
-                    
-                    if(returnhandler.returnExp != nullptr && returntype == -1){
-                        //no return in void function allowed
-                    }
-
-                    ReturnValue returnValue = returnhandler.returnExp->interp();
-
-                    if(returnValue.boolValue != nullptr){
-                        if(returntype != BOOL){
-                            //wrong return type error
-                        }
-                    }
-                    else if(returnValue.intValue != nullptr){
-                        if(returntype != INT){
-                            //wrong return type error
-                        }
-                    }
-
-                    returnhandler.returnEncountered = false;
-                    // Bubble up the return statement
-                    return returnValue;
-                }
-            }
-
         }
-    } 
+
+        stmlist = stmlist->next;
+
+    }
+
+    if(returntype != -1 && !returnhandler.returnEncountered){
+        std::cout << "Error: function needs a return type" << std::endl;
+    }
+
+    return ReturnValue();
 }
  
 

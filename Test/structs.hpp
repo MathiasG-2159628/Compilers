@@ -232,6 +232,15 @@ struct ArithmeticAssignOpStm : public Stm_ {
 
 };
 
+struct ProgramStm : public Stm_{
+    StmList* stmlist;
+
+    ProgramStm(StmList* stml);
+    ProgramStm();
+
+    virtual void interp() override;
+};
+
 
 //Expressions
 struct IntlitExp : public Exp_
@@ -307,11 +316,11 @@ struct NotExp : public Exp_{
 };
 
 struct FunctionExp : public Exp_{
-    ExpList arguments;
+    ExpList* arguments;
     char* identifier;
 
-    FunctionExp(ExpList args, char* id);
-
+    FunctionExp(ExpList* args, char* id);
+  
     FunctionExp();
 
     virtual ReturnValue interp() override;

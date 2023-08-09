@@ -53,6 +53,7 @@
 
 %left MUL DIV
 %left PLUS MIN
+%left NOT
 %nonassoc EQ NE
 %nonassoc GT GE LT LE
 %nonassoc AND
@@ -88,6 +89,7 @@
 %type <exp> arithmetic_op_expression
 %type <exp> boolean_op_expression
 %type <exp> boolean_arithmetic_op_expression 
+%type <exp> function_expression
 
 //Function related stuff
 %type <funcsig>   function_signature
@@ -282,13 +284,16 @@ parameter_declaration : IDEN INT {
 
 
 void_function_statement : IDEN LPAREN expressionlist RPAREN SEMICOLON {
-                          char* identifier = new char[std::strlen(yylval.id) + 1];
-                          std::strcpy(identifier, yylval.id);
+                          char* identifier = new char[std::strlen($1) + 1];
+                          std::strcpy(identifier, $1);
+                          std::cout << "void_function_statement : IDEN " << identifier << " LPAREN expressionlist RPAREN SEMICOLON " << std::endl;
+
                           $$ = new VoidFunctionStm($3, identifier); thesyntree = $$;}
 
                         |  IDEN LPAREN RPAREN SEMICOLON {
                           char* identifier = new char[std::strlen(yylval.id) + 1];
                           std::strcpy(identifier, yylval.id);
+                          std::cout << "void_function_statement : IDEN " << identifier << " LPAREN RPAREN SEMICOLON " << std::endl;
                           $$ = new VoidFunctionStm(nullptr, identifier); thesyntree = $$;}
 
                         ;
@@ -309,11 +314,13 @@ expression : INTLITERAL {std::cout << "expression : INTLITERAL " << yylval.intli
                   char* identifier = new char[std::strlen(yylval.id) + 1];
                   std::strcpy(identifier, yylval.id);
                   $$ = new IdExp(identifier);
-                  }        
+                  }
+           | NOT expression {$$ = new NotExp($2); std::cout << "expression: NOT expression";}   
            | LPAREN expression RPAREN  {std::cout << "LPAREN expression RPAREN  \n"; $$ = $2;}  
            | arithmetic_op_expression    
            | boolean_op_expression
-           | boolean_arithmetic_op_expression       
+           | boolean_arithmetic_op_expression      
+           | function_expression 
            ;
 
 arithmetic_op_expression : 
@@ -332,10 +339,30 @@ boolean_op_expression:
 
 boolean_arithmetic_op_expression:
              expression GT expression     {$$ = new BooleanArithmeticOpExp($1, GT, $3); std::cout << "boolean_arithmetic_op_expression : expression GT expression" << std::endl;}
-           | expression GE expression     { $$ = new BooleanArithmeticOpExp($1, GE, $3); std::cout << "boolean_arithmetic_op_expression : expression GE expression" << std::endl;}
-           | expression LT expression     { $$ = new BooleanArithmeticOpExp($1, LT, $3); std::cout << "boolean_arithmetic_op_expression : expression LT expression" << std::endl;}
-           | expression LE expression     { $$ = new BooleanArithmeticOpExp($1, LE, $3); std::cout << "boolean_arithmetic_op_expression : expression LE expression" << std::endl;}
+           | expression GE expression     {$$ = new BooleanArithmeticOpExp($1, GE, $3); std::cout << "boolean_arithmetic_op_expression : expression GE expression" << std::endl;}
+           | expression LT expression     {$$ = new BooleanArithmeticOpExp($1, LT, $3); std::cout << "boolean_arithmetic_op_expression : expression LT expression" << std::endl;}
+           | expression LE expression     {$$ = new BooleanArithmeticOpExp($1, LE, $3); std::cout << "boolean_arithmetic_op_expression : expression LE expression" << std::endl;}
            ;
+
+function_expression : IDEN LPAREN expressionlist RPAREN{
+                      char* identifier = new char[std::strlen($1) + 1];
+                      std::strcpy(identifier, $1);
+                      std::cout << "function_expression : IDEN " << identifier << " LPAREN expressionlist RPAREN SEMICOLON" << std::endl;
+                      $$ = new FunctionExp($3, identifier);
+                       
+                    }
+
+                    | IDEN LPAREN RPAREN SEMICOLON{
+                      char* identifier = new char[std::strlen($1) + 1];
+                      std::strcpy(identifier, $1);
+                      std::cout << "function_expression : IDEN " << identifier << " LPAREN RPAREN SEMICOLON" << std::endl;
+                      $$ = new FunctionExp(nullptr, identifier);
+                    }
+
+           ;
+
+
+
 
   
 %%
