@@ -1,6 +1,6 @@
 if(true){
 
-    func poo(){
+    func poo(a int, b bool){
             fmt.Println(3);
     } 
 

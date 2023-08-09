@@ -1768,8 +1768,8 @@ yyreduce:
 /* Line 1455 of yacc.c  */
 #line 219 "test.ypp"
     {
-                                char* identifier = new char[std::strlen(yylval.id) + 1];
-                                std::strcpy(identifier, yylval.id);
+                                char* identifier = new char[std::strlen((yyvsp[(2) - (6)].id)) + 1];
+                                std::strcpy(identifier, (yyvsp[(2) - (6)].id));
                                 std::cout << "function_declaration_statement : FUNC IDEN " << identifier << " function_signature LBRACE statementlist RBRACE " << std::endl;
                                 (yyval.stm) = new Function_DeclarationStm((yyvsp[(3) - (6)].funcsig), (yyvsp[(5) - (6)].stmlist), identifier); 
                                 thesyntree = (yyval.stm);;}
@@ -1781,7 +1781,7 @@ yyreduce:
 #line 226 "test.ypp"
     {  
                                 char* identifier = new char[std::strlen(yylval.id) + 1];
-                                std::strcpy(identifier, yylval.id);
+                                std::strcpy(identifier, (yyvsp[(2) - (5)].id));
                                 std::cout << "DECLARING FUNCTION " << identifier << " " << std::endl;                             
 
                                 std::cout << "function_declaration_statement : FUNC IDEN " << identifier << " function_signature LBRACE statementlist RBRACE " << std::endl;

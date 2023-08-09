@@ -128,15 +128,20 @@ void Function_DeclarationStm::interp(){
     std::vector<int> paramtypes;
     std::vector<char*> paramnames;
 
+ 
+
+
     while(paramlist != nullptr){
         paramtypes.push_back(paramlist->head->type);
         paramnames.push_back(paramlist->head->name);
 
         paramlist = paramlist->next;
     }
-    
+
+    std::cout << "DECLARED IDENTIFIER: " << identifier << std::endl;
+
     //Add function to table
-    functionhandler.addFunction(identifier, new Function(identifier, paramnames, paramtypes, returnType, stmlist));
+    functionhandler.addFunction( new Function(identifier, paramnames, paramtypes, returnType, stmlist));
 }
 
 
@@ -352,7 +357,6 @@ void VoidFunctionStm::interp(){
     std::cout << "interpreting void function stm " << std::endl;
     //Call the function from the function table 
     Function function = functionhandler.lookupFunction(identifier);
-    std::cout << "TESTPOINT" << std::endl;
     int returntype = function.functionType;
     StmList* stmlist = function.stmlist;
 
@@ -366,16 +370,30 @@ void VoidFunctionStm::interp(){
     std::vector<char*> paramNames = function.paramNames;
     std::vector<int> paramTypes = function.paramTypes;
 
-    if(args != nullptr && function.paramNames.size() == 0){
+   
+    std::cout << "Printing param names " << std::endl;
+    for(auto&& i: paramNames){
+        std::cout << i << " " << std::endl;
+    }
 
+    std::cout << "Printing param types " << std::endl;
+    for(auto&& i: paramTypes){
+        std::cout << i << " " << std::endl;
+    }
+    
+
+    if(args != nullptr || function.paramNames.size() != 0){
+
+        
+        
         int i = 0;
         while (args->next != nullptr)
         {
             if(i == paramNames.size() && args->next != nullptr){
-                //Too many arguments
+                std::cout << "Too many arguments " << std::endl;
             }
             else if(i != paramNames.size() && args->next == nullptr){
-                //Not enough arguments
+                std::cout << "Not enough arguments " << std::endl;
             }
 
 
@@ -385,7 +403,7 @@ void VoidFunctionStm::interp(){
             //So I have to do it the stupid way
             if(returnValue.intValue != nullptr){
                 if(paramTypes[i] != INT){
-                    //wrong type
+                    std::cout << "Type error " << std::endl;
                 }
                 else{
                     symbolhandler.addSymbol(paramNames[i], returnValue);
@@ -393,7 +411,7 @@ void VoidFunctionStm::interp(){
             }
             else if(returnValue.boolValue != nullptr){
                 if(paramTypes[i] != BOOL){                      
-                    //wrong type
+                    std::cout << "Type error " << std::endl;
                 }
                 else{
                     symbolhandler.addSymbol(paramNames[i], returnValue);
@@ -404,16 +422,11 @@ void VoidFunctionStm::interp(){
             args = args->next;
         }
     }
-    else{
-       std::cout << "too many arguments" << std::endl;
-    }
-
-    //Executing the function
-
     
+    //Executing the function
     while(stmlist != nullptr){
         
-        if(std::is_same<decltype(stmlist->head), ReturnStm>::value){
+        if(dynamic_cast<ReturnStm*>(stmlist->head) != nullptr){
             
             ReturnStm* returnstm = dynamic_cast<ReturnStm*>(stmlist->head);
             ReturnValue returnValue = returnstm->expr->interp();

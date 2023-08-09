@@ -217,15 +217,15 @@ return_statement : RETURN SEMICOLON {
 
 
 function_declaration_statement : FUNC IDEN function_signature LBRACE statementlist RBRACE{
-                                char* identifier = new char[std::strlen(yylval.id) + 1];
-                                std::strcpy(identifier, yylval.id);
+                                char* identifier = new char[std::strlen($2) + 1];
+                                std::strcpy(identifier, $2);
                                 std::cout << "function_declaration_statement : FUNC IDEN " << identifier << " function_signature LBRACE statementlist RBRACE " << std::endl;
                                 $$ = new Function_DeclarationStm($3, $5, identifier); 
                                 thesyntree = $$;}
 
                                 | FUNC IDEN function_signature LBRACE RBRACE{  
                                 char* identifier = new char[std::strlen(yylval.id) + 1];
-                                std::strcpy(identifier, yylval.id);
+                                std::strcpy(identifier, $2);
                                 std::cout << "DECLARING FUNCTION " << identifier << " " << std::endl;                             
 
                                 std::cout << "function_declaration_statement : FUNC IDEN " << identifier << " function_signature LBRACE statementlist RBRACE " << std::endl;

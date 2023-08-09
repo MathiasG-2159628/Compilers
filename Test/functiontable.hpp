@@ -39,7 +39,7 @@ struct FunctionHandler{
 
     Function lookupFunction(char* name);
 
-    void addFunction(char* name, Function* newFunction);
+    void addFunction(Function* newFunction);
 };
 
 inline FunctionHandler functionhandler;

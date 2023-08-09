@@ -3,18 +3,21 @@
 
 //Functionhandler definitions
 
-void FunctionHandler::addFunction(char* name, Function* newFunction){
+void FunctionHandler::addFunction(Function* newFunction){
     newFunction->next = functionTable->head;
     functionTable->head = newFunction;
+    std::cout << "Added function " << newFunction->name << " to function table";
 }
 
 FunctionHandler::FunctionHandler(){
-    FunctionTable funcTable;
-    functionTable = &funcTable;
+    functionTable = new FunctionTable();
 }
 
 
 Function FunctionHandler::lookupFunction(char* name){
+
+    std::cout << "Looking up function " << name << std::endl;
+
     Function* current = functionTable->head;
         while (current != nullptr) {
             if (!strcmp(current->name, name)) {
