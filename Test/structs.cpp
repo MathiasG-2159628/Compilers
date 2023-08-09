@@ -114,6 +114,7 @@ Function_signature::Function_signature(ParamList* p, int t){
 
 
 Function_DeclarationStm::Function_DeclarationStm(Function_signature* sig, StmList* stml, char* id){
+
     signature = sig;
     stmlist = stml;
     identifier = id;
@@ -122,6 +123,7 @@ Function_DeclarationStm::Function_DeclarationStm(Function_signature* sig, StmLis
 Function_DeclarationStm::Function_DeclarationStm(){}
 
 void Function_DeclarationStm::interp(){
+
     int returnType = signature->type;
     ParamList* paramlist = signature->params;
 
@@ -292,6 +294,20 @@ void AssignStm::interp(){
 
 
 ReturnStm::ReturnStm(Exp e){
+    
+    
+    int i = -1;
+
+    if(e != nullptr){
+        if(e->interp().boolValue != nullptr){
+            i = BOOL;
+        }else{
+            i = INT;
+        }
+    }
+
+    returnTypesInStatement.push_back(i);
+
     expr = e;
 }
 
@@ -387,28 +403,28 @@ void VoidFunctionStm::interp(){
     
 
     if(paramArgs.size() == paramNames.size()){
-        
-        int i = 0;
-        for(int i=0; i < paramArgs.size() -1; i++)
-        {
-         
-            ReturnValue returnValue = paramArgs[i]->interp();
+        if(paramArgs.size() != 0){
+            for(int i=0; i < paramArgs.size(); i++)
+            {
+                
+                ReturnValue returnValue = paramArgs[i]->interp();
 
-            if(returnValue.intValue != nullptr){
-                if(paramTypes[i] != INT){
-                    std::cout << "Type error " << std::endl;
-                    break;
+                if(returnValue.intValue != nullptr){
+                    if(paramTypes[i] != INT){
+                        std::cout << "Type error " << std::endl;
+                        break;
+                    }
+                    else{
+                        symbolhandler.addSymbol(paramNames[i], returnValue);
+                    }
                 }
-                else{
-                    symbolhandler.addSymbol(paramNames[i], returnValue);
-                }
-            }
-            else if(returnValue.boolValue != nullptr){
-                if(paramTypes[i] != BOOL){                      
-                    std::cout << "Type error " << std::endl;
-                }
-                else{
-                    symbolhandler.addSymbol(paramNames[i], returnValue);
+                else if(returnValue.boolValue != nullptr){
+                    if(paramTypes[i] != BOOL){                      
+                        std::cout << "Type error " << std::endl;
+                    }
+                    else{
+                        symbolhandler.addSymbol(paramNames[i], returnValue);
+                    }
                 }
             }
         }
@@ -845,27 +861,28 @@ ReturnValue FunctionExp::interp(){
 
     if(paramArgs.size() == paramNames.size()){
         
-        int i = 0;
-        for(int i=0; i < paramArgs.size() -1; i++)
-        {
-         
-            ReturnValue returnValue = paramArgs[i]->interp();
+        if(paramArgs.size() != 0){
+            for(int i=0; i < paramArgs.size(); i++)
+            {
+            
+                ReturnValue returnValue = paramArgs[i]->interp();
 
-            if(returnValue.intValue != nullptr){
-                if(paramTypes[i] != INT){
-                    std::cout << "Type error " << std::endl;
-                    break;
+                if(returnValue.intValue != nullptr){
+                    if(paramTypes[i] != INT){
+                        std::cout << "Type error " << std::endl;
+                        break;
+                    }
+                    else{
+                        symbolhandler.addSymbol(paramNames[i], returnValue);
+                    }
                 }
-                else{
-                    symbolhandler.addSymbol(paramNames[i], returnValue);
-                }
-            }
-            else if(returnValue.boolValue != nullptr){
-                if(paramTypes[i] != BOOL){                      
-                    std::cout << "Type error " << std::endl;
-                }
-                else{
-                    symbolhandler.addSymbol(paramNames[i], returnValue);
+                else if(returnValue.boolValue != nullptr){
+                    if(paramTypes[i] != BOOL){                      
+                        std::cout << "Type error " << std::endl;
+                    }
+                    else{
+                        symbolhandler.addSymbol(paramNames[i], returnValue);
+                    }
                 }
             }
         }

@@ -101,12 +101,17 @@
 
 //TODO: WRITE PROGRAM STRUCT THAT DOESN'T CAUSE THE STATEMENTS TO BE EXECUTED
 //TODO: NOT EXP
-program : statementlist
+program : declaration_list
         | ;
 
 //TODO: define trivial comment token
 /* comment: statementlist SEMICOLON
        ; */
+
+declaration_list : function_declaration_statement declaration_list
+                 | declaration_statement declaration_list
+                 | declaration_statement
+                 | function_declaration_statement
 
 statement : block_statement
           | if_statement

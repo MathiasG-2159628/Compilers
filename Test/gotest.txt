@@ -1,8 +1,5 @@
-if(true){
 
-    func poo(a int, b bool) bool{
-            return 1;
-    } 
 
-    fmt.Println(!(3>2));
-}
+func poo() bool{
+        return 1;
+} 

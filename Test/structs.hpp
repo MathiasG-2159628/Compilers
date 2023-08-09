@@ -14,8 +14,6 @@
 //TODO: error handling
 //TODO: for block statement: push and pop new symbol table on the stack
 
-
-
 struct Stm_ {
     virtual void interp() {};
 };
