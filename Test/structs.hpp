@@ -14,6 +14,8 @@
 //TODO: error handling
 //TODO: for block statement: push and pop new symbol table on the stack
 
+inline std::vector<int> returnTypesInStatement = std::vector<int>();
+
 struct Stm_ {
     virtual void interp() {};
 };

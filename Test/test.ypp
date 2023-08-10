@@ -108,8 +108,8 @@ program : declaration_list
 /* comment: statementlist SEMICOLON
        ; */
 
-declaration_list : function_declaration_statement declaration_list
-                 | declaration_statement declaration_list
+declaration_list :  declaration_list function_declaration_statement
+                 | declaration_list declaration_statement 
                  | declaration_statement
                  | function_declaration_statement
 

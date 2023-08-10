@@ -118,6 +118,22 @@ Function_DeclarationStm::Function_DeclarationStm(Function_signature* sig, StmLis
     signature = sig;
     stmlist = stml;
     identifier = id;
+
+    
+    //RETURN TYPE TYPECHECKING, COMPARE EACH ELEMENT WITH SIGNATURE
+    std::cout << "EVALUATING TYPES" << std::endl;
+    for(int i = 0; i < returnTypesInStatement.size(); i++){
+        if(returnTypesInStatement[i] != signature->type){
+            std::cout << "ERROR: WRONG RETURN TYPE IN FUNCTION " << identifier << std::endl;
+            break;
+        }
+    }
+
+    //CLEARS FOR THE NEXT FUNCTION STATEMENT
+    returnTypesInStatement.clear();
+
+
+
 }
 
 Function_DeclarationStm::Function_DeclarationStm(){}
@@ -137,8 +153,6 @@ void Function_DeclarationStm::interp(){
 
         paramlist = paramlist->next;
     }
-
-    std::cout << "DECLARED IDENTIFIER: " << identifier << std::endl;
 
     //Add function to table
     functionhandler.addFunction( new Function(identifier, paramnames, paramtypes, returnType, stmlist));
