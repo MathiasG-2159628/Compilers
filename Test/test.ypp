@@ -155,12 +155,12 @@ block_statement : LBRACE statementlist RBRACE{std::cout << "LBRACE statementlist
                                               $$ = new BlockStm(nullptr); thesyntree = $$;}
                 ;
 
-if_statement : IF LPAREN expression RPAREN block_statement{std::cout << "IF LPAREN expression RPAREN block_statement \n"; 
-                                                          $$ = new If_stm($3, $5); thesyntree = $$;}
+if_statement : IF expression block_statement{std::cout << "IF LPAREN expression RPAREN block_statement \n"; 
+                                                          $$ = new If_stm($2, $3); thesyntree = $$;}
              ;
 
-for_statement : FOR LPAREN expression RPAREN block_statement{std::cout << "for_statement : FOR LPAREN expression RPAREN block_statement \n"; 
-                                                            $$ = new For_stm($3, $5); thesyntree = $$;}
+for_statement : FOR expression block_statement{std::cout << "for_statement : FOR LPAREN expression RPAREN block_statement \n"; 
+                                                            $$ = new For_stm($2, $3); thesyntree = $$;}
               ;
 
 //TODO VOOR LATER: ZELF DEFINIEREN ALS TOKEN

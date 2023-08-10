@@ -6,6 +6,8 @@
 #include <algorithm>
 #include <cstring>
 #include <type_traits>
+#include "symboltypetable.hpp"
+#include "functypetable.hpp"
 
 bool containsValue(const std::vector<char*> vec, char* value) {
     for (const auto& element : vec) {
@@ -69,6 +71,10 @@ PrintStm::PrintStm(ExpList* expl){
     explist = expl;
 }
 
+void PrintStm::typecheck(){
+    //No logic needed 
+}
+
 void PrintStm::interp(){
 
     std::vector<std::string> printStrings;
@@ -118,25 +124,71 @@ Function_DeclarationStm::Function_DeclarationStm(Function_signature* sig, StmLis
     signature = sig;
     stmlist = stml;
     identifier = id;
-
-    
-    //RETURN TYPE TYPECHECKING, COMPARE EACH ELEMENT WITH SIGNATURE
-    std::cout << "EVALUATING TYPES" << std::endl;
-    for(int i = 0; i < returnTypesInStatement.size(); i++){
-        if(returnTypesInStatement[i] != signature->type){
-            std::cout << "ERROR: WRONG RETURN TYPE IN FUNCTION " << identifier << std::endl;
-            break;
-        }
-    }
-
-    //CLEARS FOR THE NEXT FUNCTION STATEMENT
-    returnTypesInStatement.clear();
-
-
-
 }
 
 Function_DeclarationStm::Function_DeclarationStm(){}
+
+void Function_DeclarationStm::typecheck(){
+
+    //Copy for evaluation
+    StmList* stml = new StmList();
+    stml->next = stmlist->next;
+    stml->head = stmlist->head;
+
+    int functionType = signature->type;
+    
+      while(stmlist != nullptr){
+        
+        if(dynamic_cast<ReturnStm*>(stml->head) != nullptr){
+
+            std::cout << "Testpoint" << std::endl;
+
+            
+            ReturnStm* returnstm = dynamic_cast<ReturnStm*>(stml->head);
+
+            
+            if(returnstm->expr != nullptr && functionType == -1){
+                std::cout << "Error: no return value in void defined function allowed" << std::endl;
+                return;
+            }
+
+            if(returnstm->expr == nullptr && functionType != -1){
+                std::cout << "Error: function needs a return type" << std::endl;
+                return;
+            }
+
+           int returntype = returnstm->expr->typecheck();
+
+            //returnstm.interp();
+
+
+            if(functionType == BOOL){
+                if(returntype != BOOL){           
+                    std::cout << "wrong return type error" << std::endl;
+                }
+            }
+            else if(functionType == INT){
+                if(returntype != INT){
+                    std::cout << "wrong return type error" << std::endl;
+                }
+            }
+
+            if(stml->next != nullptr){
+                std::cout << "Unreachable code error" << std::endl;
+            }
+
+            return;
+        }
+
+        symboltypehandler.addSymbolType(identifier, functionType);
+        stml = stml->next;
+
+    }
+
+    if(functionType != -1 && !returnhandler.returnEncountered){
+        std::cout << "Error: function needs a return type" << std::endl;
+    }
+}
 
 void Function_DeclarationStm::interp(){
 
@@ -146,11 +198,9 @@ void Function_DeclarationStm::interp(){
     std::vector<int> paramtypes;
     std::vector<char*> paramnames;
 
-
     while(paramlist != nullptr){
         paramtypes.push_back(paramlist->head->type);
         paramnames.push_back(paramlist->head->name);
-
         paramlist = paramlist->next;
     }
 
@@ -163,16 +213,97 @@ DeclarationStm::DeclarationStm(int dcltype, IdList* idl, ExpList* expl){
     declaredType = dcltype;
     idlist = idl;
     explist = expl;
+
 }
 
 DeclarationStm::DeclarationStm(){
 
 }
 
-void DeclarationStm::interp(){
- 
-    std::cout << "INTERPRETING DECLR STM" << std::endl;
+//"COMPILE TIME" TYPE AND ERROR CHECKING
+void DeclarationStm::typecheck(){
 
+    //Copy objects for evaluation
+    IdList* idl = new IdList();
+    idl->head = idlist->head;
+    idl->next = idlist->next;
+
+    ExpList* expl = new ExpList();
+    expl->head = explist->head;
+    expl->next = explist->next;
+
+    //DO THIS IN CONSTRUCTOR
+    std::vector<char*> declared_ids;
+    if(expl == nullptr){
+        //Default assignment of value, but only if a type is specified
+        while(idl != nullptr){
+            
+            if(containsValue(declared_ids, idl->head)){
+                
+                std::cout << idl->head << std::endl;
+
+                for(auto&& i: declared_ids){
+                    std::cout << i << " ";
+                }
+                std::cout << std::endl;
+
+                std::cout << "Error: duplicate indentifier in declaration" << std::endl;
+                return;
+            }
+
+            symboltypehandler.addSymbolType(idl->head, declaredType);
+        }
+    }
+    else{
+        while(idl != nullptr){
+            
+            if(containsValue(declared_ids, idl->head)){
+                std::cout << "Error: duplicate indentifier in declaration" << std::endl;
+            }
+            declared_ids.push_back(idl->head);
+
+
+            //TODO: fix too many arguments
+            if((idl->next != nullptr && expl->next == nullptr) ){
+                std::cout << "Error: argument count not matching" << std::endl;
+            }
+
+            if(idl->next == nullptr && expl->next != nullptr){
+                std::cout << "Error: argument count not matching" << std::endl;
+            }
+            
+            int returnType =  expl->head->typecheck();
+            
+
+            if(declaredType == INT){
+                if(returnType != INT){
+                    std::cout << "Type error" << std::endl;
+                }
+
+            }
+            else if(declaredType == BOOL){
+
+                if(returnType != BOOL){
+                    std::cout << "Type error" << std::endl;
+                }
+            }
+            else if(declaredType == -1){
+                if(returnType != -1){
+                    std::cout << "No return value allowed in void function " << std::endl;
+                }
+            }
+
+            symboltypehandler.addSymbolType(idl->head, declaredType);
+
+            idl = idl->next;
+            expl = expl->next;             
+        }
+    }
+
+}
+
+//INCLUDES "RUNTIME" ERROR CHECKING
+void DeclarationStm::interp(){
     std::vector<char*> declared_ids;
     if(explist == nullptr){
         //Default assignment of value, but only if a type is specified
@@ -271,7 +402,6 @@ void DeclarationStm::interp(){
     }
 }
 
-
 AssignStm::AssignStm(IdList* id, ExpList* e){
     idlist = id;
     explist = e;
@@ -279,6 +409,48 @@ AssignStm::AssignStm(IdList* id, ExpList* e){
 
 AssignStm::AssignStm(){
 
+}
+
+void AssignStm::typecheck(){
+
+    //Copy objects for evaluation
+    IdList* idl = new IdList();
+    idl->head = idlist->head;
+    idl->next = idlist->next;
+
+    ExpList* expl = new ExpList();
+    expl->head = explist->head;
+    expl->next = explist->next;
+
+    std::vector<char*> assigned_ids;
+
+    while(idl != nullptr){
+
+        if(containsValue(assigned_ids, idl->head)){
+            std::cout << "Duplicate identifier in assign statement";
+            return;
+        }
+        
+        assigned_ids.push_back(idl->head);
+
+        if(idl->next != nullptr && expl->next == nullptr){
+            std::cout << "Error: argument count not matching" << std::endl;
+        }
+
+        if(idl->next == nullptr && expl->next != nullptr){
+            std::cout << "Error: argument count not matching" << std::endl;
+        }
+        
+        int lookupReturnType = symboltypehandler.lookupSymbolType(idlist->head);
+        int typecheckReturnType = expl->head->typecheck();
+        
+        if(lookupReturnType == typecheckReturnType){
+            std::cout << "Argument type not matching variable" << std::endl;
+        }
+
+        idl = idl->next;
+        expl = expl->next;
+    }
 }
 
 void AssignStm::interp(){
@@ -322,8 +494,7 @@ void AssignStm::interp(){
 
 
 ReturnStm::ReturnStm(Exp e){
-    
-    
+
     int i = -1;
 
     if(e != nullptr){
@@ -346,6 +517,23 @@ BlockStm::BlockStm(){
 
 BlockStm::BlockStm(StmList* stl){
     stmlist = stl;
+}
+
+void BlockStm::typecheck(){
+    if(stmlist == nullptr) return;
+
+    StmList* list = new StmList();
+    list->head = stmlist->head;
+    list->next = stmlist->next;
+
+    symboltypehandler.pushSymbolTypeTable(SymbolTypeTable());
+    while(list != nullptr){
+        
+        list->head->typecheck();
+
+        list = list->next;      
+    }
+    symboltypehandler.popSymbolTypeTable();
 }
 
 void BlockStm::interp(){
@@ -582,6 +770,10 @@ If_stm::If_stm(Exp ex, Stm bstm){
         blockStm = static_cast<BlockStm*>(bstm);
 }
 
+void If_stm::typecheck(){
+    blockStm->typecheck();
+}
+
 void If_stm::interp(){
 
     ReturnValue returnValue = exp->interp();
@@ -607,6 +799,10 @@ For_stm::For_stm(){}
 For_stm::For_stm(Exp ex, Stm bstm){
     exp = ex;
     blockStm = static_cast<BlockStm*>(bstm);
+}
+
+void For_stm::typecheck(){
+
 }
 
 void For_stm::interp(){
@@ -636,6 +832,11 @@ ArithmeticAssignOpStm::ArithmeticAssignOpStm(char* l, int op, Exp r) {
     oper = op;
 };
 
+
+void ArithmeticAssignOpStm::typecheck(){
+    if(right->typecheck() != INT) std::cout << "Can't assign non-int value to integer value " << std::endl;
+}
+
 void ArithmeticAssignOpStm::interp() {
     ReturnValue returnValue = right->interp();
 
@@ -663,36 +864,16 @@ void ArithmeticAssignOpStm::interp() {
 }
 
 
-ProgramStm::ProgramStm(StmList* stml){
-    stmlist = stml;
-}
-
-ProgramStm::ProgramStm(){};
-
-void ProgramStm::interp(){
-
-    while(stmlist != nullptr){
-
-        if(dynamic_cast<ReturnStm*>(stmlist->head) == nullptr && dynamic_cast<ReturnStm*>(stmlist->head) == nullptr){
-            std::cout << "Non-declaration statement outside function body" << std::endl;
-        }
-        else{
-            stmlist->head->interp();
-            stmlist = stmlist->next;
-        }
-    }
-
-    VoidFunctionStm mainfunc = VoidFunctionStm(nullptr, "main");
-    mainfunc.interp();
-}
-
-
 IntlitExp::IntlitExp(){
 
 }
 
 IntlitExp::IntlitExp(int i){
     intlit = i;
+}
+
+int IntlitExp::typecheck(){
+    return INT;
 }
 
 ReturnValue IntlitExp::interp(){
@@ -708,6 +889,10 @@ BoollitExp::BoollitExp(bool b){
     boollit = b;
 }
 
+int BoollitExp::typecheck(){
+    return BOOL;
+}
+
 ReturnValue BoollitExp::interp() {
     return ReturnValue(boollit);
 }
@@ -720,6 +905,16 @@ ArithmeticOpExp::ArithmeticOpExp(Exp l, int op, Exp r){
     left = l;
     right = r;
     oper = op;
+}
+
+int ArithmeticOpExp::typecheck(){
+    int type_right = right->typecheck();
+    int type_left = left->typecheck();
+
+    if(type_right != INT && type_left != INT){
+        std::cout << "No non-integer values allowed in expression" << std::endl;
+    }
+    return INT;
 }
 
 ReturnValue ArithmeticOpExp::interp(){
@@ -753,6 +948,16 @@ BooleanOpExp::BooleanOpExp(Exp l, int op, Exp r) {
     right = r;
     oper = op;
 };
+
+int BooleanOpExp::typecheck(){
+    int type_right = right->typecheck();
+    int type_left = left->typecheck();
+
+    if(type_right != BOOL && type_left != BOOL){
+        std::cout << "No non-bool values allowed in expression" << std::endl;
+    }
+    return BOOL;
+}
 
 ReturnValue BooleanOpExp::interp(){
     //Check if left and right types are equal
@@ -800,6 +1005,16 @@ BooleanArithmeticOpExp::BooleanArithmeticOpExp(Exp l, int op, Exp r){
     oper = op;
 }
 
+int BooleanArithmeticOpExp::typecheck(){
+    int type_right = right->typecheck();
+    int type_left = left->typecheck();
+
+    if(type_right != INT && type_left != INT){
+        std::cout << "No non-bool values allowed in expression" << std::endl;
+    }
+    return BOOL;
+}
+
 ReturnValue BooleanArithmeticOpExp::interp(){
     //Check if left and right types are both numeric
     //if not throw yyerror
@@ -836,6 +1051,10 @@ NotExp::NotExp(Exp ex){
     expr = ex;
 }
 
+int NotExp::typecheck(){
+    if(expr->typecheck() != BOOL) std::cout << "No non-boolean expression allowed in not expression" << std::endl;
+}
+
 ReturnValue NotExp::interp(){
     if(expr->interp().boolValue == nullptr){
         //type error
@@ -850,6 +1069,10 @@ FunctionExp::FunctionExp(){}
 FunctionExp::FunctionExp(ExpList* args, char* id){
     arguments = args;
     identifier = id;
+}
+
+int FunctionExp::typecheck(){
+    return functiontypehandler.lookupFunctionType(identifier).type;
 }
 
 ReturnValue FunctionExp::interp(){
@@ -1011,6 +1234,10 @@ IdExp::IdExp(char* id){
     identifier = id;
     std::cout << "CONSTRUCTED IDENTIFIER "  << identifier << std::endl;
 
+}
+
+int IdExp::typecheck(){
+    
 }
 
 ReturnValue IdExp::interp(){

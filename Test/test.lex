@@ -53,7 +53,7 @@ funct               "func"
 package             "package"
 identifier           [a-z]([a-z]|[0-9])*
 newline               "\n"
-print                 "fmt.Println"
+print                 "print"
 comma                ","
 is               "="
 
@@ -106,7 +106,7 @@ is               "="
 
 {funct}                {lastTokenType = FUNC; return FUNC;}
 {package}               {lastTokenType = PACKAGE; return PACKAGE;}
-                          
+{print}                   {lastTokenType = PRINT; return PRINT;}
 {identifier}              {lastTokenType = IDEN; 
                             yylval.id = strdup(yytext);
                             return IDEN;}
@@ -119,7 +119,7 @@ is               "="
                             }
                           }
 
-{print}                   {lastTokenType = PRINT; return PRINT;}
+
 {comma}                   {lastTokenType = COMMA; return COMMA;}
 {is}                   {lastTokenType = IS; return IS;}
 

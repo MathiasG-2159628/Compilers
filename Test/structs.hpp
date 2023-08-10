@@ -10,13 +10,20 @@
 #include <iostream>
 #include <string>
 #include "ReturnValue.hpp"
+#include <unordered_map>
+
+
 
 //TODO: error handling
 //TODO: for block statement: push and pop new symbol table on the stack
 
 inline std::vector<int> returnTypesInStatement = std::vector<int>();
+std::unordered_map<std::string, std::vector<int>> varTypeTable;
+
 
 struct Stm_ {
+
+    virtual void typecheck(){};
     virtual void interp() {};
 };
 
@@ -24,6 +31,7 @@ struct Exp_ {
 
     Exp_();
 
+    virtual int typecheck(){};
     virtual ReturnValue interp(){ return ReturnValue(); };
 };
 
@@ -113,6 +121,8 @@ struct PrintStm : public Stm_{
 
     PrintStm();
 
+    virtual void typecheck() override;
+
     void interp() override;
 };
 
@@ -125,7 +135,9 @@ struct Function_DeclarationStm : public Stm_{
 
     Function_DeclarationStm();
 
-    void interp() override;
+    virtual void typecheck() override;
+
+    virtual void interp() override;
 };
 
 struct DeclarationStm : public Stm_{
@@ -137,7 +149,9 @@ struct DeclarationStm : public Stm_{
 
     DeclarationStm();
 
-    void interp() override;
+    virtual void typecheck() override;
+
+    virtual void interp() override;
 };
 
 struct AssignStm : public Stm_
@@ -148,7 +162,9 @@ struct AssignStm : public Stm_
 
     AssignStm();
 
-    void interp() override;
+    virtual void typecheck() override;
+
+    virtual void interp() override;
 };
 
 struct ReturnStm : public Stm_
@@ -167,6 +183,8 @@ struct BlockStm : public Stm_{
 
     BlockStm(StmList* stl);
 
+    virtual void typecheck() override;
+
     virtual void interp() override;
 };
 
@@ -178,6 +196,8 @@ struct VoidFunctionStm : public Stm_{
     VoidFunctionStm(ExpList* args, char* id);
 
     VoidFunctionStm();
+
+    virtual void typecheck() override;
 
     virtual void interp() override;
 
@@ -192,6 +212,8 @@ struct IncDecStm : public Stm_{
 
     IncDecStm(int ac, char* id);
 
+    virtual void typecheck() override;
+
     virtual void interp() override;
 
 };
@@ -204,6 +226,8 @@ struct If_stm : public Stm_{
 
     If_stm();
 
+    virtual void typecheck() override;
+
     virtual void interp() override;
 };
 
@@ -214,6 +238,8 @@ struct For_stm : public Stm_{
     For_stm(Exp ex, Stm bstm);
 
     For_stm();
+
+    virtual void typecheck() override;
 
     virtual void interp() override;
 };
@@ -228,20 +254,11 @@ struct ArithmeticAssignOpStm : public Stm_ {
 
     ArithmeticAssignOpStm();
 
+    virtual void typecheck() override;
+
     virtual void interp() override;
 
 };
-
-struct ProgramStm : public Stm_{
-    StmList* stmlist;
-
-    ProgramStm(StmList* stml);
-    ProgramStm();
-
-    virtual void interp() override;
-};
-
-
 //Expressions
 struct IntlitExp : public Exp_
 {
@@ -251,6 +268,7 @@ struct IntlitExp : public Exp_
 
     IntlitExp();
 
+    virtual int typecheck() override;
     virtual ReturnValue interp() override;
 };
 
@@ -262,6 +280,7 @@ struct BoollitExp : public Exp_
 
     BoollitExp();
 
+    virtual int typecheck() override;
     virtual ReturnValue interp() override;
 };
 
@@ -274,6 +293,9 @@ struct ArithmeticOpExp : public Exp_
 
     ArithmeticOpExp();
 
+    virtual int typecheck() override;
+
+    virtual int typecheck() override;
     virtual ReturnValue interp() override;
 };
  
@@ -288,6 +310,9 @@ struct BooleanOpExp : public Exp_{
 
     BooleanOpExp();
 
+    virtual int typecheck() override;
+
+    virtual int typecheck() override;
     virtual ReturnValue interp() override;
 };
 
@@ -301,6 +326,7 @@ struct BooleanArithmeticOpExp : public Exp_{
 
     BooleanArithmeticOpExp();
 
+    virtual int typecheck() override;
     virtual ReturnValue interp() override;
 
 };
@@ -312,6 +338,7 @@ struct NotExp : public Exp_{
 
     NotExp();
 
+    virtual int typecheck() override;
     virtual ReturnValue interp() override;
 };
 
@@ -323,6 +350,7 @@ struct FunctionExp : public Exp_{
   
     FunctionExp();
 
+    virtual int typecheck() override;
     virtual ReturnValue interp() override;
 };
 
@@ -334,6 +362,7 @@ struct IdExp: public Exp_{
 
     IdExp();
 
+    virtual int typecheck() override;
     virtual ReturnValue interp() override;
 };
 
