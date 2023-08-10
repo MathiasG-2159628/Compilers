@@ -179,9 +179,17 @@ void DeclarationStm::interp(){
         while(idlist != nullptr){
             
             if(containsValue(declared_ids, idlist->head)){
+                
+                std::cout << idlist->head << std::endl;
+
+                for(auto&& i: declared_ids){
+                    std::cout << i << " ";
+                }
+                std::cout << std::endl;
+
                 std::cout << "Error: duplicate indentifier in declaration" << std::endl;
+                return;
             }
-            declared_ids.push_back(idlist->head);
 
 
             if(declaredType == INT){
@@ -195,6 +203,10 @@ void DeclarationStm::interp(){
             else{
                 std::cout << "Type error" << std::endl;
             }
+
+             declared_ids.push_back(idlist->head);
+
+             idlist = idlist->next;
         }
     }
     else{
@@ -275,7 +287,9 @@ void AssignStm::interp(){
     while(idlist != nullptr){
 
         if(containsValue(assigned_ids, idlist->head)){
+
             std::cout << "Duplicate identifier in assign statement";
+            return;
         }
         
         assigned_ids.push_back(idlist->head);

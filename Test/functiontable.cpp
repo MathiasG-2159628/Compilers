@@ -6,7 +6,7 @@
 void FunctionHandler::addFunction(Function* newFunction){
     newFunction->next = functionTable->head;
     functionTable->head = newFunction;
-    std::cout << "Added function " << newFunction->name << " to function table";
+    std::cout << "Added function " << newFunction->name << " to function table" << std::endl;
 }
 
 FunctionHandler::FunctionHandler(){

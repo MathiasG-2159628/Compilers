@@ -101,17 +101,19 @@
 
 //TODO: WRITE PROGRAM STRUCT THAT DOESN'T CAUSE THE STATEMENTS TO BE EXECUTED
 //TODO: NOT EXP
-program : declaration_list
+program : statementlist
         | ;
 
 //TODO: define trivial comment token
 /* comment: statementlist SEMICOLON
        ; */
+/* 
 
-declaration_list :  declaration_list function_declaration_statement
-                 | declaration_list declaration_statement 
-                 | declaration_statement
+//TODO: TRY ADDING RULES TO THIS PART OF THE CODE!
+declaration_list : declaration_statement
                  | function_declaration_statement
+                 | function_declaration_statement declaration_list 
+                 | declaration_statement declaration_list  */
 
 statement : block_statement
           | if_statement
@@ -231,7 +233,7 @@ function_declaration_statement : FUNC IDEN function_signature LBRACE statementli
                                 thesyntree = $$;}
 
                                 | FUNC IDEN function_signature LBRACE RBRACE{  
-                                char* identifier = new char[std::strlen(yylval.id) + 1];
+                                char* identifier = new char[std::strlen($2) + 1];
                                 std::strcpy(identifier, $2);
                                 std::cout << "DECLARING FUNCTION " << identifier << " " << std::endl;                             
 
@@ -305,7 +307,7 @@ void_function_statement : IDEN LPAREN expressionlist RPAREN SEMICOLON {
 
 //EXPRESSIONS
 
-expressionlist : expressionlist COMMA expression {std::cout << "expressionlist COMMA expression  \n";
+expressionlist :  expressionlist COMMA expression {std::cout << "expressionlist COMMA expression  \n";
                                                  $$ = new ExpList($3, $1);}
                | expression {std::cout << "expression  \n";
                             $$ = new ExpList($1, nullptr);}
@@ -404,6 +406,9 @@ int main(int argc, char* argv[]) {
     std::cout << "\n\nInterpreting AST: \n";
 
     thesyntree->interp();  
+
+    /* VoidFunctionStm main = VoidFunctionStm(nullptr, "main");
+    main.interp();  */
 
     return 0;
 }
