@@ -18,7 +18,6 @@
 //TODO: for block statement: push and pop new symbol table on the stack
 
 inline std::vector<int> returnTypesInStatement = std::vector<int>();
-std::unordered_map<std::string, std::vector<int>> varTypeTable;
 
 
 struct Stm_ {
@@ -42,6 +41,7 @@ typedef Exp_* Exp;
 struct ReturnHandler{
     bool returnEncountered = false;
     Exp returnExp = nullptr;
+    int returnscopetype = -1;
 
     ReturnHandler();
 };
@@ -295,7 +295,6 @@ struct ArithmeticOpExp : public Exp_
 
     virtual int typecheck() override;
 
-    virtual int typecheck() override;
     virtual ReturnValue interp() override;
 };
  
@@ -312,7 +311,6 @@ struct BooleanOpExp : public Exp_{
 
     virtual int typecheck() override;
 
-    virtual int typecheck() override;
     virtual ReturnValue interp() override;
 };
 

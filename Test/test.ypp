@@ -155,7 +155,9 @@ block_statement : LBRACE statementlist RBRACE{std::cout << "LBRACE statementlist
                                               $$ = new BlockStm(nullptr); thesyntree = $$;}
                 ;
 
-if_statement : IF expression block_statement{std::cout << "IF LPAREN expression RPAREN block_statement \n"; 
+//TODO: EMPTY PARENTHESIS RULES
+
+if_statement : IF expression block_statement{std::cout << "IF expression block_statement \n"; 
                                                           $$ = new If_stm($2, $3); thesyntree = $$;}
              ;
 
@@ -184,7 +186,6 @@ declaration_statement :
 assignment_statement : identifierlist IS expressionlist SEMICOLON {std::cout << "assignment_statement : identifierlist IS expressionlist SEMICOLON \n";
                                                                   $$ = new AssignStm($1, $3); thesyntree = $$;}
                      ;
-
 
 arithmetic_assign_op_statement :
 
@@ -354,15 +355,15 @@ boolean_arithmetic_op_expression:
 function_expression : IDEN LPAREN expressionlist RPAREN{
                       char* identifier = new char[std::strlen($1) + 1];
                       std::strcpy(identifier, $1);
-                      std::cout << "function_expression : IDEN " << identifier << " LPAREN expressionlist RPAREN SEMICOLON" << std::endl;
+                      std::cout << "function_expression : IDEN " << identifier << " LPAREN expressionlist RPAREN" << std::endl;
                       $$ = new FunctionExp($3, identifier);
                        
                     }
 
-                    | IDEN LPAREN RPAREN SEMICOLON{
+                    | IDEN LPAREN RPAREN{
                       char* identifier = new char[std::strlen($1) + 1];
                       std::strcpy(identifier, $1);
-                      std::cout << "function_expression : IDEN " << identifier << " LPAREN RPAREN SEMICOLON" << std::endl;
+                      std::cout << "function_expression : IDEN " << identifier << " LPAREN RPAREN" << std::endl;
                       $$ = new FunctionExp(nullptr, identifier);
                     }
 
@@ -403,9 +404,11 @@ int main(int argc, char* argv[]) {
     std::cout << "Parsing instructions: " << "\n\n";
     yyparse();
 
+    std::cout << "\n\nTypechecking AST:" << std::endl;
+    thesyntree->typecheck();  
+
     std::cout << "\n\nInterpreting AST: \n";
 
-    thesyntree->interp();  
 
     /* VoidFunctionStm main = VoidFunctionStm(nullptr, "main");
     main.interp();  */

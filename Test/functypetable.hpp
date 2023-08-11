@@ -1,7 +1,7 @@
 //FunctionType table
 
-#ifndef FunctionTypeTYPE_TABLE
-#define FunctionTypeTYPE_TABLE
+#ifndef FUNCTIONTYPE_TABLE
+#define FUNCTIONTYPE_TABLE
 
 #include <string>
 #include <vector>

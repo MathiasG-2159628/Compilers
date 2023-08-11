@@ -1,19 +1,18 @@
-var x, u
+if(true){
 
-func doo() int{
-    if(true){
-        return 5;
-    }
-    return 2;
-}
 
-func poo() bool{
+    func poo() bool{
+        if(true){
+            return 5;
+        }
         return true;
-} 
+    }
 
-func main(){
+    var b = poo();
 
 }
+
+
 
 
 
