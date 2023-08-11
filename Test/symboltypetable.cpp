@@ -34,6 +34,7 @@ void SymbolTypeHandler::addSymbolType(char* name, int value) {
     newSymbolType->next = symbolTypeTable->head;
 
     symbolTypeTable->head = newSymbolType;
+    std::cout << "Added " << name << " to symboltype table with value " << value << std::endl;
 };
 
 void SymbolTypeHandler::updateSymbolType(char* name, int value) {

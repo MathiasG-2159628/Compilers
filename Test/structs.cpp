@@ -311,21 +311,25 @@ void DeclarationStm::typecheck(){
             
             int returnType =  expl->head->typecheck();
             
+            std::cout << idl->head << std::endl;
 
             if(declaredType == INT){
                 if(returnType != INT){
-                    std::cout << "Type error" << std::endl;
+                    std::cout << "Type error: can't assign non-int value to int variable" << std::endl;
                 }
 
             }
             else if(declaredType == BOOL){
 
                 if(returnType != BOOL){
-                    std::cout << "Type error" << std::endl;
+                    std::cout << "Type error: can't assign non-bool value to bool variable" << std::endl;
                 }
             }
             else if(declaredType == -1){
-                if(returnType != -1){
+                if(returnType == -1){
+                    std::cout << "Type error: can't assign type void to variables" << std::endl;
+                }
+                else{
                     declaredType = returnType;
                 }
             }
@@ -481,7 +485,9 @@ void AssignStm::typecheck(){
         int lookupReturnType = symboltypehandler.lookupSymbolType(idlist->head);
         int typecheckReturnType = expl->head->typecheck();
         
-        if(lookupReturnType == typecheckReturnType){
+        std::cout << "Lookup return type: " << lookupReturnType << std::endl;
+        std::cout << "typecheckReturnType: " << typecheckReturnType << std::endl;
+        if(lookupReturnType != typecheckReturnType){
             std::cout << "Argument type not matching variable" << std::endl;
         }
 
