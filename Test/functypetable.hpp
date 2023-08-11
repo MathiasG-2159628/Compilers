@@ -13,6 +13,7 @@ struct FunctionType{
     FunctionType* next;
     char* name;
     int type;
+    std::vector<int> paramtypes;
 
     FunctionType(char* n, int t);
 

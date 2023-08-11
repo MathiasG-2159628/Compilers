@@ -130,7 +130,21 @@ Function_DeclarationStm::Function_DeclarationStm(){}
 
 void Function_DeclarationStm::typecheck(){
 
-   
+    symboltypehandler.pushSymbolTypeTable(SymbolTypeTable());
+
+    std::vector<int> paramTypes;
+
+    if(signature->params != nullptr){
+       ParamList* list = new ParamList();
+       list->head = signature->params->head;
+       list->next = signature->params->next;
+
+       while(list != nullptr){
+            symboltypehandler.addSymbolType(list->head->name, list->head->type);
+            paramTypes.push_back(list->head->type);
+            list = list->next;
+       }
+    }
 
     //Copy for evaluation
     StmList* stml = new StmList();
@@ -161,9 +175,10 @@ void Function_DeclarationStm::typecheck(){
                 int returntype = -1;
                 
                 if(returnstm->expr != nullptr){
-                        returntype = returnstm->expr->typecheck();
+                        returntype =  returnstm->expr->typecheck();
                 } 
 
+                std::cout << "RETURNTYPE: " << returntype << std::endl;
                     //returnstm.interp();
                 
 
@@ -198,6 +213,7 @@ void Function_DeclarationStm::typecheck(){
         ftype->type = functionType;
         ftype->next = nullptr;
         ftype->name = identifier;
+        ftype->paramtypes = paramTypes;
         functiontypehandler.addFunctionType(ftype);
    
     }
@@ -207,6 +223,7 @@ void Function_DeclarationStm::typecheck(){
         }
     }
     returnhandler.returnscopetype = -1;
+    symboltypehandler.popSymbolTypeTable();
    
 }
 
@@ -625,7 +642,41 @@ VoidFunctionStm::VoidFunctionStm(ExpList* args, char* id){
 
 VoidFunctionStm::VoidFunctionStm(){};
 
-void VoidFunctionStm::typecheck(){};
+void VoidFunctionStm::typecheck(){
+
+  FunctionType functiontype = functiontypehandler.lookupFunctionType(identifier);
+    if(arguments != nullptr && functiontype.paramtypes.size() != 0){
+        ExpList* args = new ExpList();
+        args->head = arguments->head;
+        args->next = arguments->next;
+
+        int i = 0;
+        while(args != nullptr){
+            if(functiontype.paramtypes[i] != args->head->typecheck()){
+                std::cout << "Error: wrong argument type" << std::endl;
+                return;
+            }
+
+            if(args->next == nullptr && i != functiontype.paramtypes.size() -1){
+                std::cout << "Error: not enough arguments" << std::endl;
+                return;
+            }
+            else if (args->next != nullptr && i == functiontype.paramtypes.size() -1){
+                std::cout << "Error: too many arguments" << std::endl;
+                return;
+            }
+
+            args = args->next;      
+            i++;
+        }
+    }
+    else if(arguments != nullptr && functiontype.paramtypes.size() == 0){
+        std::cout << "Error: too many arguments" << std::endl;
+    }
+    else if(arguments == nullptr && functiontype.paramtypes.size() != 0){
+        std::cout << "Error: not enough arguments" << std::endl;
+    }
+};
 
 void VoidFunctionStm::interp(){
     std::cout << "interpreting void function stm " << std::endl;
@@ -1120,6 +1171,43 @@ FunctionExp::FunctionExp(ExpList* args, char* id){
 }
 
 int FunctionExp::typecheck(){
+
+    
+    FunctionType functiontype = functiontypehandler.lookupFunctionType(identifier);
+    if(arguments != nullptr && functiontype.paramtypes.size() != 0){
+        ExpList* args = new ExpList();
+        args->head = arguments->head;
+        args->next = arguments->next;
+
+        int i = 0;
+        while(args != nullptr){
+            std::cout << "paramtype:" << functiontype.paramtypes[i] << std::endl;
+            std::cout << "argtype:" << args->head->typecheck() << std::endl;
+            if(functiontype.paramtypes[i] != args->head->typecheck()){
+                std::cout << "Error: wrong argument type" << std::endl;
+                return 0;
+            }
+
+            if(args->next == nullptr && i != functiontype.paramtypes.size() -1){
+                std::cout << "Error: not enough arguments" << std::endl;
+                return 0 ;
+            }
+            else if (args->next != nullptr && i == functiontype.paramtypes.size() -1){
+                std::cout << "Error: too many arguments" << std::endl; 
+                return 0;
+            }
+
+            args = args->next;      
+            i++;
+        }
+    }
+    else if(arguments != nullptr && functiontype.paramtypes.size() == 0){
+        std::cout << "Error: too many arguments" << std::endl;
+    }
+    else if(arguments == nullptr && functiontype.paramtypes.size() != 0){
+        std::cout << "Error: not enough arguments" << std::endl;
+    }
+
     return functiontypehandler.lookupFunctionType(identifier).type;
 }
 
@@ -1283,7 +1371,7 @@ IdExp::IdExp(char* id){
 }
 
 int IdExp::typecheck(){
-    
+   return symboltypehandler.lookupSymbolType(identifier);
 }
 
 ReturnValue IdExp::interp(){

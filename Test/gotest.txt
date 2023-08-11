@@ -1,14 +1,12 @@
 if(true){
 
 
-    func poo() bool{
-        if(true){
-            return 5;
-        }
-        return true;
+    func poo(a int) int{
+
+        return a;
     }
 
-    var b = poo();
+    poo(true);
 
 }
 
