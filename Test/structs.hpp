@@ -17,11 +17,9 @@
 //TODO: error handling
 //TODO: for block statement: push and pop new symbol table on the stack
 
-inline std::vector<int> returnTypesInStatement = std::vector<int>();
 
 
 struct Stm_ {
-
     virtual void typecheck(){};
     virtual void interp() {};
 };
@@ -79,6 +77,15 @@ struct StmList{
     StmList();
 };
 
+struct DeclarationList{
+    Stm head;
+    DeclarationList* next;
+
+    DeclarationList(Stm h, DeclarationList* n);
+
+    DeclarationList();
+};
+
 //Params
 
 struct Param_declaration{
@@ -100,8 +107,6 @@ struct ParamList{
 };
 
 
-
-
 struct Function_signature{
     ParamList* params;
     int type;
@@ -113,6 +118,18 @@ struct Function_signature{
 
 
 //Statements
+
+struct ProgramStm : public Stm_{
+    DeclarationList* declist;
+    
+    ProgramStm(DeclarationList* decl);
+
+    ProgramStm();
+
+    virtual void typecheck() override;
+
+    void interp() override;
+};
 
 struct PrintStm : public Stm_{
     ExpList* explist;
@@ -223,6 +240,7 @@ struct If_stm : public Stm_{
     BlockStm* blockStm;
 
     If_stm(Exp ex, Stm bstm);
+    If_stm(Exp ex, BlockStm* bstm);
 
     If_stm();
 
@@ -236,6 +254,7 @@ struct For_stm : public Stm_{
     BlockStm* blockStm;
 
     For_stm(Exp ex, Stm bstm);
+    For_stm(Exp ex, BlockStm* bstm);
 
     For_stm();
 

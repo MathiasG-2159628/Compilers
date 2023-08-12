@@ -3,6 +3,8 @@
 #include <iostream>
 #include <cstring>
 
+
+
 extern SymbolTypeHandler symboltypehandler;
 
 //SymbolTypehandler definitions
@@ -26,10 +28,22 @@ void SymbolTypeHandler::popSymbolTypeTable() {
             symbolTypeTable = nullptr;
         }
     }
-     std::cout << "SymbolType table popped" << std::endl;
+    
+    std::cout << "SymbolType table popped" << std::endl;
 }
 
 void SymbolTypeHandler::addSymbolType(char* name, int value) {
+
+    // SymbolType* current = symbolTypeTable->head;
+    // while (current != nullptr) {
+    //           //strcmp returns 0 if succeded
+    //             if (!strcmp(current->name, name)) {
+    //                 std::cout << "Symbol already defined in current scope" << std::endl;
+    //             }
+    //             current = current->next;
+    // }
+
+
     SymbolType* newSymbolType = new SymbolType(name, value); 
     newSymbolType->next = symbolTypeTable->head;
 
@@ -51,13 +65,14 @@ void SymbolTypeHandler::updateSymbolType(char* name, int value) {
             }
         }
 
-        printf("Variable '%s' does not exist in the SymbolType table.\n", name);
+        std::cout << "Variable " << name << " does not exist in the SymbolType table" << std::endl;
 };
 
 int SymbolTypeHandler::lookupSymbolType(char* name){
-        for (int i = symbolTypeTableStack.size() - 1; i >= 0; --i) {
 
-            //TODO: IF SymbolType IS NOT FOUND IN CURRENT SCOPE, SEARCH THROUGH PREVIOUS SCOPES
+        std::cout << "Checking type of variable " << name << std::endl;
+
+        for (int i = symbolTypeTableStack.size() - 1; i >= 0; --i) {
 
             SymbolType* current =  symbolTypeTableStack[i].head;
 
@@ -70,7 +85,7 @@ int SymbolTypeHandler::lookupSymbolType(char* name){
             }
         }
 
-        printf("Variable '%s' is not present in the SymbolType table.\n", name);
+        std::cout << "Variable " << name << " does not exist in the SymbolType table" << std::endl;
 
         return 0;
 };

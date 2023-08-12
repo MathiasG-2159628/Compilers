@@ -1,14 +1,13 @@
-if(true){
+var a = 5;
 
-
-    func poo(a int) int{
-
+func first(a int) int{
+    if(a < 20){
         return a;
     }
+}
 
-    var a,b = poo(5), 5;
-
-    b = true;
+func main(){
+    var a = first(10)
 
 }
 

@@ -5,6 +5,7 @@
 #include <iostream>
 #include <algorithm>
 #include <cstring>
+#include <string>
 #include <type_traits>
 #include "symboltypetable.hpp"
 #include "functypetable.hpp"
@@ -42,21 +43,38 @@ IdList::IdList(){};
 
 
 StmList::StmList(Stm h, StmList* s){
-
-
-    head = h;
-    next = s;
+    if(dynamic_cast<Function_DeclarationStm*>(h) == nullptr){
+        head = h;
+        next = s;
+    }
+    else{
+        std::cout << "No function definition allowed inside block" << std::endl;
+    }
+    
 }
 
 StmList::StmList(){}
 
 
-ParamList::ParamList(Param_declaration* h, ParamList* n){
+ParamList::ParamList(Param_declaration* h, ParamList* n){  
         head = h;
         next = n;
 }
 
 ParamList::ParamList(){}
+
+DeclarationList::DeclarationList(Stm h, DeclarationList* n){
+
+        if(dynamic_cast<DeclarationStm*>(h) == nullptr && dynamic_cast<Function_DeclarationStm*>(h) == nullptr ){
+             std::cout << "Error: non-declaration statement not allowed in global scope" << std::endl;
+             
+        }else{
+            head = h;
+            next = n;
+        }
+}
+
+DeclarationList::DeclarationList(){}
 
 
 Param_declaration::Param_declaration(char* n, int t){
@@ -67,12 +85,41 @@ Param_declaration::Param_declaration(char* n, int t){
 Param_declaration::Param_declaration(){}
 
 
+ProgramStm::ProgramStm(DeclarationList* decl){
+    declist = decl;
+}
+
+void ProgramStm::typecheck(){
+    DeclarationList* decl = new DeclarationList(declist->head, declist->next);
+
+    while(decl != nullptr){
+        decl->head->typecheck();
+        decl = decl->next;
+    }
+}
+
+void ProgramStm::interp(){
+    DeclarationList* decl = new DeclarationList(declist->head, declist->next);
+
+    while(decl != nullptr){
+        decl->head->interp();
+        decl = decl->next;
+    }
+}
+
+
 PrintStm::PrintStm(ExpList* expl){
     explist = expl;
 }
 
 void PrintStm::typecheck(){
-    //No logic needed 
+    ExpList* expl = new ExpList(explist->head, explist->next);
+
+    int i = 0;
+    while(expl != nullptr){
+        i = expl->head->typecheck();
+        expl = expl->next;
+    }
 }
 
 void PrintStm::interp(){
@@ -128,6 +175,7 @@ Function_DeclarationStm::Function_DeclarationStm(Function_signature* sig, StmLis
 
 Function_DeclarationStm::Function_DeclarationStm(){}
 
+
 void Function_DeclarationStm::typecheck(){
 
     symboltypehandler.pushSymbolTypeTable(SymbolTypeTable());
@@ -135,9 +183,8 @@ void Function_DeclarationStm::typecheck(){
     std::vector<int> paramTypes;
 
     if(signature->params != nullptr){
-       ParamList* list = new ParamList();
-       list->head = signature->params->head;
-       list->next = signature->params->next;
+       ParamList* list = new ParamList(signature->params->head, signature->params->next);
+
 
        while(list != nullptr){
             symboltypehandler.addSymbolType(list->head->name, list->head->type);
@@ -146,15 +193,18 @@ void Function_DeclarationStm::typecheck(){
        }
     }
 
+
     //Copy for evaluation
-    StmList* stml = new StmList();
     int functionType = signature->type;
     returnhandler.returnscopetype = functionType;
-    
-    if(stmlist != 0){
-        stml->next = stmlist->next;
-        stml->head = stmlist->head;
-        
+    bool isReturnInFunctionScope = false;
+
+    //BEPERKING: KAN NIET ZIEN OF ELK CODEPAD EEN RETURN GEEFT
+
+    if(stmlist != nullptr){
+  
+        StmList* stml = new StmList(stmlist->head, stmlist->next);
+         
         while(stml != nullptr){
 
             if(dynamic_cast<ReturnStm*>(stml->head) != nullptr){
@@ -164,12 +214,10 @@ void Function_DeclarationStm::typecheck(){
                 
                 if(returnstm->expr != nullptr && functionType == -1){
                     std::cout << "Error: no return value in void defined function allowed" << std::endl;
-                    return;
                 }
 
                 if(returnstm->expr == nullptr && functionType != -1){
                     std::cout << "Error: function needs a return type" << std::endl;
-                    return;
                 }
                 
                 int returntype = -1;
@@ -197,7 +245,9 @@ void Function_DeclarationStm::typecheck(){
                     std::cout << "Unreachable code error" << std::endl;
                 }
 
-            }else{
+            }
+            else{
+
                 stml->head->typecheck();
             }
 
@@ -208,26 +258,28 @@ void Function_DeclarationStm::typecheck(){
         if(functionType != -1 && !returnhandler.returnEncountered){
             std::cout << "Error: function needs a return type" << std::endl;
         }
-
-        FunctionType* ftype = new FunctionType();
-        ftype->type = functionType;
-        ftype->next = nullptr;
-        ftype->name = identifier;
-        ftype->paramtypes = paramTypes;
-        functiontypehandler.addFunctionType(ftype);
-   
     }
     else{
         if(functionType != -1){
              std::cout << "Error: function needs a return type" << std::endl;
         }
     }
+
+
+    FunctionType* ftype = new FunctionType();
+    ftype->type = functionType;
+    ftype->next = nullptr;
+    ftype->name = identifier;
+    ftype->paramtypes = paramTypes;
+    functiontypehandler.addFunctionType(ftype);
+
     returnhandler.returnscopetype = -1;
     symboltypehandler.popSymbolTypeTable();
    
 }
 
 void Function_DeclarationStm::interp(){
+
 
     int returnType = signature->type;
     ParamList* paramlist = signature->params;
@@ -259,15 +311,12 @@ DeclarationStm::DeclarationStm(){
 
 //"COMPILE TIME" TYPE AND ERROR CHECKING
 void DeclarationStm::typecheck(){
-
+    
     //Copy objects for evaluation
-    IdList* idl = new IdList();
-    idl->head = idlist->head;
-    idl->next = idlist->next;
+    IdList* idl = new IdList(idlist->head, idlist->next);
 
-    ExpList* expl = new ExpList();
-    expl->head = explist->head;
-    expl->next = explist->next;
+    ExpList* expl = new ExpList(explist->head, explist->next);
+
 
     //DO THIS IN CONSTRUCTOR
     std::vector<char*> declared_ids;
@@ -310,8 +359,8 @@ void DeclarationStm::typecheck(){
             }
             
             int returnType =  expl->head->typecheck();
+             
             
-            std::cout << idl->head << std::endl;
 
             if(declaredType == INT){
                 if(returnType != INT){
@@ -334,7 +383,10 @@ void DeclarationStm::typecheck(){
                 }
             }
 
+           
+
             symboltypehandler.addSymbolType(idl->head, declaredType);
+
 
             idl = idl->next;
             expl = expl->next;             
@@ -455,13 +507,9 @@ AssignStm::AssignStm(){
 void AssignStm::typecheck(){
 
     //Copy objects for evaluation
-    IdList* idl = new IdList();
-    idl->head = idlist->head;
-    idl->next = idlist->next;
+    IdList* idl = new IdList(idlist->head, idlist->next);
 
-    ExpList* expl = new ExpList();
-    expl->head = explist->head;
-    expl->next = explist->next;
+    ExpList* expl = new ExpList(explist->head, explist->next);
 
     std::vector<char*> assigned_ids;
 
@@ -537,19 +585,6 @@ void AssignStm::interp(){
 
 
 ReturnStm::ReturnStm(Exp e){
-
-    int i = -1;
-
-    if(e != nullptr){
-        if(e->interp().boolValue != nullptr){
-            i = BOOL;
-        }else{
-            i = INT;
-        }
-    }
-
-    returnTypesInStatement.push_back(i);
-
     expr = e;
 }
 
@@ -564,22 +599,20 @@ BlockStm::BlockStm(StmList* stl){
 
 void BlockStm::typecheck(){
 
-    //TODO: RECURSIVE CHECKING FOR RETURN TYPE;
     if(stmlist == nullptr) return;
 
-    StmList* list = new StmList();
-    list->head = stmlist->head;
-    list->next = stmlist->next;
-
+    StmList* list = new StmList(stmlist->head, stmlist->next);
+   
     symboltypehandler.pushSymbolTypeTable(SymbolTypeTable());
     while(list != nullptr){
-        
+                                        
         if(dynamic_cast<ReturnStm*>(list->head) != nullptr){
 
 
                 ReturnStm* returnstm = static_cast<ReturnStm*>(list->head);
 
                 returnhandler.returnEncountered = true;
+
                 int returntype = returnstm->expr->typecheck();
 
                 if(returntype != returnhandler.returnscopetype){
@@ -604,13 +637,11 @@ void BlockStm::typecheck(){
 void BlockStm::interp(){
     if(stmlist == nullptr) return;
 
-    StmList* list = new StmList();
-    list->head = stmlist->head;
-    list->next = stmlist->next;
+    StmList* list = new StmList(stmlist->head, stmlist->next);    
+
 
     symbolhandler.pushSymbolTable(SymbolTable());
     while(list != nullptr){
-        std::cout << "EXECUTING BLOCKSTATEMENT" << " \n";
         if(dynamic_cast<ReturnStm*>(list->head) != nullptr){
 
                 std::cout << "RETURN STATEMENT ENCOUNTERED" << " \n";
@@ -652,9 +683,7 @@ void VoidFunctionStm::typecheck(){
 
   FunctionType functiontype = functiontypehandler.lookupFunctionType(identifier);
     if(arguments != nullptr && functiontype.paramtypes.size() != 0){
-        ExpList* args = new ExpList();
-        args->head = arguments->head;
-        args->next = arguments->next;
+        ExpList* args = new ExpList(arguments->head, arguments->next);
 
         int i = 0;
         while(args != nullptr){
@@ -752,10 +781,11 @@ void VoidFunctionStm::interp(){
     else{
         std::cout << "Too many arguments " << std::endl;
     }
+
     
     //Executing the function
     while(stmlist != nullptr){
-        
+
         if(dynamic_cast<ReturnStm*>(stmlist->head) != nullptr){
             
             ReturnStm* returnstm = dynamic_cast<ReturnStm*>(stmlist->head);
@@ -770,6 +800,7 @@ void VoidFunctionStm::interp(){
                 std::cout << "Error: function needs a return type" << std::endl;
                 return;
             }
+        
 
             ReturnValue returnValue = returnstm->expr->interp();
 
@@ -794,9 +825,9 @@ void VoidFunctionStm::interp(){
             return;
         }
         else {
-            stmlist->head->interp(); // Execute the nested block
+            stmlist->head->interp(); 
+            // Execute the nested block
             if (returnhandler.returnEncountered) {
-                
                 ReturnValue returnValue = returnhandler.returnExp->interp();
 
                 if(returnhandler.returnExp != nullptr && returntype == -1){
@@ -826,7 +857,7 @@ void VoidFunctionStm::interp(){
     }
 
     if(returntype != -1 && !returnhandler.returnEncountered){
-        std::cout << "Error: function needs a return type" << std::endl;
+        std::cout << "Error: expected a return value" << std::endl;
     }
 
 }
@@ -873,7 +904,6 @@ If_stm::If_stm(Exp ex, Stm bstm){
 }
 
 void If_stm::typecheck(){
-
     if(exp->typecheck() != BOOL) std::cout << "Boolean type expected in if-clause" << std::endl;
     blockStm->typecheck();
 }
@@ -888,8 +918,12 @@ void If_stm::interp(){
 
     if(returnValue.boolValue != nullptr){
 
-        if(*returnValue.boolValue == 1){            
+        if(*returnValue.boolValue == true){   
+            std::cout << "if condition is true" << std::endl;         
             blockStm->interp();
+        }
+        else{
+            std::cout << "if condition is false" << std::endl;
         }
     }
     else{
@@ -1181,9 +1215,7 @@ int FunctionExp::typecheck(){
     
     FunctionType functiontype = functiontypehandler.lookupFunctionType(identifier);
     if(arguments != nullptr && functiontype.paramtypes.size() != 0){
-        ExpList* args = new ExpList();
-        args->head = arguments->head;
-        args->next = arguments->next;
+        ExpList* args = new ExpList(arguments->head, arguments->next);
 
         int i = 0;
         while(args != nullptr){
@@ -1377,7 +1409,8 @@ IdExp::IdExp(char* id){
 }
 
 int IdExp::typecheck(){
-   return symboltypehandler.lookupSymbolType(identifier);
+   int type = symboltypehandler.lookupSymbolType(identifier);
+   return type;
 }
 
 ReturnValue IdExp::interp(){
@@ -1385,3 +1418,4 @@ ReturnValue IdExp::interp(){
 
     return symbolhandler.lookupSymbol(identifier);
 }
+

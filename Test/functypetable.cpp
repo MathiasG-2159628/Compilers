@@ -5,6 +5,11 @@
 //FunctionTypehandler definitions
 
 void FunctionTypeHandler::addFunctionType(FunctionType* newFunctionType){
+
+    // if(lookupFunctionType(newFunctionType->name).type != 0){
+    //     std::cout << "Redefinition of function" << std::endl;
+    // }
+
     newFunctionType->next = functionTypeTable->head;
     functionTypeTable->head = newFunctionType;
     std::cout << "Added FunctionType " << newFunctionType->name << " to FunctionTypeType table" << std::endl;
@@ -29,8 +34,10 @@ FunctionType FunctionTypeHandler::lookupFunctionType(char* name){
         
 
         printf("FunctionType '%s' is not present in the FunctionType table.\n", name);
+        FunctionType functiontype;
+        functiontype.type = 0; 
 
-        return FunctionType();
+        return functiontype;
 }
 
 

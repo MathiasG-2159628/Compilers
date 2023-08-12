@@ -47,7 +47,7 @@ lesserthan            "<"
 lesserorequal         "<="
 equals                "=="
 notequals             "!="
-intliteral            "-"?[0-9]+
+intliteral            [0-9]+
 boolliteral          "true"|"false"
 funct               "func"
 package             "package"
@@ -112,7 +112,7 @@ is               "="
                             return IDEN;}
 
 {newline}                 { 
-                            if (lastTokenType == IDEN) 
+                            if (lastTokenType == IDEN || lastTokenType == RPAREN) 
                             {
                                 lastTokenType = -1; 
                                 return SEMICOLON; 

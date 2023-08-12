@@ -11,15 +11,13 @@
   #include "lexer.h"
   #include "functiontable.hpp"
   #include "lex.yy.c"
+  #include "symboltypetable.hpp"
 
   Stm thesyntree;
 
 %}
 
 //TODO: implement the rest and implement package main functionality
-// -> make initial program statement consisting of a statement list 
-// these statements will be executed 
-// after that is done lookup the main function in the function table and execute everything
 
 
 %union{
@@ -36,6 +34,7 @@
   StmList* stmlist;
   IdList*  idlist;
   ParamList* paramlist;
+  DeclarationList* decllist;
 
   //Function related stuff
   Param_declaration* paramdecl;
@@ -46,13 +45,18 @@
 %token <boollit> BOOLLITERAL
 %token <intlit> INTLITERAL
 
+//TODO: DECLARATIONLIST
+//PACKAGE
+//TEST BY CALLING MAIN AND SO ON
+//FINISH UP
+
 %token  SEMICOLON INT BOOL RETURN VAR IF FOR LPAREN RPAREN LBRACE RBRACE PLUS MIN MUL DIV PLUSASSIGN MINASSIGN 
 %token  MULASSIGN DIVASSIGN AND OR NOT INC DEC GT GE LT LE EQ NE 
 %token  COMMA PRINT FUNC PACKAGE IS
 
 
 %left MUL DIV
-%left PLUS MIN
+%right PLUS MIN
 %left NOT
 %nonassoc EQ NE
 %nonassoc GT GE LT LE
@@ -65,12 +69,14 @@
 //Base 
 %type <stm> statement
 %type <exp> expression
+%type <stm> program
 
 //Lists
 %type <explist> expressionlist
 %type <stmlist> statementlist
 %type <idlist> identifierlist
 %type <paramlist> parameterlist
+%type <decllist> declaration_list
 
 //Statements
 %type <stm> print_statement
@@ -101,19 +107,28 @@
 
 //TODO: WRITE PROGRAM STRUCT THAT DOESN'T CAUSE THE STATEMENTS TO BE EXECUTED
 //TODO: NOT EXP
-program : statementlist
-        | ;
+program : declaration_list {$$ = new ProgramStm($1);
+                            thesyntree = $$;} ;
 
 //TODO: define trivial comment token
 /* comment: statementlist SEMICOLON
        ; */
-/* 
 
-//TODO: TRY ADDING RULES TO THIS PART OF THE CODE!
-declaration_list : declaration_statement
-                 | function_declaration_statement
-                 | function_declaration_statement declaration_list 
-                 | declaration_statement declaration_list  */
+
+declaration_list : declaration_statement {std::cout << "declaration_list: function_declaration_statement declaration_list" << std::endl;
+                                          $$ = new DeclarationList($1, nullptr);
+                                         }
+                 | function_declaration_statement {std::cout << "declaration_list: function_declaration_statement" << std::endl;
+                                                   $$ = new DeclarationList($1, nullptr);
+                                                  }
+                 | function_declaration_statement declaration_list {
+                                                                   std::cout << "declaration_list: function_declaration_statement declaration_list" << std::endl;
+                                                                   $$ = new DeclarationList($1, $2);}
+                 | declaration_statement declaration_list {
+                                                          std::cout << "declaration_list: declaration_statement declaration_list" << std::endl;
+                                                          $$ = new DeclarationList($1, $2)}
+                 ;
+                                                            
 
 statement : block_statement
           | if_statement
@@ -238,7 +253,7 @@ function_declaration_statement : FUNC IDEN function_signature LBRACE statementli
                                 std::strcpy(identifier, $2);
                                 std::cout << "DECLARING FUNCTION " << identifier << " " << std::endl;                             
 
-                                std::cout << "function_declaration_statement : FUNC IDEN " << identifier << " function_signature LBRACE statementlist RBRACE " << std::endl;
+                                std::cout << "function_declaration_statement : FUNC IDEN " << identifier << " function_signature" << std::endl;
                                  
                                 $$ = new Function_DeclarationStm($3, nullptr, identifier); 
                                
@@ -314,11 +329,7 @@ expressionlist :  expressionlist COMMA expression {std::cout << "expressionlist 
                             $$ = new ExpList($1, nullptr);}
                ;
 
-expression : INTLITERAL {std::cout << "expression : INTLITERAL " << yylval.intlit << "\n";
-                        $$ = new IntlitExp(yylval.intlit);} 
-           | BOOLLITERAL {std::cout << "expression : BOOLLITERAL " << yylval.boollit << "\n";
-                         $$ = new BoollitExp(yylval.boollit);}
-           | IDEN {std::cout << "expression : IDEN " << yylval.id << "\n";
+expression : IDEN {std::cout << "expression : IDEN " << yylval.id << "\n";
                   char* identifier = new char[std::strlen(yylval.id) + 1];
                   std::strcpy(identifier, yylval.id);
                   $$ = new IdExp(identifier);
@@ -329,6 +340,10 @@ expression : INTLITERAL {std::cout << "expression : INTLITERAL " << yylval.intli
            | boolean_op_expression
            | boolean_arithmetic_op_expression      
            | function_expression 
+           | INTLITERAL {std::cout << "expression : INTLITERAL " << yylval.intlit << "\n";
+                        $$ = new IntlitExp(yylval.intlit);} 
+           | BOOLLITERAL {std::cout << "expression : BOOLLITERAL " << yylval.boollit << "\n";
+                         $$ = new BoollitExp(yylval.boollit);}
            ;
 
 arithmetic_op_expression : 
@@ -397,6 +412,7 @@ int main(int argc, char* argv[]) {
     int tokenid;
 
     symbolhandler.pushSymbolTable(SymbolTable());
+    symboltypehandler.pushSymbolTypeTable(SymbolTypeTable());
 
     yyin = fopen("./gotest.txt", "r");
  
@@ -404,16 +420,25 @@ int main(int argc, char* argv[]) {
     std::cout << "Parsing instructions: " << "\n\n";
     yyparse();
 
+    
+
     std::cout << "\n\nTypechecking AST:" << std::endl;
-    thesyntree->typecheck();  
+    thesyntree->typecheck(); 
 
+    //I use this property for typechecking aswell as interpreting. Hence why I reset it for insurance 
+    returnhandler.returnEncountered = false;
+   
     std::cout << "\n\nInterpreting AST: \n";
+   
+    thesyntree->interp();
+
+    VoidFunctionStm main = VoidFunctionStm(nullptr, "main");
+    main.interp();  
 
 
-    /* VoidFunctionStm main = VoidFunctionStm(nullptr, "main");
-    main.interp();  */
 
     return 0;
+
 }
 
 void yyerror (char *s) {

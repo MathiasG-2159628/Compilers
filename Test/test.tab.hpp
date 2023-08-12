@@ -87,7 +87,7 @@ typedef union YYSTYPE
 {
 
 /* Line 1676 of yacc.c  */
-#line 25 "test.ypp"
+#line 23 "test.ypp"
 
   //Literals and base classes
   char* id;
@@ -102,6 +102,7 @@ typedef union YYSTYPE
   StmList* stmlist;
   IdList*  idlist;
   ParamList* paramlist;
+  DeclarationList* decllist;
 
   //Function related stuff
   Param_declaration* paramdecl;
@@ -110,7 +111,7 @@ typedef union YYSTYPE
 
 
 /* Line 1676 of yacc.c  */
-#line 114 "test.tab.hpp"
+#line 115 "test.tab.hpp"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
