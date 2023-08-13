@@ -65,10 +65,24 @@ ParamList::ParamList(){}
 
 DeclarationList::DeclarationList(Stm h, DeclarationList* n){
 
-        if(dynamic_cast<DeclarationStm*>(h) == nullptr && dynamic_cast<Function_DeclarationStm*>(h) == nullptr ){
+        if(dynamic_cast<DeclarationStm*>(h) == nullptr && dynamic_cast<Function_DeclarationStm*>(h) == nullptr && dynamic_cast<PackageStm*>(h) == nullptr){
              std::cout << "Error: non-declaration statement not allowed in global scope" << std::endl;
              
         }else{
+
+            if(dynamic_cast<PackageStm*>(h) != nullptr){
+                PackageStm* pckgstm = dynamic_cast<PackageStm*>(h);
+                if(!strcmp(pckgstm->packageid, "main")){
+                    std::cout << "package included!" << std::endl;
+                    packageMainIncluded = true;
+                }
+            }
+            else{
+                if(!packageMainIncluded){
+                    std::cout << "Error: expected package" << std::endl;
+                }
+            }
+
             head = h;
             next = n;
         }
@@ -1002,6 +1016,22 @@ void ArithmeticAssignOpStm::interp() {
     }
 }
 
+
+PackageStm::PackageStm(){
+
+}
+
+PackageStm::PackageStm(char* id){
+    packageid = id;
+}
+
+void PackageStm::typecheck(){
+
+}
+
+void PackageStm::interp(){
+
+}
 
 IntlitExp::IntlitExp(){
 

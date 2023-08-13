@@ -90,6 +90,7 @@
 %type <stm> return_statement
 %type <stm> function_declaration_statement
 %type <stm> void_function_statement
+%type <stm> package_statement
 
 //Expressions
 %type <exp> arithmetic_op_expression
@@ -121,12 +122,18 @@ declaration_list : declaration_statement {std::cout << "declaration_list: functi
                  | function_declaration_statement {std::cout << "declaration_list: function_declaration_statement" << std::endl;
                                                    $$ = new DeclarationList($1, nullptr);
                                                   }
+                 | package_statement{std::cout << "declaration_list: package_statement" << std::endl;
+                                                   $$ = new DeclarationList($1, nullptr);
+                 }
                  | function_declaration_statement declaration_list {
                                                                    std::cout << "declaration_list: function_declaration_statement declaration_list" << std::endl;
                                                                    $$ = new DeclarationList($1, $2);}
                  | declaration_statement declaration_list {
                                                           std::cout << "declaration_list: declaration_statement declaration_list" << std::endl;
-                                                          $$ = new DeclarationList($1, $2)}
+                                                          $$ = new DeclarationList($1, $2);}
+                 | package_statement declaration_list {
+                                                          std::cout << "declaration_list: package_statement declaration_list" << std::endl;
+                                                          $$ = new DeclarationList($1, $2);}
                  ;
                                                             
 
@@ -141,6 +148,7 @@ statement : block_statement
           | return_statement
           | function_declaration_statement
           | void_function_statement
+          | package_statement
           ;
 
 //This parsing works in the wrong order, but in declarationstm the values are assigned to the right vals
@@ -170,8 +178,6 @@ block_statement : LBRACE statementlist RBRACE{std::cout << "LBRACE statementlist
                                               $$ = new BlockStm(nullptr); thesyntree = $$;}
                 ;
 
-//TODO: EMPTY PARENTHESIS RULES
-
 if_statement : IF expression block_statement{std::cout << "IF expression block_statement \n"; 
                                                           $$ = new If_stm($2, $3); thesyntree = $$;}
              ;
@@ -180,7 +186,7 @@ for_statement : FOR expression block_statement{std::cout << "for_statement : FOR
                                                             $$ = new For_stm($2, $3); thesyntree = $$;}
               ;
 
-//TODO VOOR LATER: ZELF DEFINIEREN ALS TOKEN
+//Niet als functie gedefinieerd
 print_statement : PRINT LPAREN expressionlist RPAREN SEMICOLON{std::cout << "print_statement : PRINT LPAREN expressionlist RPAREN \n"; 
                                                       $$ = new PrintStm($3); thesyntree = $$;}
 
@@ -321,6 +327,13 @@ void_function_statement : IDEN LPAREN expressionlist RPAREN SEMICOLON {
 
                         ;
 
+package_statement : PACKAGE IDEN SEMICOLON{ 
+                          char* identifier = new char[std::strlen($2) + 1];
+                          std::strcpy(identifier, $2);
+                          std::cout << "package_statement : PACKAGE IDEN " << identifier << std::endl;
+                          $$ = new PackageStm(identifier); thesyntree = $$;
+                      }
+
 //EXPRESSIONS
 
 expressionlist :  expressionlist COMMA expression {std::cout << "expressionlist COMMA expression  \n";
@@ -381,7 +394,6 @@ function_expression : IDEN LPAREN expressionlist RPAREN{
                       std::cout << "function_expression : IDEN " << identifier << " LPAREN RPAREN" << std::endl;
                       $$ = new FunctionExp(nullptr, identifier);
                     }
-
            ;
 
 

@@ -17,7 +17,7 @@
 //TODO: error handling
 //TODO: for block statement: push and pop new symbol table on the stack
 
-
+inline bool packageMainIncluded = false;
 
 struct Stm_ {
     virtual void typecheck(){};
@@ -278,6 +278,19 @@ struct ArithmeticAssignOpStm : public Stm_ {
     virtual void interp() override;
 
 };
+
+struct PackageStm : public Stm_{
+    char* packageid;
+
+    PackageStm(char* id);
+    PackageStm();
+
+    virtual void typecheck() override;
+
+    virtual void interp() override;
+
+};
+
 //Expressions
 struct IntlitExp : public Exp_
 {

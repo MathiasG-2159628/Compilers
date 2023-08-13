@@ -1,3 +1,5 @@
+package main
+
 var a = 5;
 
 func first(a int) int{
@@ -7,7 +9,9 @@ func first(a int) int{
 }
 
 func main(){
-    var a = first(10)
+    var a = first(10-5)
+    var a = true;
+    print(a)
 
 }
 
