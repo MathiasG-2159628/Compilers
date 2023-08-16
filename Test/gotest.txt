@@ -3,7 +3,7 @@ package main
 var a = 5;
 
 func first(a int) int{
-    if(a < 20){
+    if print(899); (a < 20){
         return a;
     }
 }

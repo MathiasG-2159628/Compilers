@@ -73,13 +73,13 @@ DeclarationList::DeclarationList(Stm h, DeclarationList* n){
             if(dynamic_cast<PackageStm*>(h) != nullptr){
                 PackageStm* pckgstm = dynamic_cast<PackageStm*>(h);
                 if(!strcmp(pckgstm->packageid, "main")){
-                    std::cout << "package included!" << std::endl;
+                    if(typeChecking){std::cout << "package included!" << std::endl;}
                     packageMainIncluded = true;
                 }
             }
             else{
                 if(!packageMainIncluded){
-                    std::cout << "Error: expected package" << std::endl;
+                    if(typeChecking){std::cout << "Error: expected package" << std::endl;}
                 }
             }
 
@@ -104,8 +104,9 @@ ProgramStm::ProgramStm(DeclarationList* decl){
 }
 
 void ProgramStm::typecheck(){
+    typeChecking = true;
     DeclarationList* decl = new DeclarationList(declist->head, declist->next);
-
+        
     while(decl != nullptr){
         decl->head->typecheck();
         decl = decl->next;
@@ -912,18 +913,20 @@ void IncDecStm::interp(){
 
 If_stm::If_stm(){}
 
-If_stm::If_stm(Exp ex, Stm bstm){
+If_stm::If_stm(Stm stm, Exp ex, Stm bstm){
         exp = ex;
         blockStm = static_cast<BlockStm*>(bstm);
+        statement = stm;
 }
 
 void If_stm::typecheck(){
+    if(statement != nullptr) statement->typecheck();
     if(exp->typecheck() != BOOL) std::cout << "Boolean type expected in if-clause" << std::endl;
     blockStm->typecheck();
 }
 
 void If_stm::interp(){
-
+    if(statement != nullptr) statement->interp();
     ReturnValue returnValue = exp->interp();
     
     // std::cout << *returnValue.boolValue << " " << returnValue.intValue << " ";

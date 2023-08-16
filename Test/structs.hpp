@@ -18,6 +18,7 @@
 //TODO: for block statement: push and pop new symbol table on the stack
 
 inline bool packageMainIncluded = false;
+inline bool typeChecking = false;
 
 struct Stm_ {
     virtual void typecheck(){};
@@ -238,9 +239,10 @@ struct IncDecStm : public Stm_{
 struct If_stm : public Stm_{
     Exp exp;
     BlockStm* blockStm;
+    Stm statement;
 
-    If_stm(Exp ex, Stm bstm);
-    If_stm(Exp ex, BlockStm* bstm);
+    If_stm(Stm stm, Exp ex, Stm bstm);
+    If_stm(Stm stm, Exp ex, BlockStm* bstm);
 
     If_stm();
 

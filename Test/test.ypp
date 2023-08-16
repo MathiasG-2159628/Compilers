@@ -178,8 +178,11 @@ block_statement : LBRACE statementlist RBRACE{std::cout << "LBRACE statementlist
                                               $$ = new BlockStm(nullptr); thesyntree = $$;}
                 ;
 
-if_statement : IF expression block_statement{std::cout << "IF expression block_statement \n"; 
-                                                          $$ = new If_stm($2, $3); thesyntree = $$;}
+if_statement : 
+                IF statement expression block_statement{std::cout << "IF statement expression block_statement \n"; 
+                                                          $$ = new If_stm($2, $3, $4); thesyntree = $$;}       
+              | IF expression block_statement{std::cout << "IF expression block_statement \n"; 
+                                                          $$ = new If_stm(nullptr, $2, $3); thesyntree = $$;}
              ;
 
 for_statement : FOR expression block_statement{std::cout << "for_statement : FOR LPAREN expression RPAREN block_statement \n"; 
@@ -432,7 +435,6 @@ int main(int argc, char* argv[]) {
     std::cout << "Parsing instructions: " << "\n\n";
     yyparse();
 
-    
 
     std::cout << "\n\nTypechecking AST:" << std::endl;
     thesyntree->typecheck(); 
