@@ -12,7 +12,7 @@ SymbolHandler::SymbolHandler(){
 }
 
 void SymbolHandler::pushSymbolTable(SymbolTable st) {
-    std::cout << "Symbol table pushed" << std::endl;
+    // std::cout << "Symbol table pushed" << std::endl;
     symbolTableStack.emplace_back(st);
     symbolTable = &symbolTableStack.back();
 }
@@ -26,7 +26,7 @@ void SymbolHandler::popSymbolTable() {
             symbolTable = nullptr;
         }
     }
-     std::cout << "Symbol table popped" << std::endl;
+    //  std::cout << "Symbol table popped" << std::endl;
 }
 
 void SymbolHandler::addSymbol(char* name, ReturnValue value) {
@@ -50,7 +50,8 @@ void SymbolHandler::updateSymbol(char* name, ReturnValue value) {
             }
         }
 
-        printf("Variable '%s' does not exist in the symbol table.\n", name);
+        std::cout << "Variable " << name << " does not exist in the symbol table" << std::endl;
+        exit(1);
 };
 
 ReturnValue SymbolHandler::lookupSymbol(char* name){
@@ -69,7 +70,8 @@ ReturnValue SymbolHandler::lookupSymbol(char* name){
             }
         }
 
-        printf("Variable '%s' is not present in the symbol table.\n", name);
+        std::cout << "Variable " << name << " does not exist in the symbol table" << std::endl;
+        exit(1);
 
         return ReturnValue();
 };

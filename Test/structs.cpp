@@ -49,6 +49,7 @@ StmList::StmList(Stm h, StmList* s){
     }
     else{
         std::cout << "No function definition allowed inside block" << std::endl;
+        exit(1);
     }
     
 }
@@ -67,19 +68,20 @@ DeclarationList::DeclarationList(Stm h, DeclarationList* n){
 
         if(dynamic_cast<DeclarationStm*>(h) == nullptr && dynamic_cast<Function_DeclarationStm*>(h) == nullptr && dynamic_cast<PackageStm*>(h) == nullptr){
              std::cout << "Error: non-declaration statement not allowed in global scope" << std::endl;
+             exit(1);
              
         }else{
 
             if(dynamic_cast<PackageStm*>(h) != nullptr){
                 PackageStm* pckgstm = dynamic_cast<PackageStm*>(h);
                 if(!strcmp(pckgstm->packageid, "main")){
-                    if(typeChecking){std::cout << "package included!" << std::endl;}
+                    //if(typeChecking){std::cout << "package included!" << std::endl;}
                     packageMainIncluded = true;
                 }
             }
             else{
                 if(!packageMainIncluded){
-                    if(typeChecking){std::cout << "Error: expected package" << std::endl;}
+                    if(typeChecking){std::cout << "Error: expected package" << std::endl; exit(1);}
                 }
             }
 
@@ -228,11 +230,13 @@ void Function_DeclarationStm::typecheck(){
 
                 
                 if(returnstm->expr != nullptr && functionType == -1){
-                    std::cout << "Error: no return value in void defined function allowed" << std::endl;
+                    std::cout << "Error: no return value in void defined function " << identifier << "allowed" << std::endl;
+                    exit(1);
                 }
 
                 if(returnstm->expr == nullptr && functionType != -1){
-                    std::cout << "Error: function needs a return type" << std::endl;
+                    std::cout << "Error: function " << identifier << "needs a return type" << std::endl;
+                    exit(1);
                 }
                 
                 int returntype = -1;
@@ -241,23 +245,25 @@ void Function_DeclarationStm::typecheck(){
                         returntype =  returnstm->expr->typecheck();
                 } 
 
-                std::cout << "RETURNTYPE: " << returntype << std::endl;
+                //std::cout << "RETURNTYPE: " << returntype << std::endl;
                     //returnstm.interp();
                 
 
                 if(functionType == BOOL){
                     if(returntype != BOOL){          
-                        std::cout << "wrong return type error" << std::endl;
+                        std::cout << "Error: wrong return type in function " << identifier << std::endl;
+                        exit(1);
                     }
                 }
                 else if(functionType == INT){
                     if(returntype != INT){
-                        std::cout << "wrong return type error" << std::endl;
+                        std::cout << "Error: wrong return type in function " << identifier << std::endl;
+                        exit(1);
                     }
                 }
 
                 if(stml->next != nullptr){
-                    std::cout << "Unreachable code error" << std::endl;
+                    std::cout << "Error: unreachable code in function" << identifier << std::endl;
                 }
 
             }
@@ -272,11 +278,13 @@ void Function_DeclarationStm::typecheck(){
 
         if(functionType != -1 && !returnhandler.returnEncountered){
             std::cout << "Error: function needs a return type" << std::endl;
+            exit(1);
         }
     }
     else{
         if(functionType != -1){
              std::cout << "Error: function needs a return type" << std::endl;
+             exit(1);
         }
     }
 
@@ -341,15 +349,15 @@ void DeclarationStm::typecheck(){
             
             if(containsValue(declared_ids, idl->head)){
                 
-                std::cout << idl->head << std::endl;
+                // std::cout << idl->head << std::endl;
 
-                for(auto&& i: declared_ids){
-                    std::cout << i << " ";
-                }
-                std::cout << std::endl;
+                // for(auto&& i: declared_ids){
+                //     std::cout << i << " ";
+                // }
+                // std::cout << std::endl;
 
-                std::cout << "Error: duplicate indentifier in declaration" << std::endl;
-                return;
+                std::cout << "Error: duplicate indentifier " << idl->head << " in declaration" << std::endl;
+                exit(1);
             }
 
             symboltypehandler.addSymbolType(idl->head, declaredType);
@@ -359,18 +367,21 @@ void DeclarationStm::typecheck(){
         while(idl != nullptr){
             
             if(containsValue(declared_ids, idl->head)){
-                std::cout << "Error: duplicate indentifier in declaration" << std::endl;
+                std::cout << "Error: duplicate indentifier  " << idl->head << " in declaration" << std::endl;
+                exit(1);
             }
             declared_ids.push_back(idl->head);
 
 
             //TODO: fix too many arguments
             if((idl->next != nullptr && expl->next == nullptr) ){
-                std::cout << "Error: argument count not matching" << std::endl;
+                std::cout << "Error: argument count not matching in declaration" << std::endl;
+                exit(1);
             }
 
             if(idl->next == nullptr && expl->next != nullptr){
-                std::cout << "Error: argument count not matching" << std::endl;
+                std::cout << "Error: argument count not matching in declaration" << std::endl;
+                exit(1);
             }
             
             int returnType =  expl->head->typecheck();
@@ -379,7 +390,8 @@ void DeclarationStm::typecheck(){
 
             if(declaredType == INT){
                 if(returnType != INT){
-                    std::cout << "Type error: can't assign non-int value to int variable" << std::endl;
+                    std::cout << "Type error: can't assign non-int value to int variable in declaration" << std::endl;
+                    exit(1);
                 }
 
             }
@@ -387,11 +399,13 @@ void DeclarationStm::typecheck(){
 
                 if(returnType != BOOL){
                     std::cout << "Type error: can't assign non-bool value to bool variable" << std::endl;
+                    exit(1);
                 }
             }
             else if(declaredType == -1){
                 if(returnType == -1){
                     std::cout << "Type error: can't assign type void to variables" << std::endl;
+                    exit(1);
                 }
                 else{
                     declaredType = returnType;
@@ -419,28 +433,29 @@ void DeclarationStm::interp(){
             
             if(containsValue(declared_ids, idlist->head)){
                 
-                std::cout << idlist->head << std::endl;
+                // std::cout << idlist->head << std::endl;
 
-                for(auto&& i: declared_ids){
-                    std::cout << i << " ";
-                }
-                std::cout << std::endl;
+                // for(auto&& i: declared_ids){
+                //     std::cout << i << " ";
+                // }
+                // std::cout << std::endl;
 
                 std::cout << "Error: duplicate indentifier in declaration" << std::endl;
-                return;
+                exit(1);
             }
 
 
             if(declaredType == INT){
                 symbolhandler.addSymbol(idlist->head, ReturnValue(0));
-                std::cout << "Added int value " << idlist->head << " to symbol table" << std::endl;
+                // std::cout << "Added int value " << idlist->head << " to symbol table" << std::endl;
             }
             else if(declaredType == BOOL){
                 symbolhandler.addSymbol(idlist->head, ReturnValue(true));
-                std::cout << "Added bool value " << idlist->head << " to symbol table" << std::endl;
+                // std::cout << "Added bool value " << idlist->head << " to symbol table" << std::endl;
             }
             else{
-                std::cout << "Type error" << std::endl;
+                std::cout << "Type error in declaration" << std::endl;
+                exit(1);
             }
 
              declared_ids.push_back(idlist->head);
@@ -453,17 +468,20 @@ void DeclarationStm::interp(){
             
             if(containsValue(declared_ids, idlist->head)){
                 std::cout << "Error: duplicate indentifier in declaration" << std::endl;
+                exit(1);
             }
             declared_ids.push_back(idlist->head);
 
 
             //TODO: fix too many arguments
             if((idlist->next != nullptr && explist->next == nullptr) ){
-                std::cout << "Error: argument count not matching" << std::endl;
+                std::cout << "Error: argument count not matching in declaration" << std::endl;
+                exit(1);
             }
 
             if(idlist->next == nullptr && explist->next != nullptr){
-                std::cout << "Error: argument count not matching" << std::endl;
+                std::cout << "Error: argument count not matching in declaration" << std::endl;
+                exit(1);
             }
             
             ReturnValue returnValue =  explist->head->interp();
@@ -474,34 +492,36 @@ void DeclarationStm::interp(){
                 if(returnValue.boolValue == nullptr){
                     symbolhandler.addSymbol(idlist->head, returnValue);
 
-                    std::cout << "Added int value " << idlist->head << " to symbol table with value " << *returnValue.intValue << std::endl;
+                    //std::cout << "Added int value " << idlist->head << " to symbol table with value " << *returnValue.intValue << std::endl;
                 }
                 else{
                     //throw error
+                    exit(1);
                 }
             }
             else if(declaredType == BOOL){
 
                 if(returnValue.boolValue == nullptr){
                     //throw error
+                    exit(1);
                 }else{
                     symbolhandler.addSymbol(idlist->head, returnValue);
-                    std::cout << "Added bool value " << idlist->head << " to symbol table with value " << *returnValue.boolValue<< std::endl;
+                    //std::cout << "Added bool value " << idlist->head << " to symbol table with value " << *returnValue.boolValue<< std::endl;
                 }
             }
             else if(declaredType == -1){
                 if(returnValue.boolValue == nullptr){
                     symbolhandler.addSymbol(idlist->head, returnValue);
-                    std::cout << "Added int value " << idlist->head << " to symbol table with value " << *returnValue.intValue << std::endl;
+                    // std::cout << "Added int value " << idlist->head << " to symbol table with value " << *returnValue.intValue << std::endl;
 
                 }else{
                     symbolhandler.addSymbol(idlist->head, returnValue);
-                    std::cout << "Added bool value " << idlist->head << " to symbol table" << std::endl;
-                    std::cout << "Added bool value " << idlist->head << " to symbol table with value " << *returnValue.boolValue<< std::endl;
+                    // std::cout << "Added bool value " << idlist->head << " to symbol table" << std::endl;
+                    // std::cout << "Added bool value " << idlist->head << " to symbol table with value " << *returnValue.boolValue<< std::endl;
                 }
             }
             else{
-                std::cout << "type error " << declaredType << std::endl;
+                // std::cout << "type error " << declaredType << std::endl;
             }
             
             idlist = idlist->next;
@@ -531,27 +551,30 @@ void AssignStm::typecheck(){
     while(idl != nullptr){
 
         if(containsValue(assigned_ids, idl->head)){
-            std::cout << "Duplicate identifier in assign statement";
-            return;
+            std::cout << "Duplicate identifier in assign statement" << std::endl;
+            exit(1);
         }
         
         assigned_ids.push_back(idl->head);
 
         if(idl->next != nullptr && expl->next == nullptr){
-            std::cout << "Error: argument count not matching" << std::endl;
+            std::cout << "Error: argument count not matching in assign statement" << std::endl;
+            exit(1);
         }
 
         if(idl->next == nullptr && expl->next != nullptr){
-            std::cout << "Error: argument count not matching" << std::endl;
+            std::cout << "Error: argument count not matching in assign statement" << std::endl;
+            exit(1);
         }
         
         int lookupReturnType = symboltypehandler.lookupSymbolType(idlist->head);
         int typecheckReturnType = expl->head->typecheck();
         
-        std::cout << "Lookup return type: " << lookupReturnType << std::endl;
-        std::cout << "typecheckReturnType: " << typecheckReturnType << std::endl;
+        // std::cout << "Lookup return type: " << lookupReturnType << std::endl;
+        // std::cout << "typecheckReturnType: " << typecheckReturnType << std::endl;
         if(lookupReturnType != typecheckReturnType){
-            std::cout << "Argument type not matching variable" << std::endl;
+            std::cout << "Error: argument type not matching variable type in assign statement" << std::endl;
+            exit(1);
         }
 
         idl = idl->next;
@@ -567,29 +590,32 @@ void AssignStm::interp(){
         if(containsValue(assigned_ids, idlist->head)){
 
             std::cout << "Duplicate identifier in assign statement";
-            return;
+            exit(1);
         }
         
         assigned_ids.push_back(idlist->head);
 
         if(idlist->next != nullptr && explist->next == nullptr){
-            std::cout << "Error: argument count not matching" << std::endl;
+            std::cout << "Error: argument count not matching in assign statement" << std::endl;
+            exit(1);
         }
 
         if(idlist->next == nullptr && explist->next != nullptr){
-            std::cout << "Error: argument count not matching" << std::endl;
+            std::cout << "Error: argument count not matching statement" << std::endl;
+            exit(1);       
         }
         
         ReturnValue lookupReturn = symbolhandler.lookupSymbol(idlist->head);
         ReturnValue interpReturn = explist->head->interp();
 
-        std::cout << "INT VAL: " << *interpReturn.intValue << std::endl;
+        // std::cout << "INT VAL: " << *interpReturn.intValue << std::endl;
 
         if(lookupReturn.boolValue == nullptr && interpReturn.boolValue != nullptr || lookupReturn.intValue == nullptr && interpReturn.intValue != nullptr){
-            std::cout << "Unmatching types" << std::endl;
+            std::cout << "Error: argument type not matching variable type" << std::endl;
+            exit(1);
         }
         else{
-            std::cout << "Updating symbol" << std::endl;
+            // std::cout << "Updating symbol" << std::endl;
             symbolhandler.updateSymbol(idlist->head, explist->head->interp());
         }
 
@@ -631,11 +657,13 @@ void BlockStm::typecheck(){
                 int returntype = returnstm->expr->typecheck();
 
                 if(returntype != returnhandler.returnscopetype){
-                    std::cout << "Wrong return type in function" << std::endl;
+                    std::cout << "Wrong return type in function call" << std::endl;
+                    exit(1);
                 }
 
                 if(list->next != nullptr){
                     std::cout << "Unreachable code error " << std::endl;
+                    exit(1);
                 }
         }
         else{
@@ -659,7 +687,7 @@ void BlockStm::interp(){
     while(list != nullptr){
         if(dynamic_cast<ReturnStm*>(list->head) != nullptr){
 
-                std::cout << "RETURN STATEMENT ENCOUNTERED" << " \n";
+                // std::cout << "RETURN STATEMENT ENCOUNTERED" << " \n";
 
                 ReturnStm* returnstm = static_cast<ReturnStm*>(list->head);
 
@@ -667,6 +695,8 @@ void BlockStm::interp(){
                 returnhandler.returnExp =  returnstm->expr;
 
                 if(list->next != nullptr){
+                    std::cout << "Error: unreachable code" << std::endl;
+                    exit(1);
                     //Unreachable code error
                 }
 
@@ -703,17 +733,17 @@ void VoidFunctionStm::typecheck(){
         int i = 0;
         while(args != nullptr){
             if(functiontype.paramtypes[i] != args->head->typecheck()){
-                std::cout << "Error: wrong argument type" << std::endl;
-                return;
+                std::cout << "Error: wrong argument type in function" << identifier << std::endl;
+                exit(1);
             }
 
             if(args->next == nullptr && i != functiontype.paramtypes.size() -1){
-                std::cout << "Error: not enough arguments" << std::endl;
-                return;
+                std::cout << "Error: not enough arguments for function" << identifier  << std::endl;
+                exit(1);
             }
             else if (args->next != nullptr && i == functiontype.paramtypes.size() -1){
-                std::cout << "Error: too many arguments" << std::endl;
-                return;
+                std::cout << "Error: too many arguments for function" << identifier << std::endl;
+                exit(1);
             }
 
             args = args->next;      
@@ -721,21 +751,19 @@ void VoidFunctionStm::typecheck(){
         }
     }
     else if(arguments != nullptr && functiontype.paramtypes.size() == 0){
-        std::cout << "Error: too many arguments" << std::endl;
+        std::cout << "Error: too many arguments for function" << identifier << std::endl;
     }
     else if(arguments == nullptr && functiontype.paramtypes.size() != 0){
-        std::cout << "Error: not enough arguments" << std::endl;
+        std::cout << "Error: not enough arguments for function" << identifier << std::endl;
     }
 };
 
 void VoidFunctionStm::interp(){
-    std::cout << "interpreting void function stm " << std::endl;
+    // std::cout << "interpreting void function stm " << std::endl;
     //Call the function from the function table 
     Function function = functionhandler.lookupFunction(identifier);
     int returntype = function.functionType;
     StmList* stmlist = function.stmlist;
-
-     
 
     //New scope definition
     symbolhandler.pushSymbolTable(SymbolTable());
@@ -747,15 +775,15 @@ void VoidFunctionStm::interp(){
     std::vector<Exp> paramArgs;
 
    
-    std::cout << "Printing param names " << std::endl;
-    for(auto&& i: paramNames){
-        std::cout << i << " " << std::endl;
-    }
+    // std::cout << "Printing param names " << std::endl;
+    // for(auto&& i: paramNames){
+    //     std::cout << i << " " << std::endl;
+    // }
 
-    std::cout << "Printing param types " << std::endl;
-    for(auto&& i: paramTypes){
-        std::cout << i << " " << std::endl;
-    }
+    // std::cout << "Printing param types " << std::endl;
+    // for(auto&& i: paramTypes){
+    //     std::cout << i << " " << std::endl;
+    // }
 
     while(args != nullptr){
         paramArgs.push_back(args->head);
@@ -773,7 +801,7 @@ void VoidFunctionStm::interp(){
                 if(returnValue.intValue != nullptr){
                     if(paramTypes[i] != INT){
                         std::cout << "Type error " << std::endl;
-                        break;
+                        exit(1);
                     }
                     else{
                         symbolhandler.addSymbol(paramNames[i], returnValue);
@@ -782,6 +810,7 @@ void VoidFunctionStm::interp(){
                 else if(returnValue.boolValue != nullptr){
                     if(paramTypes[i] != BOOL){                      
                         std::cout << "Type error " << std::endl;
+                        exit(1);
                     }
                     else{
                         symbolhandler.addSymbol(paramNames[i], returnValue);
@@ -791,10 +820,12 @@ void VoidFunctionStm::interp(){
         }
     }
     else if(paramArgs.size() < paramNames.size()){
-        std::cout << "Not enough arguments " << std::endl;
+        std::cout << "Not enough arguments for void function" << std::endl;
+        exit(1);
     }
     else{
-        std::cout << "Too many arguments " << std::endl;
+        std::cout << "Too many arguments for void function" << std::endl;
+        exit(1);
     }
 
     
@@ -808,12 +839,12 @@ void VoidFunctionStm::interp(){
             
             if(returnstm->expr != nullptr && returntype == -1){
                 std::cout << "Error: no return value in void defined function allowed" << std::endl;
-                return;
+                exit(1);
             }
 
             if(returnstm->expr == nullptr && returntype != -1){
                 std::cout << "Error: function needs a return type" << std::endl;
-                return;
+                exit(1);
             }
         
 
@@ -824,17 +855,20 @@ void VoidFunctionStm::interp(){
 
             if(returnValue.boolValue != nullptr){
                 if(returntype != BOOL){           
-                    std::cout << "wrong return type error" << std::endl;
+                    std::cout << "Error: wrong return type" << std::endl;
+                    exit(1);
                 }
             }
             else if(returnValue.intValue != nullptr){
                 if(returntype != INT){
-                    std::cout << "wrong return type error" << std::endl;
+                    std::cout << "Error: wrong return type" << std::endl;
+                    exit(1);
                 }
             }
 
             if(stmlist->next != nullptr){
-                std::cout << "Unreachable code" << std::endl;
+                std::cout << "Error: unreachable code" << std::endl;
+                exit(1);
             }
 
             return;
@@ -846,17 +880,20 @@ void VoidFunctionStm::interp(){
                 ReturnValue returnValue = returnhandler.returnExp->interp();
 
                 if(returnhandler.returnExp != nullptr && returntype == -1){
-                    std::cout << "No return statement in void function allowed" << std::endl;
+                    std::cout << "Error: no return statement in void function allowed" << std::endl;
+                    exit(1);
                 }
 
                 if(returnValue.boolValue != nullptr){
                     if(returntype != BOOL){
-                        std::cout << "Wrong return type error" << std::endl;
+                        std::cout << "Error: wrong return type error" << std::endl;
+                        exit(1);
                     }
                 }
                 else if(returnValue.intValue != nullptr){
                     if(returntype != INT){
-                        std::cout << "Wrong return type error" << std::endl;
+                        std::cout << "Error: wrong return type error" << std::endl;
+                        exit(1);
                     }
                 }
 
@@ -873,6 +910,7 @@ void VoidFunctionStm::interp(){
 
     if(returntype != -1 && !returnhandler.returnEncountered){
         std::cout << "Error: expected a return value" << std::endl;
+        exit(1);
     }
 
 }
@@ -886,7 +924,10 @@ IncDecStm::IncDecStm(int ac, char* id){
 }
 
 void IncDecStm::typecheck(){
-    if(symboltypehandler.lookupSymbolType(identifier) != INT) std::cout << "No non-int type allowed in incdec stm" << std::endl;
+    if(symboltypehandler.lookupSymbolType(identifier) != INT){
+        std::cout << "Error: no non-int type allowed in incdec stm" << std::endl;
+        exit(1);
+    }
 }
 
 void IncDecStm::interp(){
@@ -921,7 +962,10 @@ If_stm::If_stm(Stm stm, Exp ex, Stm bstm){
 
 void If_stm::typecheck(){
     if(statement != nullptr) statement->typecheck();
-    if(exp->typecheck() != BOOL) std::cout << "Boolean type expected in if-clause" << std::endl;
+    if(exp->typecheck() != BOOL){
+        std::cout << "Error: boolean type expected in if-clause" << std::endl;
+        exit(1);
+    }
     blockStm->typecheck();
 }
 
@@ -936,15 +980,16 @@ void If_stm::interp(){
     if(returnValue.boolValue != nullptr){
 
         if(*returnValue.boolValue == true){   
-            std::cout << "if condition is true" << std::endl;         
+            // std::cout << "if condition is true" << std::endl;         
             blockStm->interp();
         }
         else{
-            std::cout << "if condition is false" << std::endl;
+            // std::cout << "if condition is false" << std::endl;
         }
     }
     else{
-        std::cout << "\nType error\n";
+        std::cout << "Error: wrong return type in function" << std::endl;
+        exit(1);
     }
 }
 
@@ -957,7 +1002,10 @@ For_stm::For_stm(Exp ex, Stm bstm){
 }
 
 void For_stm::typecheck(){
-    if(exp->typecheck() != BOOL) std::cout << "Boolean type expected in for-clause" << std::endl;
+    if(exp->typecheck() != BOOL){
+        std::cout << "Error: boolean type expected in for-clause" << std::endl;
+        exit(1);
+    } 
     blockStm->typecheck();
 }
 
@@ -965,13 +1013,13 @@ void For_stm::interp(){
     ReturnValue returnValue = exp->interp();
 
     if(returnValue.boolValue != nullptr){
-        std::cout << "GOING INTO LOOP" << " \n";
+        // std::cout << "GOING INTO LOOP" << " \n";
         while(*returnValue.boolValue){
-            std::cout << "EXECUTING LOOP" << " \n";
+            // std::cout << "EXECUTING LOOP" << " \n";
 
             blockStm->interp();
             returnValue = exp->interp();
-            std::cout << "Value of a: " << *returnValue.boolValue;
+            // std::cout << "Value of a: " << *returnValue.boolValue;
         }
     }
     else{
@@ -990,7 +1038,10 @@ ArithmeticAssignOpStm::ArithmeticAssignOpStm(char* l, int op, Exp r) {
 
 
 void ArithmeticAssignOpStm::typecheck(){
-    if(right->typecheck() != INT) std::cout << "Can't assign non-int value to integer value " << std::endl;
+    if(right->typecheck() != INT){
+        std::cout << "Can't assign non-int value to integer value " << std::endl;
+        exit(1);
+    } 
 }
 
 void ArithmeticAssignOpStm::interp() {
@@ -1084,7 +1135,8 @@ int ArithmeticOpExp::typecheck(){
     int type_left = left->typecheck();
 
     if(type_right != INT && type_left != INT){
-        std::cout << "No non-integer values allowed in expression" << std::endl;
+        std::cout << "Error: non-integer values allowed in expression" << std::endl;
+        exit(1);
     }
     return INT;
 }
@@ -1126,7 +1178,8 @@ int BooleanOpExp::typecheck(){
     int type_left = left->typecheck();
 
     if(type_right != BOOL && type_left != BOOL){
-        std::cout << "No non-bool values allowed in expression" << std::endl;
+        std::cout << "Error: no non-bool values allowed in boolean op expression" << std::endl;
+        exit(1);
     }
     return BOOL;
 }
@@ -1162,7 +1215,8 @@ ReturnValue BooleanOpExp::interp(){
             }
         }
         else{
-            std::cout << "Error: types not matching" << std::endl;
+            std::cout << "Error: no non-bool values allowed in boolean op expression" << std::endl;
+            exit(1);
         }
 
         return false;
@@ -1183,6 +1237,7 @@ int BooleanArithmeticOpExp::typecheck(){
 
     if(type_right != INT && type_left != INT){
         std::cout << "No non-bool values allowed in expression" << std::endl;
+        exit(1);
     }
     return BOOL;
 }
@@ -1224,7 +1279,10 @@ NotExp::NotExp(Exp ex){
 }
 
 int NotExp::typecheck(){
-    if(expr->typecheck() != BOOL) std::cout << "No non-boolean expression allowed in not expression" << std::endl;
+    if(expr->typecheck() != BOOL){
+        std::cout << "No non-boolean expression allowed in ! expression" << std::endl;
+        exit(1);
+    }
 }
 
 ReturnValue NotExp::interp(){
@@ -1252,20 +1310,20 @@ int FunctionExp::typecheck(){
 
         int i = 0;
         while(args != nullptr){
-            std::cout << "paramtype:" << functiontype.paramtypes[i] << std::endl;
-            std::cout << "argtype:" << args->head->typecheck() << std::endl;
+            // std::cout << "paramtype:" << functiontype.paramtypes[i] << std::endl;
+            // std::cout << "argtype:" << args->head->typecheck() << std::endl;
             if(functiontype.paramtypes[i] != args->head->typecheck()){
-                std::cout << "Error: wrong argument type" << std::endl;
-                return 0;
+                std::cout << "Error: wrong argument type in function " << identifier << std::endl;
+                exit(1);
             }
 
             if(args->next == nullptr && i != functiontype.paramtypes.size() -1){
-                std::cout << "Error: not enough arguments" << std::endl;
-                return 0 ;
+                std::cout << "Error: not enough arguments in function " << identifier << std::endl;
+                exit(1);
             }
             else if (args->next != nullptr && i == functiontype.paramtypes.size() -1){
-                std::cout << "Error: too many arguments" << std::endl; 
-                return 0;
+                std::cout << "Error: too many arguments in function " << identifier << std::endl; 
+                exit(1);
             }
 
             args = args->next;      
@@ -1273,17 +1331,19 @@ int FunctionExp::typecheck(){
         }
     }
     else if(arguments != nullptr && functiontype.paramtypes.size() == 0){
-        std::cout << "Error: too many arguments" << std::endl;
+        std::cout << "Error: too many arguments for function " << identifier << std::endl;
+        exit(1);
     }
     else if(arguments == nullptr && functiontype.paramtypes.size() != 0){
-        std::cout << "Error: not enough arguments" << std::endl;
+        std::cout << "Error: not enough arguments for function " << identifier << std::endl;
+        exit(1);
     }
 
     return functiontypehandler.lookupFunctionType(identifier).type;
 }
 
 ReturnValue FunctionExp::interp(){
-   std::cout << "interpreting void function stm " << std::endl;
+//    std::cout << "interpreting void function stm " << std::endl;
     //Call the function from the function table 
     Function function = functionhandler.lookupFunction(identifier);
     int returntype = function.functionType;
@@ -1301,15 +1361,15 @@ ReturnValue FunctionExp::interp(){
     std::vector<Exp> paramArgs;
 
    
-    std::cout << "Printing param names " << std::endl;
-    for(auto&& i: paramNames){
-        std::cout << i << " " << std::endl;
-    }
+    // std::cout << "Printing param names " << std::endl;
+    // for(auto&& i: paramNames){
+    //     std::cout << i << " " << std::endl;
+    // }
 
-    std::cout << "Printing param types " << std::endl;
-    for(auto&& i: paramTypes){
-        std::cout << i << " " << std::endl;
-    }
+    // std::cout << "Printing param types " << std::endl;
+    // for(auto&& i: paramTypes){
+    //     std::cout << i << " " << std::endl;
+    // }
 
     while(args != nullptr){
         paramArgs.push_back(args->head);
@@ -1328,7 +1388,7 @@ ReturnValue FunctionExp::interp(){
                 if(returnValue.intValue != nullptr){
                     if(paramTypes[i] != INT){
                         std::cout << "Type error " << std::endl;
-                        break;
+                        exit(1);
                     }
                     else{
                         symbolhandler.addSymbol(paramNames[i], returnValue);
@@ -1337,6 +1397,7 @@ ReturnValue FunctionExp::interp(){
                 else if(returnValue.boolValue != nullptr){
                     if(paramTypes[i] != BOOL){                      
                         std::cout << "Type error " << std::endl;
+                        exit(1);
                     }
                     else{
                         symbolhandler.addSymbol(paramNames[i], returnValue);
@@ -1346,10 +1407,12 @@ ReturnValue FunctionExp::interp(){
         }
     }
     else if(paramArgs.size() < paramNames.size()){
-        std::cout << "Not enough arguments " << std::endl;
+        std::cout << "Not enough arguments for function " << identifier  << std::endl;
+        exit(1);
     }
     else{
-        std::cout << "Too many arguments " << std::endl;
+        std::cout << "Too many arguments for function " << identifier << std::endl;
+        exit(1);
     }
     
     //Executing the function
@@ -1362,11 +1425,13 @@ ReturnValue FunctionExp::interp(){
 
             
             if(returnstm->expr != nullptr && returntype == -1){
-                std::cout << "Error: no return value in void defined function allowed" << std::endl;
+                std::cout << "Error: no return value in void defined function " << identifier << " allowed" << std::endl;
+                exit(1);
             }
 
             if(returnstm->expr == nullptr && returntype != -1){
-                std::cout << "Error: function needs a return type" << std::endl;
+                std::cout << "Error: function " << identifier << " needs a return type" << std::endl;
+                exit(1);
             }
 
             ReturnValue returnValue = returnstm->expr->interp();
@@ -1376,17 +1441,20 @@ ReturnValue FunctionExp::interp(){
 
             if(returnValue.boolValue != nullptr){
                 if(returntype != BOOL){           
-                    std::cout << "wrong return type error" << std::endl;
+                    std::cout << "Error: wrong return type in function " << identifier << std::endl;
+                    exit(1);
                 }
             }
             else if(returnValue.intValue != nullptr){
                 if(returntype != INT){
-                    std::cout << "wrong return type error" << std::endl;
+                    std::cout << "Error: wrong return type error in function " << identifier << std::endl;
+                    exit(1);
                 }
             }
 
             if(stmlist->next != nullptr){
-                std::cout << "Unreachable code" << std::endl;
+                std::cout << "Error: unreachable code in function " << identifier << std::endl;
+                exit(1);
             }
 
             return returnValue;
@@ -1398,17 +1466,20 @@ ReturnValue FunctionExp::interp(){
                 ReturnValue returnValue = returnhandler.returnExp->interp();
 
                 if(returnhandler.returnExp != nullptr && returntype == -1){
-                    std::cout << "No return statement in void function allowed" << std::endl;
+                    std::cout << "No return statement in void function " << identifier << " allowed" << std::endl;
+                    exit(1);
                 }
 
                 if(returnValue.boolValue != nullptr){
                     if(returntype != BOOL){
-                        std::cout << "Wrong return type error" << std::endl;
+                        std::cout << "Wrong return type error in function " << identifier << std::endl;
+                        exit(1);
                     }
                 }
                 else if(returnValue.intValue != nullptr){
                     if(returntype != INT){
-                        std::cout << "Wrong return type error" << std::endl;
+                        std::cout << "Wrong return type error in function " << std::endl;
+                        exit(1);
                     }
                 }
 
@@ -1424,7 +1495,7 @@ ReturnValue FunctionExp::interp(){
     }
 
     if(returntype != -1 && !returnhandler.returnEncountered){
-        std::cout << "Error: function needs a return type" << std::endl;
+        std::cout << "Error: function " << identifier << " needs a return type" << std::endl;
     }
 
     return ReturnValue();
@@ -1437,7 +1508,7 @@ IdExp::IdExp(){
 
 IdExp::IdExp(char* id){
     identifier = id;
-    std::cout << "CONSTRUCTED IDENTIFIER "  << identifier << std::endl;
+    // std::cout << "CONSTRUCTED IDENTIFIER "  << identifier << std::endl;
 
 }
 
@@ -1447,7 +1518,7 @@ int IdExp::typecheck(){
 }
 
 ReturnValue IdExp::interp(){
-    std::cout << "INTERPRETING ID EXP " << identifier << std::endl;
+    // std::cout << "INTERPRETING ID EXP " << identifier << std::endl;
 
     return symbolhandler.lookupSymbol(identifier);
 }

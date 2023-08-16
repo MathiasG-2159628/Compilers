@@ -6,7 +6,7 @@
 void FunctionHandler::addFunction(Function* newFunction){
     newFunction->next = functionTable->head;
     functionTable->head = newFunction;
-    std::cout << "Added function " << newFunction->name << " to function table" << std::endl;
+    // std::cout << "Added function " << newFunction->name << " to function table" << std::endl;
 }
 
 FunctionHandler::FunctionHandler(){
@@ -16,7 +16,7 @@ FunctionHandler::FunctionHandler(){
 
 Function FunctionHandler::lookupFunction(char* name){
 
-    std::cout << "Looking up function " << name << std::endl;
+    // std::cout << "Looking up function " << name << std::endl;
 
     Function* current = functionTable->head;
         while (current != nullptr) {
@@ -27,7 +27,8 @@ Function FunctionHandler::lookupFunction(char* name){
         }
         
 
-        printf("Function '%s' is not present in the function table.\n", name);
+        std::cout << "Function " << name << " is not present in the function table." << std::endl;
+        exit(1);
 
         return Function();
 }

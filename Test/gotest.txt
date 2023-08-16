@@ -9,8 +9,7 @@ func first(a int) int{
 }
 
 func main(){
-    var a = first(10-5)
-    var a = true;
+    var a,b = first(10-5), 5;
     print(a)
 
 }

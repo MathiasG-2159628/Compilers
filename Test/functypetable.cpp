@@ -12,7 +12,7 @@ void FunctionTypeHandler::addFunctionType(FunctionType* newFunctionType){
 
     newFunctionType->next = functionTypeTable->head;
     functionTypeTable->head = newFunctionType;
-    std::cout << "Added FunctionType " << newFunctionType->name << " to FunctionTypeType table" << std::endl;
+    // std::cout << "Added FunctionType " << newFunctionType->name << " to FunctionTypeType table" << std::endl;
 }
 
 FunctionTypeHandler::FunctionTypeHandler(){
@@ -22,7 +22,7 @@ FunctionTypeHandler::FunctionTypeHandler(){
 
 FunctionType FunctionTypeHandler::lookupFunctionType(char* name){
 
-    std::cout << "Looking up FunctionType " << name << std::endl;
+    // std::cout << "Looking up FunctionType " << name << std::endl;
 
     FunctionType* current = functionTypeTable->head;
         while (current != nullptr) {
@@ -33,7 +33,9 @@ FunctionType FunctionTypeHandler::lookupFunctionType(char* name){
         }
         
 
-        printf("FunctionType '%s' is not present in the FunctionType table.\n", name);
+        std::cout << "Function " << name << " is not present in the functiontype table." << std::endl;
+
+        //can be ignored actually
         FunctionType functiontype;
         functiontype.type = 0; 
 

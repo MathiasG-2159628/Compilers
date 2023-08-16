@@ -14,7 +14,7 @@ SymbolTypeHandler::SymbolTypeHandler(){
 }
 
 void SymbolTypeHandler::pushSymbolTypeTable(SymbolTypeTable st) {
-    std::cout << "SymbolType table pushed" << std::endl;
+    // std::cout << "SymbolType table pushed" << std::endl;
     symbolTypeTableStack.emplace_back(st);
     symbolTypeTable = &symbolTypeTableStack.back();
 }
@@ -29,7 +29,7 @@ void SymbolTypeHandler::popSymbolTypeTable() {
         }
     }
     
-    std::cout << "SymbolType table popped" << std::endl;
+    // std::cout << "SymbolType table popped" << std::endl;
 }
 
 void SymbolTypeHandler::addSymbolType(char* name, int value) {
@@ -48,7 +48,7 @@ void SymbolTypeHandler::addSymbolType(char* name, int value) {
     newSymbolType->next = symbolTypeTable->head;
 
     symbolTypeTable->head = newSymbolType;
-    std::cout << "Added " << name << " to symboltype table with value " << value << std::endl;
+    // std::cout << "Added " << name << " to symboltype table with value " << value << std::endl;
 };
 
 void SymbolTypeHandler::updateSymbolType(char* name, int value) {
@@ -65,12 +65,13 @@ void SymbolTypeHandler::updateSymbolType(char* name, int value) {
             }
         }
 
-        std::cout << "Variable " << name << " does not exist in the SymbolType table" << std::endl;
+        std::cout << "Variable " << name << " does not exist in the symboltype table" << std::endl;
+        exit(1);
 };
 
 int SymbolTypeHandler::lookupSymbolType(char* name){
 
-        std::cout << "Checking type of variable " << name << std::endl;
+        // std::cout << "Checking type of variable " << name << std::endl;
 
         for (int i = symbolTypeTableStack.size() - 1; i >= 0; --i) {
 
@@ -87,7 +88,7 @@ int SymbolTypeHandler::lookupSymbolType(char* name){
 
         std::cout << "Variable " << name << " does not exist in the SymbolType table" << std::endl;
 
-        return 0;
+        exit(1);
 };
 
 //SymbolType table definitions

@@ -2438,6 +2438,7 @@ int main(int argc, char* argv[]) {
 
     std::cout << "\n\nTypechecking AST:" << std::endl;
     thesyntree->typecheck(); 
+    std::cout << "Typechecking success" << std::endl;
 
     //I use this property for typechecking aswell as interpreting. Hence why I reset it for insurance 
     returnhandler.returnEncountered = false;
