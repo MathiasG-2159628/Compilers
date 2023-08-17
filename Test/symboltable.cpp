@@ -12,7 +12,7 @@ SymbolHandler::SymbolHandler(){
 }
 
 void SymbolHandler::pushSymbolTable(SymbolTable st) {
-    std::cout << "Symbol table pushed" << std::endl;
+    // std::cout << "Symbol table pushed" << std::endl;
     symbolTableStack.emplace_back(st);
     symbolTable = &symbolTableStack.back();
 }
@@ -30,7 +30,7 @@ void SymbolHandler::popSymbolTable() {
 }
 
 void SymbolHandler::addSymbol(char* name, ReturnValue value) {
-    std::cout << "added symbol " << name << " with value" << *value.intValue << std::endl;
+    // std::cout << "added symbol " << name << " with value" << *value.intValue << std::endl;
     Symbol* newSymbol = new Symbol(name, value); 
     newSymbol->next = symbolTable->head;
 

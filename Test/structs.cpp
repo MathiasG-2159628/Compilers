@@ -117,7 +117,6 @@ void ProgramStm::typecheck(){
 
 void ProgramStm::interp(){
     DeclarationList* decl = new DeclarationList(declist->head, declist->next);
-
     while(decl != nullptr){
         decl->head->interp();
         decl = decl->next;
@@ -143,9 +142,11 @@ void PrintStm::interp(){
 
     std::vector<std::string> printStrings;
 
-    while(explist != nullptr){
+    ExpList* expl = new ExpList(explist->head, explist->next);
 
-            ReturnValue returnValue = explist->head->interp();
+    while(expl != nullptr){
+
+            ReturnValue returnValue = expl->head->interp();
             //Check the type of ReturnValue
 
             if(returnValue.boolValue == nullptr){
@@ -160,7 +161,7 @@ void PrintStm::interp(){
                 }                
             }
   
-            explist = explist->next;
+            expl = expl->next;
     }
     
     std::reverse(printStrings.begin(), printStrings.end());
@@ -1023,7 +1024,7 @@ void For_stm::interp(){
 
             blockStm->interp();
             returnValue = exp->interp();
-            // std::cout << "Value of a: " << *returnValue.boolValue;
+            // std::cout << *symbolhandler.lookupSymbol("b").intValue << std::endl;
         }
     }
     else{

@@ -11,14 +11,27 @@ func first(a int) int{
                 return a;
             }
         }
-       
     }
+    return a;
 }
 
 func main(){
-    print(first(8));
-  
+    print(first(100));
+    print(first(1));
+    
 
+    if(3 > 2){
+      print(3>2);
+    }
+    
+    var b, c int = 0, 10;
+
+    for b < c {
+        b += 1;
+        print(b);
+    }
+
+    print(false);
 }
 
 
