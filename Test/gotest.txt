@@ -3,14 +3,21 @@ package main
 var a = 5;
 
 func first(a int) int{
-    if print(899); (a < 20){
-        return a;
+   
+    if (a < 20){
+        {
+            var a = 9;
+            {
+                return a;
+            }
+        }
+       
     }
 }
 
 func main(){
-    var a,b = first(10-5), 5;
-    print(a)
+    print(first(8));
+  
 
 }
 

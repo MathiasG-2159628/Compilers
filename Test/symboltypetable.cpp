@@ -52,7 +52,7 @@ void SymbolTypeHandler::addSymbolType(char* name, int value) {
 };
 
 void SymbolTypeHandler::updateSymbolType(char* name, int value) {
-        for (int i = symbolTypeTableStack.size() - 1; i >= 0; --i) {
+        for (int i = symbolTypeTableStack.size(); i >= 0; --i) {
             SymbolType* current = symbolTypeTableStack[i].head;
             while (current != nullptr) {
                 //strcmp returns 0 if succeded

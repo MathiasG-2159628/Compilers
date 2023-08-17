@@ -12,7 +12,7 @@ SymbolHandler::SymbolHandler(){
 }
 
 void SymbolHandler::pushSymbolTable(SymbolTable st) {
-    // std::cout << "Symbol table pushed" << std::endl;
+    std::cout << "Symbol table pushed" << std::endl;
     symbolTableStack.emplace_back(st);
     symbolTable = &symbolTableStack.back();
 }
@@ -30,13 +30,17 @@ void SymbolHandler::popSymbolTable() {
 }
 
 void SymbolHandler::addSymbol(char* name, ReturnValue value) {
+    std::cout << "added symbol " << name << " with value" << *value.intValue << std::endl;
     Symbol* newSymbol = new Symbol(name, value); 
     newSymbol->next = symbolTable->head;
 
     symbolTable->head = newSymbol;
+
+    updateSymbol(name, value);
 };
 
 void SymbolHandler::updateSymbol(char* name, ReturnValue value) {
+        //std::cout << "updating var" << name << std::endl;
         for (int i = symbolTableStack.size() - 1; i >= 0; --i) {
             Symbol* current = symbolTableStack[i].head;
             while (current != nullptr) {
@@ -55,7 +59,7 @@ void SymbolHandler::updateSymbol(char* name, ReturnValue value) {
 };
 
 ReturnValue SymbolHandler::lookupSymbol(char* name){
-        for (int i = symbolTableStack.size() - 1; i >= 0; --i) {
+        for (int i = symbolTableStack.size(); i >= 0; --i) {
 
             //TODO: IF SYMBOL IS NOT FOUND IN CURRENT SCOPE, SEARCH THROUGH PREVIOUS SCOPES
 

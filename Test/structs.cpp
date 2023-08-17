@@ -235,7 +235,7 @@ void Function_DeclarationStm::typecheck(){
                 }
 
                 if(returnstm->expr == nullptr && functionType != -1){
-                    std::cout << "Error: function " << identifier << "needs a return type" << std::endl;
+                    std::cout << "Error: return value expected in function " << identifier << std::endl;
                     exit(1);
                 }
                 
@@ -277,13 +277,13 @@ void Function_DeclarationStm::typecheck(){
         }
 
         if(functionType != -1 && !returnhandler.returnEncountered){
-            std::cout << "Error: function needs a return type" << std::endl;
+            std::cout << "Error: return value expected in function " << identifier << std::endl;
             exit(1);
         }
     }
     else{
         if(functionType != -1){
-             std::cout << "Error: function needs a return type" << std::endl;
+             std::cout << "Error: return value expected in function " << identifier << std::endl;
              exit(1);
         }
     }
@@ -398,7 +398,7 @@ void DeclarationStm::typecheck(){
             else if(declaredType == BOOL){
 
                 if(returnType != BOOL){
-                    std::cout << "Type error: can't assign non-bool value to bool variable" << std::endl;
+                    std::cout << "Type error: can't assign non-bool value to bool variable in declaration" << std::endl;
                     exit(1);
                 }
             }
@@ -686,7 +686,7 @@ void BlockStm::interp(){
     symbolhandler.pushSymbolTable(SymbolTable());
     while(list != nullptr){
         if(dynamic_cast<ReturnStm*>(list->head) != nullptr){
-
+                
                 // std::cout << "RETURN STATEMENT ENCOUNTERED" << " \n";
 
                 ReturnStm* returnstm = static_cast<ReturnStm*>(list->head);
@@ -704,11 +704,15 @@ void BlockStm::interp(){
         }
         else{
             //returnsm encounter
-            list->head->interp();
+           
+            
             if(returnhandler.returnEncountered){
 
                 symbolhandler.popSymbolTable();
                 return;
+            }
+            else{
+                list->head->interp();
             }
         }
 
@@ -843,7 +847,7 @@ void VoidFunctionStm::interp(){
             }
 
             if(returnstm->expr == nullptr && returntype != -1){
-                std::cout << "Error: function needs a return type" << std::endl;
+                std::cout << "Error: return value expected in function " << identifier << std::endl;
                 exit(1);
             }
         
@@ -1430,7 +1434,7 @@ ReturnValue FunctionExp::interp(){
             }
 
             if(returnstm->expr == nullptr && returntype != -1){
-                std::cout << "Error: function " << identifier << " needs a return type" << std::endl;
+                std::cout << "Error: function " << identifier << " expected a return value" << std::endl;
                 exit(1);
             }
 
@@ -1460,9 +1464,9 @@ ReturnValue FunctionExp::interp(){
             return returnValue;
         }
         else {
+
             stmlist->head->interp(); // Execute the nested block
             if (returnhandler.returnEncountered) {
-                
                 ReturnValue returnValue = returnhandler.returnExp->interp();
 
                 if(returnhandler.returnExp != nullptr && returntype == -1){
@@ -1494,8 +1498,11 @@ ReturnValue FunctionExp::interp(){
 
     }
 
+   
+
     if(returntype != -1 && !returnhandler.returnEncountered){
-        std::cout << "Error: function " << identifier << " needs a return type" << std::endl;
+        std::cout << "Error: expected a return value in function " << identifier << std::endl;
+        exit(1);
     }
 
     return ReturnValue();
